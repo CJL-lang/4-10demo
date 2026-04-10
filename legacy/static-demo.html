@@ -1,0 +1,1835 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Academy App Prototype</title>
+    <style>
+        :root {
+            --color-primary: #ECAB13;
+            --color-bg: #221C10;
+            --color-text-secondary: #A9A9A9;
+            --color-border: rgba(236, 171, 19, 0.2);
+            --color-surface: rgba(34, 28, 16, 0.2);
+
+            --color-body: #0f0b03;
+            --color-card: #2a2113;
+            --color-card-2: #312617;
+            --color-white: #f3efe6;
+            --color-muted: #8e8577;
+            --radius-xl: 28px;
+            --radius-lg: 22px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+            --shadow-main: 0 20px 36px rgba(0, 0, 0, 0.38);
+            --shadow-soft: 0 10px 20px rgba(0, 0, 0, 0.26);
+            --shadow-gold: 0 18px 42px rgba(236, 171, 19, 0.18);
+            --transition-fast: 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+            --transition-main: 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+            --font-display: "Bahnschrift", "Segoe UI Variable Display", "Arial Narrow", "Noto Sans SC", "Microsoft YaHei UI", sans-serif;
+            --font-ui: "Noto Sans SC", "Microsoft YaHei UI", "PingFang SC", sans-serif;
+            --font-mono: "Consolas", "JetBrains Mono", "SFMono-Regular", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            color: var(--color-white);
+            background:
+                radial-gradient(1200px 600px at 86% -4%, rgba(236, 171, 19, 0.24), transparent 55%),
+                radial-gradient(900px 400px at 12% 84%, rgba(236, 171, 19, 0.16), transparent 52%),
+                linear-gradient(160deg, #120d05 0%, #191207 42%, #0f0b04 100%);
+            display: flex;
+            justify-content: center;
+            padding: 12px;
+            position: relative;
+            overflow: hidden;
+            min-height: 100dvh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                repeating-linear-gradient(120deg,
+                    rgba(255, 255, 255, 0.02) 0 1px,
+                    transparent 1px 6px),
+                radial-gradient(circle at 50% 50%, rgba(236, 171, 19, 0.08), transparent 60%);
+            opacity: 0.14;
+        }
+
+        .device-shell {
+            width: 100%;
+            max-width: 430px;
+            height: calc(100dvh - 24px);
+            max-height: calc(100dvh - 24px);
+            background:
+                linear-gradient(180deg, rgba(42, 33, 18, 0.92) 0%, rgba(16, 12, 6, 0.97) 100%);
+            border: 1px solid rgba(236, 171, 19, 0.25);
+            border-radius: 34px;
+            box-shadow:
+                0 0 0 1px rgba(236, 171, 19, 0.08),
+                var(--shadow-main),
+                inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            animation: shellIn 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .device-shell::before,
+        .device-shell::after {
+            content: "";
+            position: absolute;
+            inset: auto;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .device-shell::before {
+            width: 320px;
+            height: 320px;
+            right: -150px;
+            top: -120px;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(236, 171, 19, 0.35), rgba(236, 171, 19, 0));
+            filter: blur(4px);
+            animation: driftGlow 7s ease-in-out infinite alternate;
+        }
+
+        .device-shell::after {
+            width: 280px;
+            height: 280px;
+            left: -120px;
+            bottom: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(236, 171, 19, 0.2), rgba(236, 171, 19, 0));
+            animation: driftGlow 6s ease-in-out infinite alternate-reverse;
+        }
+
+        .app {
+            height: 100%;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-main {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 22px 20px 116px;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(236, 171, 19, 0.45) transparent;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .app-main::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .app-main::-webkit-scrollbar-thumb {
+            background: rgba(236, 171, 19, 0.45);
+            border-radius: 999px;
+        }
+
+        .screen {
+            display: none;
+            opacity: 0;
+            transform: translateY(16px) scale(0.988);
+            filter: blur(2px);
+            transition: opacity var(--transition-main), transform var(--transition-main), filter var(--transition-main);
+            will-change: transform, opacity, filter;
+        }
+
+        .screen.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--color-border);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+            object-fit: cover;
+            background:
+                linear-gradient(145deg, #134a6b, #09253a),
+                radial-gradient(circle at 70% 20%, rgba(236, 171, 19, 0.35), transparent 40%);
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+        }
+
+        .title-sub {
+            color: var(--color-text-secondary);
+            font-size: 12px;
+            line-height: 1.2;
+        }
+
+        .title-main {
+            font-family: var(--font-display);
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1.06;
+            color: #f3d79f;
+            letter-spacing: 0.2px;
+        }
+
+        .title-main.small {
+            font-size: 26px;
+        }
+
+        .title-main.medium {
+            font-size: 20px;
+        }
+
+        .icon-button {
+            width: 38px;
+            height: 38px;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            background: rgba(236, 171, 19, 0.08);
+            color: var(--color-primary);
+            display: grid;
+            place-items: center;
+            font-size: 18px;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+        }
+
+        .icon-button:hover {
+            transform: translateY(-1px);
+            background: rgba(236, 171, 19, 0.14);
+            box-shadow: 0 8px 16px rgba(236, 171, 19, 0.16);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .card {
+            background: linear-gradient(130deg, rgba(44, 34, 20, 0.95), rgba(30, 24, 14, 0.9));
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            box-shadow: var(--shadow-soft);
+            backdrop-filter: blur(4px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 245, 226, 0.45), transparent);
+            pointer-events: none;
+        }
+
+        .card.glow {
+            box-shadow:
+                0 0 0 1px var(--color-border),
+                var(--shadow-gold);
+        }
+
+        .card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .muted {
+            color: var(--color-text-secondary);
+        }
+
+        .tiny {
+            font-size: 12px;
+        }
+
+        .stat-big {
+            font-family: var(--font-display);
+            font-size: 76px;
+            line-height: 0.95;
+            color: #f5cb68;
+            margin: 8px 0 14px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            text-shadow: 0 8px 20px rgba(236, 171, 19, 0.2);
+        }
+
+        .stat-big.small {
+            font-size: 54px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .card-label {
+            font-size: 36px;
+            line-height: 1;
+            color: #f5cb68;
+            font-family: var(--font-display);
+            font-weight: 800;
+        }
+
+        .appointment-banner {
+            width: 100%;
+            border: none;
+            border-radius: var(--radius-xl);
+            background: linear-gradient(135deg, #f2c24f, #ECAB13);
+            color: #3b2a06;
+            font-family: var(--font-ui);
+            font-weight: 800;
+            text-align: left;
+            padding: 20px;
+            box-shadow: 0 14px 24px rgba(236, 171, 19, 0.28);
+            cursor: pointer;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+            margin-bottom: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .appointment-banner::after {
+            content: "";
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            right: -46px;
+            top: -36px;
+            border-radius: 28px;
+            background: rgba(130, 90, 10, 0.14);
+            transform: rotate(22deg);
+        }
+
+        .appointment-banner:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 30px rgba(236, 171, 19, 0.34);
+            filter: saturate(1.05);
+        }
+
+        .appointment-banner h3 {
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+
+        .appointment-banner p {
+            font-size: 16px;
+            color: rgba(59, 42, 6, 0.72);
+        }
+
+        .section-title {
+            font-size: clamp(32px, 7vw, 38px);
+            line-height: 1.1;
+            margin: 10px 0 14px;
+            font-family: var(--font-display);
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-wrap: balance;
+        }
+
+        .section-title.s {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .text-link {
+            color: var(--color-primary);
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 14px;
+            transition: opacity var(--transition-fast), transform var(--transition-fast);
+        }
+
+        .text-link:hover {
+            opacity: 0.84;
+            transform: translateX(2px);
+        }
+
+        .chip-row {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            margin-bottom: 18px;
+            scrollbar-width: none;
+        }
+
+        .chip-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .date-chip {
+            min-width: 84px;
+            padding: 14px 10px;
+            text-align: center;
+            border-radius: 18px;
+            border: 1px solid var(--color-border);
+            background: linear-gradient(160deg, rgba(39, 30, 18, 0.95), rgba(29, 22, 13, 0.9));
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .date-chip .dow {
+            font-family: var(--font-display);
+            font-size: 13px;
+            color: var(--color-text-secondary);
+        }
+
+        .date-chip .day {
+            font-family: var(--font-display);
+            font-size: 42px;
+            line-height: 1;
+            color: #fff2d4;
+            margin: 6px 0;
+            font-weight: 700;
+        }
+
+        .date-chip:hover {
+            border-color: rgba(236, 171, 19, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .date-chip.active {
+            background: linear-gradient(140deg, #efc153, #ECAB13);
+            border-color: rgba(236, 171, 19, 0.8);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(236, 171, 19, 0.28);
+        }
+
+        .date-chip.active .dow,
+        .date-chip.active .day {
+            color: #2d2005;
+        }
+
+        .coach-card {
+            display: grid;
+            grid-template-columns: 82px 1fr auto;
+            gap: 14px;
+            align-items: center;
+            margin-bottom: 14px;
+            padding: 14px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            background: linear-gradient(120deg, rgba(47, 36, 21, 0.96), rgba(35, 27, 16, 0.92));
+            transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .coach-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(236, 171, 19, 0.42);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .coach-photo {
+            width: 82px;
+            height: 82px;
+            border-radius: 20px;
+            object-fit: cover;
+            border: 1px solid rgba(236, 171, 19, 0.45);
+            background: linear-gradient(145deg, #1f4d75, #081727);
+            display: grid;
+            place-items: center;
+            font-size: 34px;
+        }
+
+        .coach-initial {
+            font-family: var(--font-display);
+            font-size: 28px;
+            letter-spacing: 1px;
+            font-weight: 800;
+            color: #f6d7a3;
+            text-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+        }
+
+        .coach-name {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .coach-sub {
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .coach-desc {
+            font-size: 14px;
+            color: #c9bda7;
+            line-height: 1.45;
+        }
+
+        .score-badge {
+            color: #ffd267;
+            font-weight: 700;
+            font-family: var(--font-display);
+            font-size: 16px;
+        }
+
+        .pill {
+            border: 1px solid var(--color-border);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 12px;
+            color: #ebdfcb;
+            background: rgba(236, 171, 19, 0.08);
+            white-space: nowrap;
+        }
+
+        .record-list .record {
+            margin-bottom: 14px;
+            padding: 16px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            background: linear-gradient(125deg, rgba(42, 32, 19, 0.94), rgba(32, 25, 15, 0.92));
+        }
+
+        .record .headline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0 10px;
+        }
+
+        .record h4 {
+            font-size: 24px;
+        }
+
+        .record p {
+            color: #c9c1b2;
+            line-height: 1.5;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .big-countdown {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            margin: 12px 0 14px;
+        }
+
+        .timer-block {
+            text-align: center;
+        }
+
+        .timer-num {
+            font-family: var(--font-mono);
+            font-size: 58px;
+            font-weight: 800;
+            line-height: 0.9;
+            color: #f5cb68;
+            letter-spacing: 0.5px;
+            min-width: 66px;
+        }
+
+        .timer-lab {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            margin-top: 6px;
+            letter-spacing: 0.8px;
+        }
+
+        .colon {
+            font-family: var(--font-mono);
+            font-size: 54px;
+            line-height: 0.9;
+            color: #d8aa45;
+            margin-bottom: 16px;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .primary-btn {
+            width: 100%;
+            border: none;
+            border-radius: 16px;
+            padding: 18px;
+            background: linear-gradient(140deg, #f0be47, #ECAB13);
+            color: #352507;
+            font-weight: 800;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 14px 26px rgba(236, 171, 19, 0.25);
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+            letter-spacing: 0.8px;
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 30px rgba(236, 171, 19, 0.32);
+        }
+
+        .primary-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 8px 16px rgba(236, 171, 19, 0.25);
+        }
+
+        .primary-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .profile-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .profile-card {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .portrait {
+            width: 154px;
+            height: 154px;
+            margin: 0 auto 16px;
+            border-radius: 18px;
+            border: 2px solid var(--color-primary);
+            background:
+                radial-gradient(circle at 60% 20%, rgba(236, 171, 19, 0.2), transparent 48%),
+                linear-gradient(135deg, #1c3a4a, #0e1d28 62%, #0f0b03 100%);
+            display: grid;
+            place-items: center;
+            font-size: 80px;
+            position: relative;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .portrait-badge {
+            position: absolute;
+            right: -12px;
+            top: -10px;
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: linear-gradient(140deg, #efc153, #ECAB13);
+            color: #3a2905;
+            display: grid;
+            place-items: center;
+            font-size: 24px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .member-pill {
+            display: inline-block;
+            margin-top: 8px;
+            border-radius: 999px;
+            padding: 8px 16px;
+            background: rgba(236, 171, 19, 0.18);
+            border: 1px solid var(--color-border);
+            color: #f2d59f;
+            font-family: var(--font-display);
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .badge-wall {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .badge-item {
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: linear-gradient(160deg, rgba(45, 34, 20, 0.95), rgba(34, 26, 15, 0.92));
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        .badge-rank {
+            width: 78px;
+            height: 78px;
+            border-radius: 18px;
+            margin: 0 auto 12px;
+            background: linear-gradient(145deg, #efc153, #e5a50f);
+            color: #6d4f12;
+            display: grid;
+            place-items: center;
+            font-family: var(--font-display);
+            font-weight: 800;
+            line-height: 1.1;
+            padding: 8px;
+        }
+
+        .rank-card {
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin-bottom: 16px;
+            background: linear-gradient(160deg, rgba(45, 34, 20, 0.95), rgba(34, 26, 15, 0.92));
+            backdrop-filter: blur(4px);
+        }
+
+        .rank-row {
+            display: grid;
+            grid-template-columns: 24px 34px 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-top: 1px solid rgba(236, 171, 19, 0.12);
+        }
+
+        .rank-row:first-of-type {
+            border-top: 0;
+        }
+
+        .rank-no {
+            font-family: var(--font-display);
+            color: #d8b572;
+            font-weight: 700;
+        }
+
+        .rank-medal {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-weight: 800;
+            font-family: var(--font-display);
+            background: radial-gradient(circle at 35% 30%, #68bcff, #0f2138 62%, #071525 100%);
+        }
+
+        .feedback-card {
+            border: 1px solid var(--color-border);
+            border-radius: 32px;
+            padding: 22px;
+            background: linear-gradient(120deg, rgba(47, 36, 21, 0.96), rgba(34, 26, 15, 0.94));
+            box-shadow: var(--shadow-soft);
+        }
+
+        .feedback-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .tag {
+            padding: 7px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            background: rgba(236, 171, 19, 0.1);
+            color: var(--color-primary);
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+        }
+
+        .status-row {
+            margin-bottom: 18px;
+        }
+
+        .status-row .row {
+            margin-bottom: 8px;
+        }
+
+        .status-name {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .status-value {
+            color: var(--color-primary);
+            font-weight: 700;
+            font-family: var(--font-display);
+        }
+
+        .stars {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            user-select: none;
+        }
+
+        .star {
+            border: 0;
+            background: transparent;
+            font-size: 36px;
+            line-height: 1;
+            color: rgba(236, 171, 19, 0.22);
+            cursor: pointer;
+            transition: transform var(--transition-fast), color var(--transition-fast);
+            padding: 0;
+        }
+
+        .star.on {
+            color: #ECAB13;
+            text-shadow: 0 0 10px rgba(236, 171, 19, 0.18);
+        }
+
+        .star:hover {
+            transform: scale(1.1);
+        }
+
+        .text-box {
+            width: 100%;
+            min-height: 120px;
+            resize: vertical;
+            margin: 8px 0 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+            background: rgba(30, 24, 14, 0.64);
+            color: var(--color-white);
+            padding: 14px;
+            font: 15px/1.5 var(--font-ui);
+            outline: none;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .text-box:focus {
+            border-color: rgba(236, 171, 19, 0.6);
+            box-shadow: 0 0 0 3px rgba(236, 171, 19, 0.18);
+        }
+
+        .bottom-nav {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+            border-top: 1px solid rgba(236, 171, 19, 0.2);
+            background: linear-gradient(180deg, rgba(25, 19, 10, 0.9), rgba(18, 14, 8, 0.98));
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            backdrop-filter: blur(7px);
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.22);
+        }
+
+        .nav-item {
+            border: 0;
+            background: transparent;
+            color: #8f8574;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 6px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: 12px;
+            font-family: var(--font-ui);
+            min-height: 54px;
+        }
+
+        .nav-item .icon {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .nav-item.active {
+            color: #f6d58f;
+            background: rgba(236, 171, 19, 0.2);
+            box-shadow: inset 0 0 0 1px rgba(236, 171, 19, 0.22);
+            transform: translateY(-2px);
+        }
+
+        .nav-item.active .icon {
+            animation: navPulse 1.4s ease-in-out infinite;
+        }
+
+        .modal-mask {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.56);
+            z-index: 20;
+            padding: 18px;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-mask.show {
+            display: flex;
+            animation: fadeIn 220ms ease;
+        }
+
+        .modal {
+            width: min(360px, 100%);
+            border-radius: 20px;
+            border: 1px solid var(--color-border);
+            background: linear-gradient(120deg, rgba(47, 36, 21, 0.98), rgba(34, 26, 15, 0.98));
+            padding: 22px;
+            box-shadow: var(--shadow-main);
+            animation: zoomIn 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .modal h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #f7d696;
+        }
+
+        .modal p {
+            color: #d6c6a7;
+            line-height: 1.55;
+            margin-bottom: 18px;
+        }
+
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn {
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            border-radius: 12px;
+            padding: 12px 10px;
+            color: #eddcba;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn.primary {
+            border: 0;
+            background: linear-gradient(140deg, #f0be47, #ECAB13);
+            color: #3a2905;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 96px;
+            transform: translateX(-50%) translateY(12px);
+            background: rgba(25, 19, 10, 0.95);
+            color: #f5ddae;
+            border: 1px solid rgba(236, 171, 19, 0.35);
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-size: 13px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all var(--transition-fast);
+            z-index: 30;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .empty-club {
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            background: linear-gradient(120deg, rgba(47, 36, 21, 0.95), rgba(34, 26, 15, 0.92));
+            box-shadow: var(--shadow-soft);
+        }
+
+        .fade-in-item {
+            opacity: 0;
+            transform: translateY(14px);
+            animation: itemIn 420ms ease forwards;
+        }
+
+        .fade-in-item:nth-child(2) {
+            animation-delay: 80ms;
+        }
+
+        .fade-in-item:nth-child(3) {
+            animation-delay: 140ms;
+        }
+
+        .fade-in-item:nth-child(4) {
+            animation-delay: 200ms;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.94);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes itemIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shellIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.985);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes driftGlow {
+            from {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+
+            to {
+                transform: translate3d(10px, -8px, 0) scale(1.05);
+            }
+        }
+
+        @keyframes navPulse {
+
+            0%,
+            100% {
+                transform: translateY(0);
+                filter: brightness(1);
+            }
+
+            50% {
+                transform: translateY(-1px);
+                filter: brightness(1.2);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .title-main {
+                font-size: 30px;
+            }
+
+            .section-title {
+                font-size: 32px;
+            }
+
+            .timer-num {
+                font-size: 50px;
+            }
+
+            .record h4 {
+                font-size: 22px;
+            }
+
+            .coach-card {
+                grid-template-columns: 72px 1fr;
+            }
+
+            .score-badge {
+                grid-column: span 2;
+                justify-self: end;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="device-shell">
+        <div class="app" id="app">
+            <main class="app-main">
+                <section class="screen" id="screen-club">
+                    <div class="header fade-in-item">
+                        <div class="user-chip">
+                            <div class="avatar">RC</div>
+                            <div>
+                                <div class="title-sub">皇家球场</div>
+                                <h1 class="title-main small">CLUBHOUSE</h1>
+                            </div>
+                        </div>
+                        <button class="icon-button" type="button" aria-label="通知">🔔</button>
+                    </div>
+
+                    <div class="empty-club fade-in-item">
+                        <div class="section-title s">俱乐部今日状态</div>
+                        <p class="muted" style="margin: 10px 0 16px; line-height: 1.6;">
+                            今日课程节奏稳定，建议先在预约页确认下次训练，再前往成长页完成课后互评。
+                        </p>
+                        <div class="grid-2" style="margin-bottom: 0;">
+                            <div class="card" style="padding: 14px;">
+                                <div class="tiny muted">活跃会员</div>
+                                <div class="stat-big small" style="font-size: 34px;">126</div>
+                            </div>
+                            <div class="card" style="padding: 14px;">
+                                <div class="tiny muted">今日教练课次</div>
+                                <div class="stat-big small" style="font-size: 34px;">32</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="screen" id="screen-booking-pre">
+                    <div class="header fade-in-item">
+                        <div class="user-chip">
+                            <div class="avatar">LS</div>
+                            <div>
+                                <div class="title-sub">皇家球场</div>
+                                <h1 class="title-main small">Welcome Back</h1>
+                            </div>
+                        </div>
+                        <button class="icon-button" type="button" aria-label="通知">🔔</button>
+                    </div>
+
+                    <div class="grid-2 fade-in-item">
+                        <article class="card">
+                            <div class="section-title s">剩余总课数</div>
+                            <div class="stat-big">12</div>
+                            <div class="muted">有效期至 2026.12.31</div>
+                        </article>
+                        <article class="card">
+                            <div class="section-title s">已消耗课数</div>
+                            <div class="stat-big" style="color:#efe4c8;">48</div>
+                            <div style="color:#99ccff; font-weight:700; margin-top:8px;">↗ 超越 85% 会员</div>
+                        </article>
+                    </div>
+
+                    <button class="appointment-banner fade-in-item" id="book-now" type="button">
+                        <h3>立即预约下一次训练课程</h3>
+                        <p>根据您的训练进度，建议本周预约</p>
+                    </button>
+
+                    <div class="section-head fade-in-item">
+                        <h2 class="section-title s">训练档期</h2>
+                        <a href="#" class="text-link" id="date-all-link">查看全部</a>
+                    </div>
+                    <div class="chip-row fade-in-item" id="schedule-row"></div>
+
+                    <div class="section-head fade-in-item" style="margin-top:4px;">
+                        <h2 class="section-title s">课程资产</h2>
+                        <span class="pill">⌘</span>
+                    </div>
+                    <div id="coach-list-pre" class="fade-in-item"></div>
+                </section>
+
+                <section class="screen" id="screen-booking-post">
+                    <div class="header fade-in-item">
+                        <div class="user-chip">
+                            <div class="avatar">LS</div>
+                            <div>
+                                <div class="title-sub">Welcome Back</div>
+                                <h1 class="title-main medium">林先生</h1>
+                            </div>
+                        </div>
+                        <button class="icon-button" type="button" aria-label="通知">🔔</button>
+                    </div>
+
+                    <article class="card glow fade-in-item">
+                        <div class="section-title s">下次发球时间</div>
+                        <div class="big-countdown" id="countdown"></div>
+                        <div class="row">
+                            <div class="muted">预约 <span id="session-time">10月24日, 14:30</span></div>
+                            <span class="pill">已确认</span>
+                        </div>
+                    </article>
+
+                    <div class="grid-2 fade-in-item" style="margin-top:14px;">
+                        <article class="card">
+                            <div class="section-title s">24°C</div>
+                            <div class="muted" style="margin-top:10px;">微风 3.2m/s</div>
+                            <div class="muted tiny" style="margin-top:6px;">绝佳挥杆天气</div>
+                        </article>
+                        <article class="card">
+                            <div class="section-title s" style="font-size:16px;">AI练习建议</div>
+                            <p class="muted" style="margin-top:10px; line-height:1.55; font-size:13px;">
+                                侧风较大，建议今日练习中加强低平球控球稳定性，并注重重心转移。
+                            </p>
+                        </article>
+                    </div>
+
+                    <article class="card glow fade-in-item" style="text-align:center; margin-bottom:14px;">
+                        <div class="section-title s" style="text-align:left; margin-bottom:12px;">上课核销码</div>
+                        <div
+                            style="width:180px;height:180px;margin:0 auto 12px;border-radius:18px;background:#f4ede2;display:grid;place-items:center;color:#0d3d43;border:5px solid #f7f3ea;box-shadow:0 10px 20px rgba(0,0,0,0.22);">
+                            <div
+                                style="width:130px;height:130px;background:#0f4a52;border:8px solid #e7e7e7;display:grid;place-items:center;color:#111;font-weight:700;font-family:'Trebuchet MS','Noto Sans SC','Microsoft YaHei',sans-serif;">
+                                QR
+                            </div>
+                        </div>
+                        <div style="color:var(--color-primary);font-weight:700;">CLASS VERIFICATIONCODE - DYNAMIC UPDATE
+                        </div>
+                    </article>
+
+                    <button class="primary-btn fade-in-item" id="to-feedback" type="button">一键导航到课后互评</button>
+
+                    <div class="section-head fade-in-item" style="margin-top:20px;">
+                        <h2 class="section-title s">您的私人教练</h2>
+                        <span class="pill">专你来</span>
+                    </div>
+                    <div id="coach-list-post" class="fade-in-item"></div>
+
+                    <div class="section-head fade-in-item" style="margin-top:6px;">
+                        <h2 class="section-title s">课程记录</h2>
+                        <a href="#" class="text-link" id="records-all-link">查看全部</a>
+                    </div>
+                    <div class="record-list fade-in-item" id="record-list"></div>
+                </section>
+
+                <section class="screen" id="screen-growth">
+                    <article class="feedback-card">
+                        <div class="feedback-head">
+                            <h2 class="section-title s">课后互评</h2>
+                            <span class="tag">EVALUATION</span>
+                        </div>
+
+                        <div class="status-row">
+                            <div class="row">
+                                <span class="status-name">体能状态</span>
+                                <span class="status-value" id="label-physical">EXCELLENT</span>
+                            </div>
+                            <div class="stars" data-group="physical"></div>
+                        </div>
+
+                        <div class="status-row">
+                            <div class="row">
+                                <span class="status-name">心理状态</span>
+                                <span class="status-value" id="label-mental">FOCUS</span>
+                            </div>
+                            <div class="stars" data-group="mental"></div>
+                        </div>
+
+                        <div class="status-row">
+                            <div class="row">
+                                <span class="status-name">技能状态</span>
+                                <span class="status-value" id="label-skill">STEADY</span>
+                            </div>
+                            <div class="stars" data-group="skill"></div>
+                        </div>
+
+                        <div class="status-row" style="margin-top:20px;">
+                            <div class="row" style="margin-bottom:10px;">
+                                <span class="status-name">匿名评价教练</span>
+                            </div>
+                            <div class="stars" data-group="coach"></div>
+                        </div>
+
+                        <textarea class="text-box" id="review-text" placeholder="教学质量反馈..."></textarea>
+                        <button class="primary-btn" id="submit-review" type="button">提交评价</button>
+                    </article>
+                </section>
+
+                <section class="screen" id="screen-profile">
+                    <div class="profile-top fade-in-item">
+                        <div class="avatar">ZA</div>
+                        <h1 class="title-main small">THE ACADEMY</h1>
+                        <button class="icon-button" type="button" style="margin-left:auto;">⚙</button>
+                    </div>
+
+                    <div class="profile-card fade-in-item">
+                        <div class="portrait">ZA
+                            <span class="portrait-badge">★</span>
+                        </div>
+                        <h2 class="title-main">张逸尘</h2>
+                        <span class="member-pill">ELITE MEMBER</span>
+                    </div>
+
+                    <div class="section-head fade-in-item">
+                        <h2 class="section-title s">勋章墙</h2>
+                        <span class="muted" style="font-size:28px;">已获得 12/24</span>
+                    </div>
+                    <div class="badge-wall fade-in-item" id="badge-wall"></div>
+
+                    <div class="section-head fade-in-item" style="margin-top:6px;">
+                        <h2 class="section-title s">学院排行榜</h2>
+                        <button class="btn" type="button" style="padding:8px 12px;">按月结算</button>
+                    </div>
+                    <div id="rankings" class="fade-in-item"></div>
+                </section>
+            </main>
+
+            <nav class="bottom-nav" id="bottom-nav">
+                <button class="nav-item" data-tab="club" type="button"><span
+                        class="icon">◫</span><span>俱乐部</span></button>
+                <button class="nav-item" data-tab="booking" type="button"><span
+                        class="icon">◷</span><span>预约</span></button>
+                <button class="nav-item" data-tab="growth" type="button"><span
+                        class="icon">⌁</span><span>成长</span></button>
+                <button class="nav-item" data-tab="profile" type="button"><span
+                        class="icon">◉</span><span>我的</span></button>
+            </nav>
+        </div>
+    </div>
+
+    <div class="modal-mask" id="confirm-modal" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <h3 id="modal-title">确认预约本周课程？</h3>
+            <p>
+                预约后将自动生成上课核销码，并切换到“预约后状态”页面。
+            </p>
+            <div class="modal-actions">
+                <button class="btn" id="cancel-booking" type="button">再想想</button>
+                <button class="btn primary" id="confirm-booking" type="button">确认预约</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        (function () {
+            var STORAGE_KEY = "academy-prototype-state";
+            var DEFAULT_STATE = {
+                currentTab: "booking",
+                bookingStatus: "pre",
+                selectedDate: 15,
+                nextSessionISO: "2026-10-24T14:30:00",
+                ratings: {
+                    physical: 4,
+                    mental: 5,
+                    skill: 3,
+                    coach: 4
+                },
+                reviewText: ""
+            };
+
+            var state = loadState();
+            var countdownTimer = null;
+
+            var scheduleDates = [
+                { dow: "MON", day: 14 },
+                { dow: "TUE", day: 15 },
+                { dow: "WED", day: 16 },
+                { dow: "THU", day: 17 },
+                { dow: "FRI", day: 18 }
+            ];
+
+            var coaches = [
+                {
+                    avatar: "SJ",
+                    name: "Sarah Jenkins",
+                    title: "PGA 高级教练",
+                    desc: "专注纠正挥杆姿势，10年教学经验",
+                    score: "★ 4.9"
+                },
+                {
+                    avatar: "DC",
+                    name: "David Chen",
+                    title: "职业巡回赛背景",
+                    desc: "推杆专家，善于数据化训练分析",
+                    score: "★ 5.0"
+                }
+            ];
+
+            var records = [
+                {
+                    date: "2026年8月24日",
+                    tag: "技能",
+                    title: "铁杆压缩",
+                    coach: "教练 Richardson",
+                    note: "专注于击球瞬间保持球杆前倾。击球效果和起草提升明显。"
+                },
+                {
+                    date: "2026年8月18日",
+                    tag: "身体",
+                    title: "跨部旋转练习",
+                    coach: "教练 Richardson",
+                    note: "修正了过早伸展问题。通过压力盘验证地面反作用力的分配。"
+                },
+                {
+                    date: "2026年8月12日",
+                    tag: "心态",
+                    title: "心态与流程",
+                    coach: "教练 Richardson",
+                    note: "击球前的视觉化技巧训练，有效降低了在窄道焦虑感。"
+                }
+            ];
+
+            var badgeData = [
+                { rank: "NO. 5", label: "身体" },
+                { rank: "NO. 14", label: "心理" },
+                { rank: "NO. 8", label: "技能" }
+            ];
+
+            var rankingGroups = [
+                {
+                    title: "心理排名",
+                    rank: "NO.4",
+                    rows: [
+                        { no: 1, medal: "1", name: "李建勋", value: "98.5" },
+                        { no: 2, medal: "2", name: "王思雅", value: "96.2" },
+                        { no: 3, medal: "3", name: "陈志豪", value: "95.8" }
+                    ]
+                },
+                {
+                    title: "技能等级",
+                    rank: "NO.8",
+                    rows: [
+                        { no: 1, medal: "1", name: "林晓慧", value: "Lv.42" },
+                        { no: 2, medal: "2", name: "周宇", value: "Lv.39" },
+                        { no: 3, medal: "3", name: "何漫漫", value: "Lv.38" }
+                    ]
+                }
+            ];
+
+            var ratingCopy = {
+                physical: ["LOW", "WARM", "GOOD", "EXCELLENT", "PEAK"],
+                mental: ["DISTRACT", "CALM", "FOCUS", "SHARP", "FLOW"],
+                skill: ["BASIC", "RISING", "STEADY", "SOLID", "MASTER"],
+                coach: ["一般", "合格", "良好", "优秀", "卓越"]
+            };
+
+            function loadState() {
+                try {
+                    var cached = localStorage.getItem(STORAGE_KEY);
+                    if (!cached) {
+                        return clone(DEFAULT_STATE);
+                    }
+                    var parsed = JSON.parse(cached);
+                    return {
+                        currentTab: parsed.currentTab || DEFAULT_STATE.currentTab,
+                        bookingStatus: parsed.bookingStatus === "booked" ? "booked" : "pre",
+                        selectedDate: Number(parsed.selectedDate) || DEFAULT_STATE.selectedDate,
+                        nextSessionISO: parsed.nextSessionISO || DEFAULT_STATE.nextSessionISO,
+                        ratings: {
+                            physical: validStar(parsed.ratings && parsed.ratings.physical, DEFAULT_STATE.ratings.physical),
+                            mental: validStar(parsed.ratings && parsed.ratings.mental, DEFAULT_STATE.ratings.mental),
+                            skill: validStar(parsed.ratings && parsed.ratings.skill, DEFAULT_STATE.ratings.skill),
+                            coach: validStar(parsed.ratings && parsed.ratings.coach, DEFAULT_STATE.ratings.coach)
+                        },
+                        reviewText: typeof parsed.reviewText === "string" ? parsed.reviewText : ""
+                    };
+                } catch (err) {
+                    return clone(DEFAULT_STATE);
+                }
+            }
+
+            function saveState() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            }
+
+            function clone(obj) {
+                return JSON.parse(JSON.stringify(obj));
+            }
+
+            function validStar(value, fallback) {
+                var n = Number(value);
+                if (n >= 1 && n <= 5) {
+                    return n;
+                }
+                return fallback;
+            }
+
+            function mount() {
+                renderSchedule();
+                renderCoachList("coach-list-pre");
+                renderCoachList("coach-list-post");
+                renderRecords();
+                renderBadgeWall();
+                renderRankings();
+                renderStars();
+                bindEvents();
+                render();
+            }
+
+            function bindEvents() {
+                document.getElementById("bottom-nav").addEventListener("click", function (event) {
+                    var button = event.target.closest(".nav-item");
+                    if (!button) {
+                        return;
+                    }
+                    state.currentTab = button.dataset.tab;
+                    saveState();
+                    render();
+                });
+
+                document.getElementById("book-now").addEventListener("click", function () {
+                    openModal();
+                });
+
+                document.getElementById("cancel-booking").addEventListener("click", function () {
+                    closeModal();
+                });
+
+                document.getElementById("confirm-booking").addEventListener("click", function () {
+                    state.bookingStatus = "booked";
+                    state.currentTab = "booking";
+                    state.nextSessionISO = buildNextSessionISO(state.selectedDate);
+                    saveState();
+                    closeModal();
+                    render();
+                    toast("预约成功，已切换到预约后状态");
+                });
+
+                document.getElementById("confirm-modal").addEventListener("click", function (event) {
+                    if (event.target.id === "confirm-modal") {
+                        closeModal();
+                    }
+                });
+
+                document.getElementById("to-feedback").addEventListener("click", function () {
+                    state.currentTab = "growth";
+                    saveState();
+                    render();
+                });
+
+                document.getElementById("submit-review").addEventListener("click", function () {
+                    var text = document.getElementById("review-text").value.trim();
+                    state.reviewText = text;
+                    saveState();
+                    toast("评价已提交，感谢你的反馈");
+                });
+
+                document.getElementById("review-text").addEventListener("input", function (event) {
+                    state.reviewText = event.target.value;
+                });
+
+                document.getElementById("date-all-link").addEventListener("click", preventLinkToast);
+                document.getElementById("records-all-link").addEventListener("click", preventLinkToast);
+            }
+
+            function preventLinkToast(event) {
+                event.preventDefault();
+                toast("演示版暂未开放完整列表");
+            }
+
+            function render() {
+                updateVisibleScreen();
+                updateNavState();
+                updateSessionText();
+                updateRatingLabels();
+                updateReviewText();
+                updateCountdown();
+            }
+
+            function updateVisibleScreen() {
+                var target = resolveScreenId();
+                var screens = document.querySelectorAll(".screen");
+                screens.forEach(function (el) {
+                    el.classList.toggle("active", el.id === target);
+                    if (el.id === target) {
+                        retriggerStagger(el);
+                    }
+                });
+            }
+
+            function resolveScreenId() {
+                if (state.currentTab === "profile") {
+                    return "screen-profile";
+                }
+                if (state.currentTab === "growth") {
+                    return "screen-growth";
+                }
+                if (state.currentTab === "club") {
+                    return "screen-club";
+                }
+                return state.bookingStatus === "booked" ? "screen-booking-post" : "screen-booking-pre";
+            }
+
+            function updateNavState() {
+                var items = document.querySelectorAll(".nav-item");
+                items.forEach(function (button) {
+                    button.classList.toggle("active", button.dataset.tab === state.currentTab);
+                });
+            }
+
+            function updateSessionText() {
+                var target = new Date(state.nextSessionISO);
+                var month = target.getMonth() + 1;
+                var day = target.getDate();
+                var hour = pad2(target.getHours());
+                var minute = pad2(target.getMinutes());
+                document.getElementById("session-time").textContent = month + "月" + day + "日, " + hour + ":" + minute;
+            }
+
+            function buildNextSessionISO(day) {
+                var base = new Date();
+                base.setMonth(9);
+                base.setDate(day);
+                base.setHours(14, 30, 0, 0);
+                if (base.getTime() < Date.now()) {
+                    base.setFullYear(base.getFullYear() + 1);
+                }
+                return base.toISOString();
+            }
+
+            function pad2(num) {
+                return String(num).padStart(2, "0");
+            }
+
+            function renderSchedule() {
+                var container = document.getElementById("schedule-row");
+                container.innerHTML = scheduleDates.map(function (item) {
+                    var active = state.selectedDate === item.day ? "active" : "";
+                    return "<button type=\"button\" class=\"date-chip " + active + "\" data-day=\"" + item.day + "\">"
+                        + "<div class=\"dow\">" + item.dow + "</div>"
+                        + "<div class=\"day\">" + item.day + "</div>"
+                        + "</button>";
+                }).join("");
+
+                container.addEventListener("click", function (event) {
+                    var chip = event.target.closest(".date-chip");
+                    if (!chip) {
+                        return;
+                    }
+                    state.selectedDate = Number(chip.dataset.day);
+                    if (state.bookingStatus === "booked") {
+                        state.nextSessionISO = buildNextSessionISO(state.selectedDate);
+                    }
+                    saveState();
+                    renderSchedule();
+                    updateSessionText();
+                    toast("已选择 " + state.selectedDate + " 号训练档期");
+                });
+            }
+
+            function renderCoachList(targetId) {
+                var host = document.getElementById(targetId);
+                host.innerHTML = coaches.map(function (coach) {
+                    return "<article class=\"coach-card\">"
+                        + "<div class=\"coach-photo\"><span class=\"coach-initial\">" + coach.avatar + "</span></div>"
+                        + "<div>"
+                        + "<div class=\"coach-name\">" + coach.name + "</div>"
+                        + "<div class=\"coach-sub\">" + coach.title + "</div>"
+                        + "<div class=\"coach-desc\">" + coach.desc + "</div>"
+                        + "</div>"
+                        + "<div class=\"score-badge\">" + coach.score + "</div>"
+                        + "</article>";
+                }).join("");
+            }
+
+            function renderRecords() {
+                var host = document.getElementById("record-list");
+                host.innerHTML = records.map(function (item) {
+                    return "<article class=\"record\">"
+                        + "<div class=\"tiny muted\">" + item.date + "</div>"
+                        + "<div class=\"headline\">"
+                        + "<h4>" + item.title + "</h4>"
+                        + "<span class=\"pill\">" + item.tag + "</span>"
+                        + "</div>"
+                        + "<div class=\"muted\">" + item.coach + "</div>"
+                        + "<p>" + item.note + "</p>"
+                        + "</article>";
+                }).join("");
+            }
+
+            function renderBadgeWall() {
+                var host = document.getElementById("badge-wall");
+                host.innerHTML = badgeData.map(function (item) {
+                    return "<article class=\"badge-item\">"
+                        + "<div class=\"badge-rank\">RANK<br>" + item.rank + "</div>"
+                        + "<div style=\"font-weight:700;font-size:30px;\">" + item.label + "</div>"
+                        + "</article>";
+                }).join("");
+            }
+
+            function renderRankings() {
+                var host = document.getElementById("rankings");
+                host.innerHTML = rankingGroups.map(function (group) {
+                    var rows = group.rows.map(function (row) {
+                        return "<div class=\"rank-row\">"
+                            + "<div class=\"rank-no\">" + row.no + "</div>"
+                            + "<div class=\"rank-medal\">" + row.medal + "</div>"
+                            + "<div style=\"font-size:30px;font-weight:700;\">" + row.name + "</div>"
+                            + "<div class=\"score-badge\">" + row.value + "</div>"
+                            + "</div>";
+                    }).join("");
+
+                    return "<section class=\"rank-card\">"
+                        + "<div class=\"card-head\">"
+                        + "<h3 class=\"section-title s\" style=\"font-size:36px;\">" + group.title + "</h3>"
+                        + "<span class=\"score-badge\">" + group.rank + "</span>"
+                        + "</div>"
+                        + rows
+                        + "</section>";
+                }).join("");
+            }
+
+            function renderStars() {
+                var groups = document.querySelectorAll(".stars");
+                groups.forEach(function (groupEl) {
+                    var group = groupEl.dataset.group;
+                    var score = state.ratings[group];
+                    var html = "";
+                    for (var i = 1; i <= 5; i++) {
+                        var on = i <= score ? "on" : "";
+                        html += "<button type=\"button\" class=\"star " + on + "\" data-group=\"" + group + "\" data-star=\"" + i + "\">★</button>";
+                    }
+                    groupEl.innerHTML = html;
+                });
+
+                document.querySelectorAll(".stars").forEach(function (groupEl) {
+                    groupEl.addEventListener("click", function (event) {
+                        var star = event.target.closest(".star");
+                        if (!star) {
+                            return;
+                        }
+                        var group = star.dataset.group;
+                        var value = Number(star.dataset.star);
+                        state.ratings[group] = value;
+                        saveState();
+                        renderStars();
+                        updateRatingLabels();
+                    });
+                });
+            }
+
+            function updateRatingLabels() {
+                document.getElementById("label-physical").textContent = ratingCopy.physical[state.ratings.physical - 1];
+                document.getElementById("label-mental").textContent = ratingCopy.mental[state.ratings.mental - 1];
+                document.getElementById("label-skill").textContent = ratingCopy.skill[state.ratings.skill - 1];
+            }
+
+            function updateReviewText() {
+                document.getElementById("review-text").value = state.reviewText || "";
+            }
+
+            function updateCountdown() {
+                if (countdownTimer) {
+                    window.clearInterval(countdownTimer);
+                    countdownTimer = null;
+                }
+
+                if (resolveScreenId() !== "screen-booking-post") {
+                    return;
+                }
+
+                var countdownHost = document.getElementById("countdown");
+
+                function tick() {
+                    var now = Date.now();
+                    var target = new Date(state.nextSessionISO).getTime();
+                    var diff = Math.max(0, target - now);
+
+                    var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    var hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                    var mins = Math.floor((diff / (1000 * 60)) % 60);
+
+                    countdownHost.innerHTML = ""
+                        + timerBlock(pad2(days), "DAYS")
+                        + "<span class=\"colon\">:</span>"
+                        + timerBlock(pad2(hours), "HOURS")
+                        + "<span class=\"colon\">:</span>"
+                        + timerBlock(pad2(mins), "MIN");
+                }
+
+                tick();
+                countdownTimer = window.setInterval(tick, 1000);
+            }
+
+            function timerBlock(value, label) {
+                return "<div class=\"timer-block\"><div class=\"timer-num\">" + value + "</div><div class=\"timer-lab\">" + label + "</div></div>";
+            }
+
+            function retriggerStagger(screenEl) {
+                var items = screenEl.querySelectorAll(".fade-in-item");
+                items.forEach(function (item) {
+                    item.style.animation = "none";
+                    item.offsetHeight;
+                    item.style.animation = "";
+                });
+            }
+
+            function openModal() {
+                var mask = document.getElementById("confirm-modal");
+                mask.classList.add("show");
+                mask.setAttribute("aria-hidden", "false");
+            }
+
+            function closeModal() {
+                var mask = document.getElementById("confirm-modal");
+                if (document.activeElement && typeof document.activeElement.blur === "function") {
+                    document.activeElement.blur();
+                }
+                mask.classList.remove("show");
+                mask.setAttribute("aria-hidden", "true");
+            }
+
+            function toast(message) {
+                var el = document.getElementById("toast");
+                el.textContent = message;
+                el.classList.add("show");
+                window.clearTimeout(toast._timer);
+                toast._timer = window.setTimeout(function () {
+                    el.classList.remove("show");
+                }, 1800);
+            }
+
+            mount();
+        })();
+    </script>
+</body>
+
+</html>

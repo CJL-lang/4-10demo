@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Royal Fairway - Pre-Booking</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#c7e7ff",
+                    "inverse-on-surface": "#363022",
+                    "outline": "#9d8f79",
+                    "secondary-fixed": "#e3e2e2",
+                    "on-surface": "#eee1cd",
+                    "secondary-container": "#484949",
+                    "inverse-primary": "#7c5800",
+                    "secondary": "#c7c6c6",
+                    "secondary-fixed-dim": "#c7c6c6",
+                    "surface-container-highest": "#3b3426",
+                    "surface-container-high": "#30291c",
+                    "primary": "#ffca68",
+                    "error": "#ffb4ab",
+                    "on-secondary-fixed": "#1a1c1c",
+                    "on-surface-variant": "#d5c4ad",
+                    "on-secondary-container": "#b8b8b8",
+                    "background": "#181307",
+                    "on-tertiary": "#00344c",
+                    "on-background": "#eee1cd",
+                    "on-tertiary-fixed-variant": "#004c6c",
+                    "surface-variant": "#3b3426",
+                    "primary-fixed": "#ffdea8",
+                    "on-primary-fixed": "#271900",
+                    "surface-container-low": "#211b0f",
+                    "primary-container": "#ecab13",
+                    "surface-tint": "#febb29",
+                    "surface-container": "#251f13",
+                    "on-tertiary-fixed": "#001e2e",
+                    "on-secondary-fixed-variant": "#464747",
+                    "on-primary": "#422d00",
+                    "on-primary-container": "#5f4200",
+                    "primary-fixed-dim": "#febb29",
+                    "tertiary": "#a1d9ff",
+                    "tertiary-container": "#4ec1ff",
+                    "on-error-container": "#ffdad6",
+                    "outline-variant": "#504533",
+                    "on-secondary": "#2f3131",
+                    "on-tertiary-container": "#004d6d",
+                    "on-error": "#690005",
+                    "surface-container-lowest": "#130d04",
+                    "surface-bright": "#40382b",
+                    "on-primary-fixed-variant": "#5e4200",
+                    "tertiary-fixed-dim": "#83cfff",
+                    "surface": "#181307",
+                    "surface-dim": "#181307",
+                    "inverse-surface": "#eee1cd",
+                    "error-container": "#93000a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-card {
+            background: rgba(59, 52, 38, 0.2);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-[#181307] dark:bg-[#181307] w-full pt-4 pb-2 px-6 no-border background-shift-tonal flat no shadows sticky top-0 z-40">
+<div class="flex justify-between items-center w-full px-6 max-w-screen-xl mx-auto">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/30">
+<img alt="Student Profile Photo" class="w-full h-full object-cover" data-alt="Close-up portrait of a professional man in high-end golf attire, soft studio lighting, premium aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5jXUQw5FIu5lCcX3LKsLXTQZQIvdAzTPJdSUGBzTXvFU2ffB_X0Ea8dp0U8rhlWx2FUNV2TnAhfFRpG8QLH_iMJ0IV7Sk5S_1WLCZ6PRBpTvallGSD73WEOBXJIZXjM6tTtkNNaDlIgz4IGwW-txmYdeXtwIPCArnv_1G_bFZQy0kzrMKDSxQzUGHu7znXnQAsq5OT3DqTsqL7OO-W0ubISLpXqhpQ0kyqw2o-ZNTrPs4Z77ANvQ7fvxna85JueO_a1RWdfYTiZM8"/>
+</div>
+<div>
+<p class="text-on-surface-variant text-[10px] uppercase tracking-widest font-medium">皇家球场</p>
+<h1 class="font-['Manrope'] headline-md tracking-tight text-[#ffca68] dark:text-[#ffca68] font-bold">Welcome Back</h1>
+</div>
+</div>
+<button class="text-[#ffca68] hover:opacity-80 transition-opacity active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<main class="px-6 mt-6 space-y-8">
+<!-- Course Assets Section (Bento Grid Style) -->
+<section class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between aspect-square">
+<div class="z-10">
+<p class="text-on-surface-variant text-sm font-medium">剩余总课数</p>
+<h2 class="text-5xl font-extrabold text-primary mt-2 tracking-tighter">12</h2>
+</div>
+<div class="absolute -bottom-4 -right-4 opacity-5">
+<span class="material-symbols-outlined text-9xl" data-icon="golf_course">golf_course</span>
+</div>
+<div class="z-10 mt-auto">
+<span class="text-[10px] text-on-surface-variant/60 tracking-wider">有效期至 2024.12.31</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-3xl p-6 flex flex-col justify-between aspect-square">
+<div>
+<p class="text-on-surface-variant text-sm font-medium">已消耗课数</p>
+<h2 class="text-5xl font-extrabold text-on-surface mt-2 tracking-tighter">48</h2>
+</div>
+<div class="mt-auto flex items-center gap-1 text-tertiary font-bold text-xs">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+<span>超越 85% 会员</span>
+</div>
+</div>
+</section>
+<!-- CTA Card -->
+<section>
+<div class="relative group cursor-pointer active:scale-[0.98] transition-transform duration-200">
+<div class="absolute inset-0 bg-gradient-to-br from-primary to-primary-container rounded-3xl blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
+<div class="relative bg-gradient-to-br from-primary to-primary-container p-8 rounded-3xl flex justify-between items-center shadow-xl">
+<div class="space-y-1">
+<h3 class="text-on-primary-container text-xl font-extrabold tracking-tight">立即预约下一次训练课程</h3>
+<p class="text-on-primary-container/80 text-xs font-medium">根据您的训练进度，建议本周预约</p>
+</div>
+<div class="bg-on-primary-container/10 p-3 rounded-2xl">
+<span class="material-symbols-outlined text-on-primary-container text-3xl" data-icon="calendar_add_on">calendar_add_on</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Calendar Preview -->
+<section class="space-y-4">
+<div class="flex justify-between items-center">
+<h4 class="text-on-surface font-bold text-lg tracking-tight">训练档期</h4>
+<button class="text-primary text-xs font-semibold">查看全部</button>
+</div>
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+<!-- Date Chips -->
+<div class="flex flex-col items-center justify-center min-w-[64px] h-20 rounded-2xl bg-surface-container-high border border-outline-variant/20">
+<span class="text-[10px] text-on-surface-variant uppercase tracking-tighter">MON</span>
+<span class="text-lg font-bold text-on-surface">14</span>
+</div>
+<div class="flex flex-col items-center justify-center min-w-[64px] h-20 rounded-2xl bg-primary text-on-primary shadow-lg shadow-primary/20">
+<span class="text-[10px] uppercase tracking-tighter opacity-80">TUE</span>
+<span class="text-lg font-bold">15</span>
+<div class="w-1 h-1 bg-on-primary rounded-full mt-1"></div>
+</div>
+<div class="flex flex-col items-center justify-center min-w-[64px] h-20 rounded-2xl bg-surface-container-high border border-outline-variant/20">
+<span class="text-[10px] text-on-surface-variant uppercase tracking-tighter">WED</span>
+<span class="text-lg font-bold text-on-surface">16</span>
+</div>
+<div class="flex flex-col items-center justify-center min-w-[64px] h-20 rounded-2xl bg-surface-container-high border border-outline-variant/20">
+<span class="text-[10px] text-on-surface-variant uppercase tracking-tighter">THU</span>
+<span class="text-lg font-bold text-on-surface">17</span>
+</div>
+<div class="flex flex-col items-center justify-center min-w-[64px] h-20 rounded-2xl bg-surface-container-high border border-outline-variant/20 opacity-50">
+<span class="text-[10px] text-on-surface-variant uppercase tracking-tighter">FRI</span>
+<span class="text-lg font-bold text-on-surface">18</span>
+</div>
+</div>
+</section>
+<!-- Recommended Coaches -->
+<section class="space-y-4">
+<div class="flex justify-between items-center">
+<h4 class="text-on-surface font-bold text-lg tracking-tight">课程资产</h4>
+<div class="flex gap-2">
+<button class="p-2 rounded-full bg-surface-container-high text-on-surface-variant"><span class="material-symbols-outlined text-sm" data-icon="tune">tune</span></button>
+</div>
+</div>
+<div class="space-y-4">
+<!-- Coach Card 1 -->
+<div class="glass-card p-5 rounded-3xl flex gap-4 items-center">
+<div class="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0">
+<img alt="Coach Sarah" class="w-full h-full object-cover" data-alt="Professional female golf coach profile photo, focused expression, outdoor golf course lighting, premium quality" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNJv2jdUg-ACe1HXnbzvr-IqtnRskmWIJBCgJDh9P5we6robFpAFzorlZ0CtadFW3npvak7EIUspRdklVkAgwZEcvXTSHhkOOtSmjPyGozDkRxo9p-kc0e4DuJh_tNjMrKxv50yrFY9KNFXdZniIebrqL16eF0BFiGe1LMhbi6M2Gx4EjpC8_swK1QJ9OzyXvy0tdGkCAICQKpcpQ_ao7ysGmqjWbo4A_YU0OHehqM9Sey4y8PmNO3jDwMS2oExyi7_ATgmu1_AqZY"/>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<div>
+<h5 class="text-on-surface font-bold">Sarah Jenkins</h5>
+<p class="text-xs text-on-surface-variant">PGA 高级教练</p>
+</div>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-xs" data-icon="star" data-weight="fill">star</span>
+<span class="text-xs font-bold">4.9</span>
+</div>
+</div>
+<p class="text-[11px] text-on-surface-variant/70 mt-2 line-clamp-1">专注纠正挥杆姿势，10年教学经验</p>
+</div>
+</div>
+<!-- Coach Card 2 -->
+<div class="glass-card p-5 rounded-3xl flex gap-4 items-center">
+<div class="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0">
+<img alt="Coach David" class="w-full h-full object-cover" data-alt="Senior male golf instructor with polo shirt, warm lighting, approachable and professional look" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCh_HN_4AhgDamIq3H1PCPV7tenYFZ7uiTzu-v6zsCdNxn8xRwsrQ9AjXxejmqVysfzw-Lrit9XM__yPxKnFCJEBKSPO4b932rGq2P214DPVdn-leC9_HzAyY9Fwurf4nJk_tdyWWDeCUURTPiAclPMrP77tE3m-ceuLXJ0W4OOXuiOE8lFrkNCqYghQ2WR_Gf_rq80NueydSm_-gUa2xdwcLO0M-_lxjTE1WXnSV9E2wMcxa1vRouFL6l4j8jSUxcS6ZvOLG_nHg5M"/>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<div>
+<h5 class="text-on-surface font-bold">David Chen</h5>
+<p class="text-xs text-on-surface-variant">职业巡回赛背景</p>
+</div>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-xs" data-icon="star" data-weight="fill">star</span>
+<span class="text-xs font-bold">5.0</span>
+</div>
+</div>
+<p class="text-[11px] text-on-surface-variant/70 mt-2 line-clamp-1">推杆专家，善于数据化训练分析</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-3 pb-8 bg-[#181307]/90 dark:bg-[#181307]/90 backdrop-blur-lg rounded-t-3xl shadow-[0_-4px_40px_rgba(238,225,205,0.06)]">
+<a class="flex flex-col items-center justify-center text-[#d5c4ad]/60 px-3 py-1 hover:text-[#ffca68] transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="fort">fort</span>
+<span class="font-['Manrope'] text-[10px] font-medium tracking-wide">俱乐部</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#ffca68] bg-[#ecab13]/10 rounded-xl px-4 py-2 transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="calendar_month" data-weight="fill" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+<span class="font-['Manrope'] text-[10px] font-medium tracking-wide">预约</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#d5c4ad]/60 px-3 py-1 hover:text-[#ffca68] transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="monitoring">monitoring</span>
+<span class="font-['Manrope'] text-[10px] font-medium tracking-wide">成长</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#d5c4ad]/60 px-3 py-1 hover:text-[#ffca68] transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-['Manrope'] text-[10px] font-medium tracking-wide">我的</span>
+</a>
+</nav>
+</body></html>

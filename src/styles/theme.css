@@ -1,0 +1,71 @@
+:root {
+    --font-ui: "Microsoft YaHei UI", "PingFang SC", "Noto Sans SC", "Segoe UI", sans-serif;
+    --primary: #ffca68;
+    --primary-container: #ecab13;
+    --primary-fixed: #ffdea8;
+    --surface: #181307;
+    --surface-low: #211b0f;
+    --surface-container: #251f13;
+    --surface-container-high: #30291c;
+    --surface-container-highest: #3b3426;
+    --surface-variant: #3b3426;
+    --on-surface: #eee1cd;
+    --on-surface-variant: #d5c4ad;
+    --outline-variant: #504533;
+    --outline: #9d8f79;
+    --tertiary: #a1d9ff;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --radius-xxl: 40px;
+
+    --shadow-soft: 0 12px 24px rgba(0, 0, 0, 0.28);
+    --shadow-gold: 0 16px 34px rgba(236, 171, 19, 0.2);
+    --transition-fast: 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    --transition-main: 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    --font-display: var(--font-ui);
+    --font-body: var(--font-ui);
+    --font-mono: var(--font-ui);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    height: 100%;
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-weight: 500;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+    color: var(--on-surface);
+    background: var(--surface);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong {
+    font-family: var(--font-display);
+}
+
+button,
+input,
+textarea {
+    font-family: inherit;
+}
