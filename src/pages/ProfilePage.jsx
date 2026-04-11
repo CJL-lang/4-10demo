@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
-import { achievementItems, rankingGroups } from "../data/mockData";
+import { useTranslation } from "react-i18next";
+import LanguageToggle from "../components/LanguageToggle";
+import { achievementItems, rankingGroups, STUDENT_AVATAR_URL } from "../data/mockData";
 import { useAppContext } from "../context/AppContext";
 
 export default function ProfilePage() {
+    const { t } = useTranslation();
     const { state, actions } = useAppContext();
     const [profileView, setProfileView] = useState("home");
 
@@ -24,15 +27,18 @@ export default function ProfilePage() {
                         <button
                             type="button"
                             className="icon-btn"
-                            aria-label="返回"
+                            aria-label={t("profile.backAria")}
                             onClick={() => setProfileView("home")}
                         >
                             ←
                         </button>
                         <div>
-                            <p className="small-label">Leaderboards</p>
-                            <h1 className="headline">学院排行榜</h1>
+                            <p className="small-label">{t("ranking.subtitle")}</p>
+                            <h1 className="headline">{t("ranking.title")}</h1>
                         </div>
+                    </div>
+                    <div className="header-actions">
+                        <LanguageToggle />
                     </div>
                 </header>
 
@@ -41,7 +47,7 @@ export default function ProfilePage() {
                         {rankingGroups.map((group) => (
                             <article className="panel rank-panel" key={group.title}>
                                 <div className="rank-head">
-                                    <h3>{group.title}</h3>
+                                    <h3>{t("ranking.skillsOverall", { defaultValue: group.title })}</h3>
                                     <span>{group.rank}</span>
                                 </div>
                                 <div className="rank-rows">
@@ -50,7 +56,7 @@ export default function ProfilePage() {
                                             <span className="rank-medal">{row.no}</span>
                                             <span className="rank-name">
                                                 {row.name}
-                                                {row.isSelf ? <em className="rank-self-tag">我</em> : null}
+                                                {row.isSelf ? <em className="rank-self-tag">{t("common.me")}</em> : null}
                                             </span>
                                             <span className="rank-value">{row.value}</span>
                                         </div>
@@ -68,32 +74,43 @@ export default function ProfilePage() {
         <section className="screen fade-enter">
             <header className="top-header profile-header">
                 <div className="user-chip">
-                    <div className="avatar" style={{
-                        backgroundImage: 'url(https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80)',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        color: 'transparent'
-                    }}>ZA</div>
-                    <h1 className="headline">THE ACADEMY</h1>
+                    <div className="avatar golf-icon" aria-hidden="true">
+                        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="16" y="2" width="8" height="20" fill="currentColor" fillOpacity="0.3" />
+                            <path d="M20 22L14 38H26L20 22Z" fill="currentColor" fillOpacity="0.9" />
+                            <circle cx="20" cy="20" r="3" fill="currentColor" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p className="small-label">{t("profile.venue")}</p>
+                        <h1 className="headline">{t("profile.title")}</h1>
+                    </div>
                 </div>
-                <button type="button" className="icon-btn" aria-label="设置">
-                    ⊙
-                </button>
+                <div className="header-actions header-actions-stack">
+                    <LanguageToggle />
+                </div>
             </header>
 
             <section className="profile-hero">
-                <div className="portrait">
-                    <span>ZA</span>
+                <div
+                    className="portrait portrait-photo"
+                    style={{
+                        backgroundImage: `url(${STUDENT_AVATAR_URL})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center top",
+                    }}
+                    aria-label={t("profile.avatarAria")}
+                >
                     <em>★</em>
                 </div>
                 <h2 className="headline profile-name">张逸尘</h2>
-                <span className="member-pill">ELITE MEMBER</span>
+                <span className="member-pill">{t("profile.member")}</span>
             </section>
 
             <section className="section-stack">
                 <div className="section-head">
-                    <h2 className="section-title-sm">勋章墙</h2>
-                    <span className="muted-text">已获得 {unlockedCount}/{achievementItems.length}</span>
+                    <h2 className="section-title-sm">{t("profile.badgeWall")}</h2>
+                    <span className="muted-text">{t("profile.badgeProgress", { unlocked: unlockedCount, total: achievementItems.length })}</span>
                 </div>
 
                 {/* 学院排名专属主勋章 */}
@@ -111,13 +128,13 @@ export default function ProfilePage() {
                 >
                     <div className="hero-badge-visual">
                         {/* 我们假设导出的logo图片保存为 public/logo.png */}
-                        <img src="/logo.png" alt="Academy Rank Logo" className="hero-badge-logo" />
+                        <img src="/logo.png" alt={t("profile.rankingHero.logoAlt")} className="hero-badge-logo" />
                         <div className="hero-badge-glow"></div>
                     </div>
                     <div className="hero-badge-info">
-                        <p className="hero-badge-label">全院综合排名</p>
-                        <h3 className="hero-badge-value">NO. 4</h3>
-                        <p className="hero-badge-desc">ELITE 级学员</p>
+                        <p className="hero-badge-label">{t("profile.rankingHero.label")}</p>
+                        <h3 className="hero-badge-value">{t("profile.rankingHero.value")}</h3>
+                        <p className="hero-badge-desc">{t("profile.rankingHero.desc")}</p>
                     </div>
                     <span className="hero-badge-arrow">→</span>
                 </article>
@@ -142,10 +159,10 @@ export default function ProfilePage() {
                                 }}
                             >
                                 <div className="badge-rank" style={{ filter: `brightness(${brightness})` }}>
-                                    <small>LEVEL</small>
+                                    <small>{t("common.level")}</small>
                                     <strong>{item.rank}</strong>
                                 </div>
-                                <p>{item.label}</p>
+                                <p>{t(`achievements.${item.id}.label`, { defaultValue: item.label })}</p>
                                 <span className="badge-state-text">{item.levelScale}</span>
                             </article>
                         );
@@ -153,35 +170,21 @@ export default function ProfilePage() {
                 </div>
             </section>
 
-            <section className="section-stack section-bottom-gap">
-                <button
-                    type="button"
-                    className="panel panel-low profile-entry-card"
-                    onClick={() => setProfileView("ranking")}
-                >
-                    <div className="entry-content">
-                        <h3 className="section-title-sm">学院排行榜</h3>
-                        <p className="muted-text">查看您的学院排名与当前段位</p>
-                    </div>
-                    <span className="entry-arrow">→</span>
-                </button>
-            </section>
-
             {activeAchievement ? (
                 <div className="modal-mask" onClick={actions.closeAchievement}>
                     <section className="modal-card achievement-detail-modal" onClick={(event) => event.stopPropagation()}>
-                        <h3>{activeAchievement.label}</h3>
-                        <p>{activeAchievement.detail}</p>
-                        <p>{activeAchievement.rule}</p>
-                        <p>等级：{activeAchievement.rank} / {activeAchievement.levelScale}</p>
-                        <p>状态：{activeAchievement.status === "unlocked" ? "已解锁" : activeAchievement.status === "progress" ? "进行中" : "未解锁"}</p>
-                        <p>{activeAchievement.milestone}</p>
+                        <h3>{t(`achievements.${activeAchievement.id}.label`, { defaultValue: activeAchievement.label })}</h3>
+                        <p>{t(`achievements.${activeAchievement.id}.detail`, { defaultValue: activeAchievement.detail })}</p>
+                        <p>{t(`achievements.${activeAchievement.id}.rule`, { defaultValue: activeAchievement.rule })}</p>
+                        <p>{t("common.level")}：{activeAchievement.rank} / {activeAchievement.levelScale}</p>
+                        <p>{t("common.status")}：{t(`profile.achievementStatus.${activeAchievement.status}`)}</p>
+                        <p>{t(`achievements.${activeAchievement.id}.milestone`, { defaultValue: activeAchievement.milestone })}</p>
                         <div className="modal-actions">
                             <button type="button" className="btn-ghost" onClick={actions.closeAchievement}>
-                                关闭
+                                {t("common.close")}
                             </button>
                             <button type="button" className="btn-primary" onClick={actions.closeAchievement}>
-                                我知道了
+                                {t("common.gotIt")}
                             </button>
                         </div>
                     </section>

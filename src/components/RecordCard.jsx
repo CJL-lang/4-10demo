@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 function getCoachAvatarLabel(coachName) {
     const pure = (coachName || "").replace(/^教练\s*/u, "").trim();
     if (!pure) {
@@ -30,9 +32,25 @@ function getResultClass(result) {
 }
 
 export default function RecordCard({ record, onClick }) {
+    const { t } = useTranslation();
     const isInteractive = typeof onClick === "function";
     const coachAvatar = getCoachAvatarLabel(record.coach);
     const resultClass = getResultClass(record.result);
+    const translatedRecord = {
+        date: t(`records.${record.id}.date`, { defaultValue: record.date }),
+        title: t(`records.${record.id}.title`, { defaultValue: record.title }),
+        drill: t(`records.${record.id}.drill`, { defaultValue: record.drill }),
+        note: t(`records.${record.id}.note`, { defaultValue: record.note }),
+        target: t(`records.${record.id}.target`, { defaultValue: record.target }),
+    };
+    const translatedResult =
+        record.result === "达标"
+            ? t("recordCard.result.passed")
+            : record.result === "部分达标"
+              ? t("recordCard.result.partial")
+              : record.result === "未达标"
+                ? t("recordCard.result.failed")
+                : record.result;
 
     return (
         <article
@@ -52,17 +70,17 @@ export default function RecordCard({ record, onClick }) {
             }
         >
             <div className="record-date">
-                <span>{record.date}</span>
+                <span>{translatedRecord.date}</span>
                 {record.time && <span style={{ marginLeft: '12px', color: 'var(--tertiary)', fontSize: '12px' }}>{record.time}</span>}
             </div>
             <div className="record-headline">
-                <h4 style={{ fontSize: '18px' }}>{record.title}</h4>
-                <span className="record-type">{record.type}</span>
+                <h4 style={{ fontSize: '18px' }}>{translatedRecord.title}</h4>
+                <span className="record-type">{t("recordFilters.skills", { defaultValue: record.type })}</span>
             </div>
 
-            {record.drill && (
+            {translatedRecord.drill && (
                 <div style={{ margin: '-4px 0 16px', fontSize: '13px', color: 'var(--primary)' }}>
-                    专项：{record.drill}
+                    {t("recordCard.drill")}:{translatedRecord.drill}
                 </div>
             )}
 
@@ -71,14 +89,14 @@ export default function RecordCard({ record, onClick }) {
                     {!record.avatarUrl && coachAvatar}
                 </div>
                 <div className="record-coach-meta">
-                    <p className="record-coach-label">主教练</p>
+                    <p className="record-coach-label">{t("recordCard.headCoach")}</p>
                     <div className="record-coach">{record.coach}</div>
                 </div>
-                {record.result ? <span className={`record-result-chip ${resultClass}`}>{record.result}</span> : null}
+                {record.result ? <span className={`record-result-chip ${resultClass}`}>{translatedResult}</span> : null}
             </div>
 
-            <p className="record-note">{record.note}</p>
-            {record.target ? <p className="record-target">{record.target}</p> : null}
+            <p className="record-note">{translatedRecord.note}</p>
+            {translatedRecord.target ? <p className="record-target">{translatedRecord.target}</p> : null}
         </article>
     );
 }

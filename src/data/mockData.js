@@ -5,6 +5,10 @@ export const navItems = [
     { key: "profile", label: "我的", icon: "◉" },
 ];
 
+/** 学员头像（演示：中国青少年学生肖像素材，可替换为学员实拍） */
+export const STUDENT_AVATAR_URL =
+    "https://th.bing.com/th/id/R.85a1cb435027eb478d54356faf95cf45?rik=huHHDpNFyEx7GA&riu=http%3a%2f%2fimgwcs3.soufunimg.com%2fopen%2f2022_09%2f26%2farticle%2ff5062fc5-abd7-4f49-b5b5-bcad0304023f.jpg&ehk=VoSP%2bR%2bwEpjHyeAAO1pSr%2baJMyvyjpN%2fAeZNiKXvbT8%3d&risl=&pid=ImgRaw&r=0";
+
 export const scheduleDates = [
     { dow: "MON", day: 14, time: "09:30-11:00", courseTitle: "短杆触感重建" },
     { dow: "TUE", day: 15, time: "14:30-16:00", courseTitle: "铁杆命中稳定课" },

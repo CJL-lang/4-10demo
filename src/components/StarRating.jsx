@@ -1,4 +1,8 @@
+import { useTranslation } from "react-i18next";
+
 export default function StarRating({ value, onChange }) {
+    const { t } = useTranslation();
+
     return (
         <div className="stars">
             {Array.from({ length: 5 }).map((_, index) => {
@@ -11,7 +15,7 @@ export default function StarRating({ value, onChange }) {
                         className={`star-btn ${active ? "active" : ""}`}
                         style={{ animationDelay: active ? `${index * 0.06}s` : "0s" }}
                         onClick={() => onChange(score)}
-                        aria-label={`评分 ${score}`}
+                        aria-label={t("growth.ratingAria", { score, defaultValue: `评分 ${score}` })}
                     >
                         ★
                     </button>
