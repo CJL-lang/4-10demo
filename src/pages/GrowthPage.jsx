@@ -60,9 +60,8 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
 
     const taskGroups = useMemo(
         () => ({
-            today: tasks.filter((task) => task.category === "今日任务" && !task.done),
-            weekly: tasks.filter((task) => task.category === "本周任务" && !task.done),
-            completed: tasks.filter((task) => task.done),
+            weekly: tasks.filter((task) => task.category === "本周作业" && !task.done),
+            completed: tasks.filter((task) => task.category === "历史作业" || task.done),
         }),
         [tasks]
     );
@@ -76,6 +75,13 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
             onDetailPageChange?.(false);
         };
     }, [detailMode, onDetailPageChange]);
+
+    useEffect(() => {
+        const scrollMain = document.querySelector(".scroll-main");
+        if (scrollMain) {
+            scrollMain.scrollTo({ top: 0, behavior: "auto" });
+        }
+    }, [detailMode, state.growthView]);
 
     const openTaskDetail = (taskId) => {
         setActiveTaskId(taskId);
@@ -140,9 +146,12 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                                 <h3>{task.title}</h3>
                                 <span className="task-difficulty">{task.difficulty}</span>
                             </div>
-                            <p className="muted-text">{task.target}</p>
-                            <div className="task-meta-row">
-                                <span>{task.dueText}</span>
+                            <div className="task-meta-row task-time-row" style={{ marginTop: "8px", fontSize: "12px", color: "var(--outline)" }}>
+                                <span>发布：{task.publishTime}</span>
+                                <span>截止：{task.deadline}</span>
+                            </div>
+                            <div className="task-meta-row" style={{ marginTop: "4px" }}>
+                                <span>教练：{task.coach}</span>
                                 <span>{task.reward}</span>
                             </div>
                             <div className="progress-track task-progress-track">
@@ -163,29 +172,14 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
 
     const renderTaskView = () => (
         <>
-            <article className="panel panel-elevated task-summary-card">
-                <div className="section-head">
-                    <h2 className="section-title-sm">任务完成进度</h2>
-                    <span className="pill">
-                        {completedCount}/{totalCount}
-                    </span>
-                </div>
-                <div className="progress-track">
-                    <span style={{ width: `${Math.round((completedCount / totalCount) * 100)}%` }} />
-                </div>
-            </article>
-            {renderTaskGroup("今日任务", taskGroups.today, "今日任务已完成，去挑战本周任务吧")}
-            {renderTaskGroup("本周任务", taskGroups.weekly, "本周任务已清空，继续保持")}
-            {renderTaskGroup("已完成", taskGroups.completed, "完成后的任务会展示在这里")}
+            {renderTaskGroup("本周作业", taskGroups.weekly, "本周作业已空，非常棒！")}
             <div className="section-bottom-gap" />
         </>
     );
 
     const renderTaskDetailView = (task) => {
-        const checkpoints = task.checkpoints?.length ? task.checkpoints : buildFallbackChecklist(task);
-
         return (
-            <section className="section-stack section-bottom-gap homework-detail-wrap">
+            <section className="section-stack section-bottom-gap homework-detail-wrap swing-3d-enter">
                 <article className="panel panel-elevated homework-brief-card">
                     <div className="homework-detail-topbar">
                         <button type="button" className="icon-btn homework-back-btn" aria-label="返回任务列表" onClick={closeTaskDetail}>
@@ -198,66 +192,78 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                         <span className="tag">ASSIGNMENT</span>
                     </div>
                     <h3 className="homework-task-title">{task.title}</h3>
-                    <p className="muted-text">{task.homeworkBrief || task.target}</p>
                     <div className="homework-meta-row">
-                        <span>负责教练：{task.coach || "教练组"}</span>
-                        <span>截止：{task.dueText}</span>
+                        <span>发布：{task.publishTime}</span>
+                        <span>截止：{task.deadline}</span>
                     </div>
-                    <ul className="homework-checklist">
-                        {checkpoints.map((item) => (
-                            <li key={item}>{item}</li>
-                        ))}
-                    </ul>
+
+                    <div className="homework-project-info" style={{ marginTop: "16px", paddingTop: "12px", borderTop: "1px dashed rgba(80, 69, 51, 0.4)" }}>
+                        <h4 style={{ margin: "0 0 8px", fontSize: "14px", color: "var(--primary-fixed)" }}>作业项目</h4>
+                        <ul className="homework-checklist">
+                            {task.projectItems?.map((item) => (
+                                <li key={item}>{item}</li>
+                            ))}
+                        </ul>
+
+                        <h4 style={{ margin: "16px 0 8px", fontSize: "14px", color: "var(--primary-fixed)" }}>项目要求</h4>
+                        <p className="muted-text" style={{ fontSize: "13px", lineHeight: "1.6" }}>{task.projectRequirements}</p>
+                    </div>
                 </article>
 
                 <article className="panel panel-low homework-submit-card">
-                    <div className="section-head">
-                        <h2 className="section-title-sm">提交作业</h2>
-                        <span className="tiny-text">视频 + 文字/语音</span>
+                    <div className="submit-header">
+                        <h2 className="submit-title">作业交付</h2>
                     </div>
 
-                    <label className="homework-field">
-                        <div className="homework-field-head">
-                            <span className="homework-field-label">训练视频（必传）</span>
-                            <button
-                                type="button"
-                                className="btn-ghost small recorder-trigger"
-                                onClick={() => videoInputRef.current?.click()}
-                            >
-                                {homeworkDraft.videoFileName ? "重新录制" : "开始录制"}
-                            </button>
-                        </div>
-                        <input
-                            ref={videoInputRef}
-                            className="homework-file-input"
-                            type="file"
-                            accept="video/*"
-                            capture="environment"
-                            onChange={(event) => {
-                                const file = event.target.files?.[0];
-                                setHomeworkDraft((prev) => ({
-                                    ...prev,
-                                    videoFileName: file?.name || "",
-                                }));
-                                event.target.value = "";
-                            }}
-                        />
-                        <div className={`homework-capture-card ${homeworkDraft.videoFileName ? "has-value" : ""}`}>
-                            <p className="homework-capture-title">视频采集</p>
-                            <p className="homework-capture-value">
-                                {homeworkDraft.videoFileName ? homeworkDraft.videoFileName : "点击右侧按钮调用相机录制"}
-                            </p>
-                        </div>
-                        <em className="homework-file-hint">
-                            {homeworkDraft.videoFileName ? `已选择：${homeworkDraft.videoFileName}` : "支持 mp4 / mov 等格式"}
-                        </em>
-                    </label>
+                    <div className="submit-actions-grid">
+                        <button type="button" className={`submit-action-btn ${homeworkDraft.videoFileName ? "active" : ""}`} onClick={() => videoInputRef.current?.click()}>
+                            <span className="action-icon">🎥</span>
+                            <span className="action-label">视频记录<span className="req-star">*</span></span>
+                            <span className="action-status">{homeworkDraft.videoFileName ? "已选" : "去拍摄"}</span>
+                        </button>
+                        
+                        <button type="button" className={`submit-action-btn ${homeworkDraft.voiceFileName ? "active" : ""}`} onClick={() => audioInputRef.current?.click()}>
+                            <span className="action-icon">🎙️</span>
+                            <span className="action-label">语音反思</span>
+                            <span className="action-status">{homeworkDraft.voiceFileName ? "已录制" : "去录音"}</span>
+                        </button>
+                    </div>
 
-                    <label className="homework-field">
-                        <span className="homework-field-label">文字复盘（可选）</span>
+                    <input
+                        ref={videoInputRef}
+                        type="file"
+                        accept="video/*"
+                        capture="environment"
+                        hidden
+                        onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            setHomeworkDraft((prev) => ({
+                                ...prev,
+                                videoFileName: file?.name || "",
+                            }));
+                            event.target.value = "";
+                        }}
+                    />
+                    <input
+                        ref={audioInputRef}
+                        type="file"
+                        accept="audio/*"
+                        capture
+                        hidden
+                        onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            setHomeworkDraft((prev) => ({
+                                ...prev,
+                                voiceFileName: file?.name || "",
+                            }));
+                            event.target.value = "";
+                        }}
+                    />
+
+                    <div className="submit-text-area">
                         <textarea
-                            className="homework-textarea"
-                            placeholder="例如：今天 7 号铁命中率提升到 70%，主要问题在于上杆节奏..."
+                            className="homework-textarea sleek-textarea"
+                            placeholder="写点什么，例如今天的挥杆节奏感..."
                             value={homeworkDraft.textNote}
                             onChange={(event) => {
                                 setHomeworkDraft((prev) => ({
@@ -266,55 +272,19 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                                 }));
                             }}
                         />
-                    </label>
+                    </div>
 
-                    <label className="homework-field">
-                        <div className="homework-field-head">
-                            <span className="homework-field-label">语音复盘（可选）</span>
-                            <button
-                                type="button"
-                                className="btn-ghost small recorder-trigger"
-                                onClick={() => audioInputRef.current?.click()}
-                            >
-                                {homeworkDraft.voiceFileName ? "重新录音" : "开始录音"}
-                            </button>
-                        </div>
-                        <input
-                            ref={audioInputRef}
-                            className="homework-file-input"
-                            type="file"
-                            accept="audio/*"
-                            capture
-                            onChange={(event) => {
-                                const file = event.target.files?.[0];
-                                setHomeworkDraft((prev) => ({
-                                    ...prev,
-                                    voiceFileName: file?.name || "",
-                                }));
-                                event.target.value = "";
-                            }}
-                        />
-                        <div className={`homework-capture-card ${homeworkDraft.voiceFileName ? "has-value" : ""}`}>
-                            <p className="homework-capture-title">语音采集</p>
-                            <p className="homework-capture-value">
-                                {homeworkDraft.voiceFileName ? homeworkDraft.voiceFileName : "点击右侧按钮调用麦克风录音"}
-                            </p>
-                        </div>
-                        <em className="homework-file-hint">
-                            {homeworkDraft.voiceFileName ? `已选择：${homeworkDraft.voiceFileName}` : "可上传 m4a / mp3 等语音文件"}
-                        </em>
-                    </label>
-
-                    <p className="tiny-text">需上传视频，并补充文字或语音任意一项后可提交。</p>
-
-                    <button
-                        type="button"
-                        className="btn-primary wide"
-                        disabled={!canSubmitHomework}
-                        onClick={handleSubmitHomework}
-                    >
-                        提交课后作业
-                    </button>
+                    <div className="submit-footer">
+                        <p className="submit-req-hint">※ 需提交视频，并选填语音或文字内容方可提交流程</p>
+                        <button
+                            type="button"
+                            className="btn-submit-action"
+                            disabled={!canSubmitHomework}
+                            onClick={handleSubmitHomework}
+                        >
+                            {canSubmitHomework ? "一键提交作业" : "完善内容以提交"}
+                        </button>
+                    </div>
                 </article>
             </section>
         );
@@ -343,27 +313,27 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                 field="physical"
                 value={state.ratings.physical}
                 onChange={(value) => actions.setRating("physical", value)}
-                label={ratingLabels.physical[state.ratings.physical - 1]}
+                label={ratingLabels.physical[state.ratings.physical - 1] || "—"}
             />
             <RatingGroup
                 name="心理状态"
                 field="mental"
                 value={state.ratings.mental}
                 onChange={(value) => actions.setRating("mental", value)}
-                label={ratingLabels.mental[state.ratings.mental - 1]}
+                label={ratingLabels.mental[state.ratings.mental - 1] || "—"}
             />
             <RatingGroup
                 name="技能状态"
                 field="skill"
                 value={state.ratings.skill}
                 onChange={(value) => actions.setRating("skill", value)}
-                label={ratingLabels.skill[state.ratings.skill - 1]}
+                label={ratingLabels.skill[state.ratings.skill - 1] || "—"}
             />
 
             <div className="rating-group">
                 <div className="rating-head">
                     <h3>匿名评价教练</h3>
-                    <span>{ratingLabels.coach[state.ratings.coach - 1]}</span>
+                    <span>{ratingLabels.coach[state.ratings.coach - 1] || "—"}</span>
                 </div>
                 <StarRating value={state.ratings.coach} onChange={(value) => actions.setRating("coach", value)} />
             </div>
@@ -378,6 +348,12 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
             <button type="button" className="btn-primary wide" onClick={onSubmit}>
                 提交评价
             </button>
+        </article>
+    );
+
+    const renderReportView = () => (
+        <article className="panel panel-low task-empty-card" style={{ marginTop: '16px' }}>
+            <p className="muted-text">课后报告页面正在开发中...</p>
         </article>
     );
 
@@ -408,6 +384,7 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
             {state.growthView === "tasks" && activeTask ? renderTaskDetailView(activeTask) : null}
             {state.growthView === "tasks" && !activeTask ? renderTaskView() : null}
             {state.growthView === "review" ? renderReviewView() : null}
+            {state.growthView === "report" ? renderReportView() : null}
         </section>
     );
 }

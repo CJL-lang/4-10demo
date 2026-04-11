@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { buildNextSessionISO, useAppContext } from "../context/AppContext";
 import { coachPost, coachesPre, courseAssetsByDate, scheduleDates } from "../data/mockData";
 import { useCountdown } from "../hooks/useCountdown";
@@ -41,6 +41,7 @@ function formatSessionTime(iso) {
 export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, onToast }) {
     const { state, actions } = useAppContext();
     const timer = useCountdown(state.nextSessionISO);
+    const [isNotificationExpanded, setIsNotificationExpanded] = useState(false);
     const selectedSchedule = useMemo(
         () => scheduleDates.find((item) => item.day === state.selectedDate) || scheduleDates[0],
         [state.selectedDate]
@@ -135,6 +136,59 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
 
             {isPre ? (
                 <>
+                    <section className={`panel notification-panel ${isNotificationExpanded ? 'is-expanded' : ''}`}>
+                        <div className="notification-header" onClick={() => setIsNotificationExpanded(!isNotificationExpanded)} style={{ cursor: 'pointer' }}>
+                            <h3 className="notification-title">
+                                <span className="notification-dot"></span>
+                                教练预约通知
+                            </h3>
+                            <div className="notification-header-right">
+                                <span className="notification-time">刚刚</span>
+                                <span className="expand-indicator"></span>
+                            </div>
+                        </div>
+                        <div className="notification-content">
+                            <p className="notification-body" style={{ marginBottom: '16px', lineHeight: '1.6' }}>
+                                您的专属教练 <strong>David Chen</strong> 为您提交了下周二下午 14:00 的一对一训练课程预约请求，请确认是否同意。
+                            </p>
+
+                            <div style={{ marginBottom: '20px', background: 'var(--surface-container-high)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(80, 69, 51, 0.4)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                                    <div>
+                                        <h4 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 6px 0', color: 'var(--on-surface)' }}>木杆·专项突击一对一</h4>
+                                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--tertiary)' }}>专项训练：解决右曲与距离释放</p>
+                                    </div>
+                                    <span style={{ backgroundColor: 'rgba(255, 202, 104, 0.1)', color: 'var(--primary)', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>14:00-15:30</span>
+                                </div>
+                                <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', margin: '16px 0' }}></div>
+                                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                    <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="David Chen" style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
+                                            <h3 style={{ fontSize: '15px', fontWeight: '600', margin: 0, color: 'var(--on-surface)' }}>David Chen</h3>
+                                            <span style={{ color: 'var(--on-surface-variant)', fontSize: '12px' }}>PGA 认证高级教练</span>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '16px', color: 'var(--on-surface-variant)', fontSize: '12px' }}>
+                                            <span>📞 159 8888 8888</span>
+                                            <span>🏆 带队最佳: 66杆</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="notification-input-wrapper">
+                                <textarea 
+                                    className="notification-input"
+                                    placeholder="如果拒绝，请填写理由 (选填)" 
+                                ></textarea>
+                            </div>
+                            <div className="notification-actions">
+                                <button className="primary-btn" onClick={(e) => { e.stopPropagation(); onToast("已同意预约"); setIsNotificationExpanded(false); actions.setBookingStatus("booked"); }}>同意</button>
+                                <button className="secondary-btn" onClick={(e) => { e.stopPropagation(); onToast("已拒绝预约"); setIsNotificationExpanded(false); }}>拒绝</button>
+                            </div>
+                        </div>
+                    </section>
+
                     <section className="split-grid card-gap">
                         <article className="panel stat-panel">
                             <p className="section-title-sm">剩余总课数</p>
@@ -148,14 +202,6 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                             <p className="accent-cold">↗ 超越 85% 会员</p>
                         </article>
                     </section>
-
-                    <button type="button" className="cta-banner" onClick={onOpenBookingModal}>
-                        <div>
-                            <h3>立即预约下一次训练课程</h3>
-                            <p>根据您的训练进度，建议本周预约</p>
-                        </div>
-                        <span className="cta-icon">+</span>
-                    </button>
 
                     <section className="section-stack">
                         <div className="section-head">
@@ -173,7 +219,7 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
 
                     <section className="section-stack">
                         <div className="section-head">
-                            <h2 className="section-title-sm">课程资产</h2>
+                            <h2 className="section-title-sm">教练发布的课程</h2>
                             <button type="button" className="round-mini">⌘</button>
                         </div>
                         <div className="stack-list">
@@ -188,6 +234,14 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                             ))}
                         </div>
                     </section>
+
+                    <button type="button" className="cta-banner" style={{marginTop:'16px'}} onClick={onOpenBookingModal}>
+                        <div>
+                            <h3 style={{fontSize: '16px', fontWeight: 'bold', marginBottom: '4px'}}>立即预约下一次训练课程</h3>
+                            <p style={{fontSize: '12px', color: 'rgba(255,255,255,0.8)'}}>根据您的训练进度，建议本周预约</p>
+                        </div>
+                        <span className="cta-icon">+</span>
+                    </button>
                 </>
             ) : (
                 <>

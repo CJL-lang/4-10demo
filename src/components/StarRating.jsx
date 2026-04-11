@@ -9,6 +9,7 @@ export default function StarRating({ value, onChange }) {
                         key={score}
                         type="button"
                         className={`star-btn ${active ? "active" : ""}`}
+                        style={{ animationDelay: active ? `${index * 0.06}s` : "0s" }}
                         onClick={() => onChange(score)}
                         aria-label={`评分 ${score}`}
                     >

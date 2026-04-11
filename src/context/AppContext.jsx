@@ -31,7 +31,7 @@ function validCourseAssetId(id, fallback) {
 
 function validRating(value, fallback) {
     const num = Number(value);
-    return num >= 1 && num <= 5 ? num : fallback;
+    return num >= 0 && num <= 5 ? num : fallback;
 }
 
 function sanitizeTaskDoneMap(input) {

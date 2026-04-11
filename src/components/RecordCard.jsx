@@ -51,15 +51,24 @@ export default function RecordCard({ record, onClick }) {
                     : undefined
             }
         >
-            <div className="record-date">{record.date}</div>
+            <div className="record-date">
+                <span>{record.date}</span>
+                {record.time && <span style={{ marginLeft: '12px', color: 'var(--tertiary)', fontSize: '12px' }}>{record.time}</span>}
+            </div>
             <div className="record-headline">
-                <h4>{record.title}</h4>
+                <h4 style={{ fontSize: '18px' }}>{record.title}</h4>
                 <span className="record-type">{record.type}</span>
             </div>
 
+            {record.drill && (
+                <div style={{ margin: '-4px 0 16px', fontSize: '13px', color: 'var(--primary)' }}>
+                    专项：{record.drill}
+                </div>
+            )}
+
             <div className="record-coach-row">
-                <div className="record-coach-avatar" aria-hidden="true">
-                    {coachAvatar}
+                <div className="record-coach-avatar" aria-hidden="true" style={record.avatarUrl ? { backgroundImage: `url(${record.avatarUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'transparent' } : {}}>
+                    {!record.avatarUrl && coachAvatar}
                 </div>
                 <div className="record-coach-meta">
                     <p className="record-coach-label">主教练</p>

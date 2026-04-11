@@ -2,9 +2,7 @@ import { useMemo } from "react";
 import { growthOverview } from "../data/mockData";
 
 const TREND_SERIES_META = [
-    { key: "physical", label: "体能", color: "var(--primary)" },
-    { key: "mental", label: "心理", color: "var(--tertiary)" },
-    { key: "skill", label: "技能", color: "#7fd6b2" },
+    { key: "skill", label: "各项技能进阶趋势", color: "var(--primary)" },
 ];
 
 const TREND_DAYS = ["D1", "D2", "D3", "D4", "D5", "D6", "D7"];
@@ -51,45 +49,14 @@ export default function ProgressOverviewSection({ withBottomGap = true }) {
     };
 
     return (
-        <>
-            <article className="panel panel-elevated progress-overview-card">
-                <div className="section-head">
-                    <h2 className="section-title-sm">{growthOverview.phaseLabel}</h2>
-                    <span className="pill">连续训练 {growthOverview.streakDays} 天</span>
-                </div>
-                <p className="muted-text">{growthOverview.weeklyGoal}</p>
-                <div className="progress-track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={growthOverview.phaseProgress}>
-                    <span style={{ width: `${growthOverview.phaseProgress}%` }} />
-                </div>
-                <p className="tiny-text">阶段达成率 {growthOverview.phaseProgress}%</p>
-            </article>
-
-            <section className="split-grid card-gap section-stack">
-                {growthOverview.dimensionScores.map((item) => (
-                    <article className="panel panel-low metric-mini-card" key={item.key}>
-                        <p className="tiny-text">{item.key}</p>
-                        <p className="metric-small">{item.displayValue ?? item.score}</p>
-                        <p className="accent-cold">{item.trend}</p>
-                    </article>
-                ))}
-            </section>
-
-            <article className={`panel panel-low trend-panel section-stack ${withBottomGap ? "section-bottom-gap" : ""}`}>
-                <div className="section-head">
-                    <h2 className="section-title-sm">周趋势</h2>
-                    <span className="muted-text">最近 7 天</span>
-                </div>
-                <div className="trend-legend">
-                    {TREND_SERIES_META.map((series) => (
-                        <span key={series.key} className="trend-legend-item">
-                            <i style={{ background: series.color }} />
-                            {series.label}
-                        </span>
-                    ))}
-                </div>
-                <div className="trend-chart-wrap" aria-label="体能心理技能周趋势曲线图">
-                    <svg className="trend-chart" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
-                        {[0, 1, 2, 3].map((step) => {
+        <article className={`panel panel-elevated trend-panel section-stack ${withBottomGap ? "section-bottom-gap" : ""}`}>
+            <div className="section-head">
+                <h2 className="section-title-sm">技能稳定度趋势</h2>
+                <span className="muted-text">最近 7 次训练</span>
+            </div>
+            <div className="trend-chart-wrap" aria-label="技能稳定度趋势曲线图">
+                <svg className="trend-chart" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
+                    {[0, 1, 2, 3].map((step) => {
                             const y = (chartHeight / 3) * step;
                             return <line key={step} className="trend-grid-line" x1="0" y1={y} x2={chartWidth} y2={y} />;
                         })}
@@ -122,6 +89,5 @@ export default function ProgressOverviewSection({ withBottomGap = true }) {
                     </div>
                 </div>
             </article>
-        </>
     );
 }
