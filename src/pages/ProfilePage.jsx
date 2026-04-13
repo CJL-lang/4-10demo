@@ -97,10 +97,10 @@ export default function ProfilePage() {
                 </div>
 
                 {/* 学院排名专属主勋章 */}
-                <article 
-                    className="badge-hero-card" 
-                    onClick={() => setProfileView("ranking")} 
-                    role="button" 
+                <article
+                    className="badge-hero-card"
+                    onClick={() => setProfileView("ranking")}
+                    role="button"
                     tabIndex={0}
                     onKeyDown={(event) => {
                         if (event.key === "Enter" || event.key === " ") {
@@ -126,7 +126,7 @@ export default function ProfilePage() {
                     {achievementItems.map((item) => {
                         const levelNum = parseInt(item.rank.replace(/\D/g, ""), 10) || 1;
                         const brightness = 0.5 + levelNum * 0.1; // L1: 0.6, L9: 1.4
-                        
+
                         return (
                             <article
                                 className="panel badge-card"
