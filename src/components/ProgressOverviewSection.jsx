@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import { growthOverview } from "../data/mockData";
 
@@ -29,6 +30,7 @@ function buildSmoothPath(values, getX, getY) {
 }
 
 export default function ProgressOverviewSection({ withBottomGap = true }) {
+    const { t } = useTranslation();
     const chartWidth = 324;
     const chartHeight = 144;
 
@@ -51,8 +53,8 @@ export default function ProgressOverviewSection({ withBottomGap = true }) {
     return (
         <article className={`panel panel-elevated trend-panel section-stack ${withBottomGap ? "section-bottom-gap" : ""}`}>
             <div className="section-head">
-                <h2 className="section-title-sm">技能稳定度趋势</h2>
-                <span className="muted-text">最近 7 次训练</span>
+                <h2 className="section-title-sm">{t("progressOverview.title", "技能稳定度趋势")}</h2>
+                <span className="muted-text">{t("progressOverview.subtitle", "最近 7 次训练")}</span>
             </div>
             <div className="trend-chart-wrap" aria-label="技能稳定度趋势曲线图">
                 <svg className="trend-chart" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
