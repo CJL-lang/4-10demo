@@ -16,6 +16,7 @@ const resources = {
                 level: "等级",
                 status: "状态",
                 me: "我",
+                more: "更多",
             },
             nav: {
                 club: "进度",
@@ -46,6 +47,7 @@ const resources = {
             recordCard: {
                 drill: "专项",
                 headCoach: "主教练",
+                viewReport: "查看课后报告",
                 result: {
                     passed: "达标",
                     partial: "部分达标",
@@ -64,6 +66,7 @@ const resources = {
                 statusPost: "预约后",
                 chooseDayToast: "已选择 {{day}} 号训练档期",
                 chooseCourseToast: "已选择课程：{{name}}",
+                chooseSlotToast: "已选择时间段：{{time}}",
                 demoListToast: "演示版暂未开放完整列表",
                 approvedToast: "已同意预约",
                 rejectedToast: "已拒绝预约",
@@ -87,9 +90,22 @@ const resources = {
                     usedCoursesHint: "↗ 超越 85% 会员",
                     scheduleTitle: "训练档期",
                     viewAll: "查看全部",
-                    coursesTitle: "教练发布的课程",
-                    ctaPrefix: "立即预约",
-                    ctaSelectedSuffix: "选中课程",
+                    availabilityTitle: "教练可预约时间",
+                    availabilityCaption: "按天查看可申请的训练时段，选中后即可发送预约申请。",
+                    slotsUnit: "个时段",
+                    slotPickerAria: "教练可预约时间段列表",
+                    slotOpenText: "可预约",
+                    selectedSlotLabel: "当前选中时间",
+                    availableNow: "可申请",
+                    selectionHint: "申请内容仅包含预约时间，课程内容将在教练同意后编辑确认。",
+                    requestSummaryTitle: "本次申请摘要",
+                    requestSummaryCaption: "确认信息后再发送",
+                    requestTimeLabel: "申请时间",
+                    requestNote: "当前申请仅提交时间段，教练同意后可继续补充课程内容。",
+                    ctaPrefix: "发送预约申请",
+                    ctaSelectedSuffix: "选中时间段",
+                    selectSlotFirst: "请先选择一个可预约时间段",
+                    scrollMoreHint: "右侧还有更多时段，可向右滑动查看",
                 },
                 post: {
                     nextTeeTime: "下次发球时间",
@@ -107,14 +123,11 @@ const resources = {
                     waiting: "等你来",
                 },
                 modal: {
-                    title: "确认预约本周课程？",
-                    desc: "预约后将自动生成上课核销码，并切换到预约后状态。",
+                    title: "确认发送预约申请？",
+                    desc: "本次仅发送时间段申请，课程内容由教练确认后再编辑。",
                     slot: "训练档期",
-                    topic: "课程主题",
-                    asset: "课程资产",
-                    autoAssign: "系统自动分配",
                     cancel: "再想想",
-                    confirm: "确认预约",
+                    confirm: "确认发送",
                     successToast: "预约成功：{{day}}号 {{slot}}",
                 },
                 reviewInvite: {
@@ -133,7 +146,7 @@ const resources = {
             },
             growth: {
                 title: "课后成长",
-                tasks: "练习任务",
+                tasks: "课后作业",
                 report: "课后报告",
                 review: "课后互评",
                 weeklyAssignments: "本周作业",
@@ -211,6 +224,7 @@ const resources = {
                 title: "训练进度",
                 notificationAria: "通知",
                 backHomeAria: "返回进度首页",
+                courseStatsAria: "课时与消耗概况",
                 recordCount: "{{count}} 条",
                 recordShown: "已展示 {{visible}} / {{total}}",
                 loadMore: "加载更多",
@@ -220,6 +234,24 @@ const resources = {
                     enteredRanking: "已进入学院排行榜",
                     evaluationComingSoon: "测评记录功能升级中，敬请期待",
                     planComingSoon: "培养计划制定中，敬请期待",
+                    openedReport: "已打开本节课报告",
+                },
+                recordReport: {
+                    pageTitle: "课后报告",
+                    subtitle: "多媒体日志与课程回顾点评（与教练端同步，只读）",
+                    mediaSection: "多媒体日志",
+                    mediaHint: "教练上传的本节课影像或示范素材，便于你课后对照复习。下图为示意缩略图。",
+                    mediaLabelImage: "图片",
+                    mediaLabelVideo: "视频",
+                    mediaAriaImage: "图片素材示意预览",
+                    mediaAriaVideo: "视频素材示意预览",
+                    reviewSection: "课程回顾点评",
+                    emptyMedia: "本节课暂无影像素材，可优先阅读下方教练文字点评。",
+                    emptyReview: "暂无文字点评，可联系教练补充。",
+                    readonlyPill: "只读",
+                    sessionTime: "上课时间",
+                    backAria: "返回课程记录",
+                    coachSign: "— {{name}}",
                 },
                 entries: {
                     records: {
@@ -241,6 +273,12 @@ const resources = {
                         label: "训练规划",
                         title: "培养计划",
                         desc: "你的专属年度、季度进阶训练方案",
+                        readonly: "培养计划只读查看",
+                        period: "时间段",
+                        goal: "计划目标",
+                        points: "规划点",
+                        breakthrough: "重点突破",
+                        studentPlan: "{{name}} 的培养计划"
                     },
                 },
                 coachCard: {
@@ -315,6 +353,8 @@ const resources = {
                     drill: "7号铁击球面控制与起草",
                     note: "命中率达到 8/10，击球重心更稳定。",
                     target: "目标 7/10",
+                    coachReview:
+                        "本节课重点练习 7 号铁杆面角度与击球瞬间的杆身前倾。从 TRACKMAN 与侧面视频看，你的击球点已明显向甜蜜区集中，目标区命中率稳定在 8/10，且送杆时重心能留在左脚内侧，这是非常好的趋势。\n\n建议巩固：继续用「半挥杆—全挥杆」两段式节奏找触感，下节课我们会加入轻度逆风下的弹道管理，请保持今天这种从容的节奏。",
                 },
                 "r-240307": {
                     date: "2024年3月7日",
@@ -322,6 +362,8 @@ const resources = {
                     drill: "30码内切杆节奏训练",
                     note: "第一落点控制更集中，落点离散度降低。",
                     target: "目标 10 球 7 次落点命中",
+                    coachReview:
+                        "本场在 30 码内切杆上，你的上杆幅度与杆面释放一致性比去年明显提高：第一落点圆心散布缩小，10 球中 7 球落在预设圆内，达标。\n\n草皮略厚时触地略浅，下次带练时会加入「略早释放、略多送杆」的想象，帮助你在湿草上也能稳定打起球。",
                 },
                 "r-240215": {
                     date: "2024年2月15日",
@@ -329,6 +371,8 @@ const resources = {
                     drill: "铁杆重心转移与压缩",
                     note: "专注于击球瞬间保持球杆前倾。击球效果和起草提升明显。",
                     target: "目标 10 球 6 次纯击球",
+                    coachReview:
+                        "这节课我们盯住铁杆「挤压」与杆身前倾：前 9 球你已经能在慢镜里看到手腕延迟释放，纯击球次数升至 6/10，属于部分达标。\n\n接下来一周请每天做 20 次无球慢挥，只在脑子里回放「左脚踏稳—胸中转向—杆头滞后通过球」三件事。节奏先稳，距离自然会回来。",
                 },
             },
             schedule: {
@@ -438,6 +482,7 @@ const resources = {
                 level: "Level",
                 status: "Status",
                 me: "Me",
+                more: "More",
             },
             nav: {
                 club: "Club",
@@ -468,6 +513,7 @@ const resources = {
             recordCard: {
                 drill: "Focus",
                 headCoach: "Head Coach",
+                viewReport: "View session report",
                 result: {
                     passed: "Passed",
                     partial: "Partially Passed",
@@ -486,6 +532,7 @@ const resources = {
                 statusPost: "booked",
                 chooseDayToast: "Selected training slot for day {{day}}",
                 chooseCourseToast: "Selected course: {{name}}",
+                chooseSlotToast: "Time slot selected: {{time}}",
                 demoListToast: "The full list is not available in this demo yet.",
                 approvedToast: "Booking approved",
                 rejectedToast: "Booking rejected",
@@ -509,9 +556,22 @@ const resources = {
                     usedCoursesHint: "Above 85% of members",
                     scheduleTitle: "Training Slots",
                     viewAll: "View all",
-                    coursesTitle: "Coach Published Courses",
-                    ctaPrefix: "Book Now",
-                    ctaSelectedSuffix: "selected course",
+                    availabilityTitle: "Coach Availability",
+                    availabilityCaption: "Browse open time slots by day and send a booking request once one is selected.",
+                    slotsUnit: "slots",
+                    slotPickerAria: "Coach available time slots",
+                    slotOpenText: "Available",
+                    selectedSlotLabel: "Selected time",
+                    availableNow: "Open",
+                    selectionHint: "The request includes only the time slot. Session details can be edited after the coach accepts.",
+                    requestSummaryTitle: "Request Summary",
+                    requestSummaryCaption: "Review before sending",
+                    requestTimeLabel: "Requested Time",
+                    requestNote: "This request only submits the time slot. Session details will be added after approval.",
+                    ctaPrefix: "Send Booking Request",
+                    ctaSelectedSuffix: "select a slot",
+                    selectSlotFirst: "Please select an available time slot first",
+                    scrollMoreHint: "More time slots to the right — swipe horizontally",
                 },
                 post: {
                     nextTeeTime: "Next Tee Time",
@@ -529,14 +589,11 @@ const resources = {
                     waiting: "Waiting for You",
                 },
                 modal: {
-                    title: "Confirm this week's booking?",
-                    desc: "A class verification code will be generated automatically after booking, and the page will switch to the booked state.",
+                    title: "Send this booking request?",
+                    desc: "This request only includes the selected time slot. Session details will be finalized after coach approval.",
                     slot: "Training Slot",
-                    topic: "Course Topic",
-                    asset: "Course Asset",
-                    autoAssign: "Assigned automatically",
                     cancel: "Maybe later",
-                    confirm: "Confirm Booking",
+                    confirm: "Send Request",
                     successToast: "Booking confirmed: day {{day}} {{slot}}",
                 },
                 reviewInvite: {
@@ -555,7 +612,7 @@ const resources = {
             },
             growth: {
                 title: "Post-Class Growth",
-                tasks: "Tasks",
+                tasks: "Homework",
                 report: "Report",
                 review: "Review",
                 weeklyAssignments: "This Week",
@@ -642,6 +699,24 @@ const resources = {
                     enteredRanking: "Opened academy ranking",
                     evaluationComingSoon: "Assessment records are being upgraded. Stay tuned.",
                     planComingSoon: "Training plan is in progress. Stay tuned.",
+                    openedReport: "Opened this session report",
+                },
+                recordReport: {
+                    pageTitle: "Session Report",
+                    subtitle: "Media log and coach notes (synced from coach view, read-only)",
+                    mediaSection: "Media log",
+                    mediaHint: "Images or clips your coach uploaded—thumbnails below are illustrative placeholders.",
+                    mediaLabelImage: "Image",
+                    mediaLabelVideo: "Video",
+                    mediaAriaImage: "Image placeholder preview",
+                    mediaAriaVideo: "Video placeholder preview",
+                    reviewSection: "Session review",
+                    emptyMedia: "No media for this session yet. Read the coach notes below.",
+                    emptyReview: "No written notes yet. Ask your coach if needed.",
+                    readonlyPill: "Read-only",
+                    sessionTime: "Session time",
+                    backAria: "Back to course records",
+                    coachSign: "— {{name}}",
                 },
                 entries: {
                     records: {
@@ -663,6 +738,12 @@ const resources = {
                         label: "Training Roadmap",
                         title: "Development Plan",
                         desc: "Your personalized yearly and quarterly training plan.",
+                        readonly: "Training plan is read-only",
+                        period: "Period",
+                        goal: "Plan Goal",
+                        points: "Planning Points",
+                        breakthrough: "Key Breakthrough",
+                        studentPlan: "{{name}}'s Development Plan"
                     },
                 },
                 coachCard: {
@@ -737,6 +818,8 @@ const resources = {
                     drill: "7-iron face control and launch training",
                     note: "Accuracy reached 8/10 and weight transfer stayed more stable through impact.",
                     target: "Target: 7/10",
+                    coachReview:
+                        "Today's focus was 7-iron face angle and forward shaft lean through impact. From TrackMan and the side camera, your strike pattern is clustering closer to the sweet spot with about 8/10 landing in the scoring zone, and your weight stays on the lead side in the finish—great trend.\n\nKeep rehearsing a two-piece tempo: half swing to feel, full swing to trust. Next session we'll layer light headwind ball-flight control—bring the same calm tempo you showed today.",
                 },
                 "r-240307": {
                     date: "Mar 7, 2024",
@@ -744,6 +827,8 @@ const resources = {
                     drill: "Tempo training for chips inside 30 yards",
                     note: "First-landing control became more focused, with noticeably lower dispersion.",
                     target: "Target: 7 successful landing hits out of 10 balls",
+                    coachReview:
+                        "On 30-yard chips your backswing length and release timing are more consistent than last cycle: landing dispersion is tighter and 7 of 10 balls found the inner ring—passing the goal.\n\nIn heavier grass contact was a touch shallow. Next time we'll cue an earlier release with a little more extension through the turf so you can nip it cleanly when it's wet.",
                 },
                 "r-240215": {
                     date: "Feb 15, 2024",
@@ -751,6 +836,8 @@ const resources = {
                     drill: "Weight transfer and compression for irons",
                     note: "The session focused on maintaining forward shaft lean at impact, which clearly improved strike quality and launch.",
                     target: "Target: 6 pure strikes out of 10 balls",
+                    coachReview:
+                        "We obsessed over compression and shaft lean: by the last few swings slow-mo shows a clearer delayed release, and pure strikes moved to 6/10—partial pass, with a clear upside.\n\nFor homework, make 20 rehearsal swings a day with no ball—replay three cues: left foot anchored, chest turning, clubhead lagging past the ball. Tempo first; distance follows.",
                 },
             },
             schedule: {

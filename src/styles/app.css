@@ -251,10 +251,6 @@
     gap: 10px;
 }
 
-.user-chip > div {
-    min-width: 0;
-}
-
 .avatar {
     width: 42px;
     height: 42px;
@@ -297,6 +293,11 @@
     font-weight: 800;
 }
 
+.profile-header .headline {
+    color: var(--primary);
+    font-size: 34px;
+}
+
 .icon-btn {
     width: 38px;
     height: 38px;
@@ -312,39 +313,6 @@
 .icon-btn:hover {
     transform: translateY(-1px);
     opacity: 0.9;
-}
-
-.header-actions {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    flex: 0 0 auto;
-}
-
-.header-actions-stack {
-    flex-direction: column;
-    align-items: flex-end;
-}
-
-.lang-toggle-btn {
-    min-width: 58px;
-    height: 38px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 202, 104, 0.34);
-    background: rgba(255, 202, 104, 0.08);
-    color: var(--primary);
-    padding: 0 12px;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    cursor: pointer;
-    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast);
-}
-
-.lang-toggle-btn:hover {
-    transform: translateY(-1px);
-    opacity: 0.94;
-    background: rgba(255, 202, 104, 0.14);
 }
 
 .panel {
@@ -407,10 +375,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0;
+    margin-bottom: 0; 
 }
 
-.is-expanded .notification-header {}
+.is-expanded .notification-header {
+}
 
 .notification-header-right {
     display: flex;
@@ -438,17 +407,8 @@
 }
 
 @keyframes pulseGlow {
-
-    0%,
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-
-    50% {
-        transform: scale(1.4);
-        opacity: 0.6;
-    }
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.6; }
 }
 
 .notification-time {
@@ -463,7 +423,7 @@
     line-height: 20px;
     text-align: center;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255,255,255,0.06);
     font-size: 10px;
     color: var(--on-surface-variant);
     transition: transform var(--transition-main);
@@ -548,7 +508,6 @@
     border: none;
     box-shadow: 0 4px 12px rgba(255, 202, 104, 0.2);
 }
-
 .notification-actions .primary-btn:active {
     opacity: 0.9;
     transform: scale(0.98);
@@ -657,22 +616,18 @@
     width: 100%;
     margin-top: 10px;
     border: 0;
-    border-radius: 18px;
-    padding: 14px 20px;
+    border-radius: 30px;
+    padding: 28px 24px;
     background: linear-gradient(135deg, var(--primary), var(--primary-container));
     color: #5f4200;
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 4px;
-    box-shadow: 0 12px 24px rgba(236, 171, 19, 0.18), inset 0 1px 0 rgba(255, 234, 191, 0.3);
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 18px 32px rgba(236, 171, 19, 0.18), inset 0 1px 0 rgba(255, 234, 191, 0.3);
     transition: transform var(--transition-fast), filter var(--transition-fast);
-    text-align: center;
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    line-height: 1.35;
+    text-align: left;
     animation: ctaPulse 7s ease-in-out infinite;
 }
 
@@ -693,6 +648,20 @@
     100% {
         transform: translateY(0);
     }
+}
+
+.cta-banner h3 {
+    margin: 0;
+    font-size: 46px;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+}
+
+.cta-banner p {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: rgba(95, 66, 0, 0.72);
 }
 
 .cta-icon {
@@ -1628,58 +1597,6 @@
     color: var(--on-surface);
 }
 
-.homework-highlight-row {
-    margin-top: 14px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.homework-highlight-chip {
-    display: inline-flex;
-    align-items: center;
-    min-height: 32px;
-    padding: 0 12px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 202, 104, 0.22);
-    background: rgba(255, 202, 104, 0.1);
-    color: var(--primary-fixed);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-}
-
-.homework-meta-grid {
-    margin-top: 14px;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-}
-
-.homework-meta-card {
-    padding: 14px 14px 12px;
-    border-radius: 18px;
-    border: 1px solid rgba(80, 69, 51, 0.34);
-    background: rgba(24, 20, 14, 0.26);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-.homework-meta-label {
-    display: block;
-    margin-bottom: 6px;
-    color: var(--outline);
-    font-size: 11px;
-    letter-spacing: 0.08em;
-}
-
-.homework-meta-card strong {
-    display: block;
-    color: var(--on-surface);
-    font-size: 13px;
-    line-height: 1.45;
-    font-weight: 700;
-}
-
 .homework-meta-row {
     margin-top: 10px;
     display: flex;
@@ -1692,71 +1609,18 @@
 
 .homework-checklist {
     margin: 12px 0 0;
-    padding: 0;
-    list-style: none;
+    padding-left: 18px;
     color: var(--on-surface-variant);
     font-size: 13px;
-    line-height: 1.65;
+    line-height: 1.6;
 }
 
 .homework-checklist li {
     position: relative;
-    padding: 12px 14px 12px 40px;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(80, 69, 51, 0.25);
 }
 
 .homework-checklist li+li {
-    margin-top: 8px;
-}
-
-.homework-checklist li::before {
-    content: "";
-    position: absolute;
-    left: 14px;
-    top: 14px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(255, 246, 217, 0.95), rgba(255, 202, 104, 0.9));
-    box-shadow: 0 0 0 4px rgba(255, 202, 104, 0.12);
-}
-
-.homework-project-info {
-    margin-top: 18px;
-    padding-top: 14px;
-    border-top: 1px dashed rgba(80, 69, 51, 0.4);
-    display: grid;
-    gap: 14px;
-}
-
-.homework-detail-block {
-    padding: 16px;
-    border-radius: 20px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(19, 16, 12, 0.16));
-    border: 1px solid rgba(80, 69, 51, 0.28);
-}
-
-.homework-block-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-}
-
-.homework-block-title {
-    margin: 0;
-    font-size: 14px;
-    color: var(--primary-fixed);
-    letter-spacing: 0.02em;
-}
-
-.homework-requirement-text {
-    margin: 12px 0 0;
-    color: var(--on-surface-variant);
-    font-size: 13px;
-    line-height: 1.7;
+    margin-top: 6px;
 }
 
 .homework-submit-card {
@@ -1860,7 +1724,7 @@
 
 .sleek-textarea:focus {
     background: rgba(25, 20, 10, 0.8);
-    box-shadow: inset 0 0 0 1px var(--primary-container), inset 0 2px 8px rgba(0, 0, 0, 0.6);
+    box-shadow: inset 0 0 0 1px var(--primary-container), inset 0 2px 8px rgba(0,0,0,0.6);
 }
 
 .submit-footer {
@@ -2083,7 +1947,6 @@
     position: absolute;
     right: -10px;
     top: -10px;
-    z-index: 1;
     width: 48px;
     height: 48px;
     border-radius: 14px;
@@ -2093,10 +1956,6 @@
     display: grid;
     place-items: center;
     font-size: 24px;
-}
-
-.portrait.portrait-photo {
-    overflow: hidden;
 }
 
 .profile-name {
@@ -2162,8 +2021,7 @@
         inset 0 1px 0 rgba(255, 243, 208, 0.72),
         inset 0 -10px 18px rgba(146, 98, 8, 0.18),
         0 10px 18px rgba(236, 171, 19, 0.22);
-    animation: goldShine 2.5s ease-in-out infinite;
-    /* 所有等级添加发光效果 */
+    animation: goldShine 2.5s ease-in-out infinite; /* 所有等级添加发光效果 */
 }
 
 .badge-rank::before {
@@ -2178,27 +2036,18 @@
 }
 
 @keyframes sweepShine {
-    0% {
-        background-position: -200% 0, 0 0;
-    }
-
-    30%,
-    100% {
-        background-position: 200% 0, 0 0;
-    }
+    0% { background-position: -200% 0, 0 0; }
+    30%, 100% { background-position: 200% 0, 0 0; }
 }
 
 @keyframes goldShine {
-
-    0%,
-    100% {
+    0%, 100% {
         box-shadow:
             inset 0 1px 0 rgba(255, 243, 208, 0.72),
             inset 0 -10px 18px rgba(146, 98, 8, 0.18),
             0 10px 18px rgba(236, 171, 19, 0.22),
             0 0 0 transparent;
     }
-
     50% {
         box-shadow:
             inset 0 1px 0 rgba(255, 243, 208, 0.9),
@@ -2492,9 +2341,32 @@
 }
 
 .booking-pre .cta-banner {
-    margin-top: 16px;
-    padding: 15px 18px;
-    border-radius: 18px;
+    margin-top: 12px;
+    padding: 20px 18px;
+    border-radius: 24px;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.booking-pre .cta-banner p {
+    margin-top: 8px;
+    font-size: 12px;
+    color: rgba(95, 66, 0, 0.78);
+}
+
+.booking-pre .cta-banner h3 {
+    max-width: 12ch;
+    font-size: 32px;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+}
+
+.booking-pre .cta-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    font-size: 38px;
+    flex: 0 0 auto;
 }
 
 .booking-pre .date-row {
@@ -2579,87 +2451,6 @@
 
 .club-subpage-header .headline {
     font-size: 32px;
-}
-
-.locale-en .headline {
-    letter-spacing: -0.01em;
-}
-
-.locale-en .lang-toggle-btn {
-    min-width: 68px;
-    letter-spacing: 0.04em;
-}
-
-.locale-en .section-title-sm {
-    font-size: 17px;
-}
-
-.locale-en .club-entry-card {
-    align-items: flex-start;
-}
-
-.locale-en .club-entry-card h3 {
-    font-size: 18px;
-    line-height: 1.2;
-}
-
-.locale-en .club-entry-card .muted-text,
-.locale-en .profile-entry-card .muted-text,
-.locale-en .hero-badge-desc {
-    font-size: 13px;
-    line-height: 1.45;
-}
-
-.locale-en .badge-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.locale-en .badge-card p {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: initial;
-    min-height: 40px;
-    font-size: 16px;
-    line-height: 1.2;
-}
-
-.locale-en .badge-rank {
-    width: 72px;
-    height: 72px;
-}
-
-.locale-en .hero-badge-label {
-    letter-spacing: 0.04em;
-}
-
-.locale-en .hero-badge-value {
-    font-size: 28px;
-}
-
-.locale-en .rank-head h3 {
-    font-size: 26px;
-}
-
-.locale-en .rank-name,
-.locale-en .rank-value {
-    font-size: 18px;
-}
-
-.locale-en .rank-row {
-    grid-template-columns: 38px minmax(0, 1fr) auto;
-    gap: 10px;
-}
-
-.locale-en .profile-name {
-    font-size: 48px;
-}
-
-.locale-en .my-coach-details h3 {
-    line-height: 1.2;
-}
-
-.locale-en .my-coach-info {
-    align-items: flex-start;
 }
 
 .club-record-page {
@@ -2876,19 +2667,6 @@
         font-size: 18px;
     }
 
-    .header-actions {
-        gap: 6px;
-    }
-
-    .header-actions-stack {
-        gap: 6px;
-    }
-
-    .lang-toggle-btn {
-        min-width: 52px;
-        padding: 0 10px;
-    }
-
     .review-invite-modal {
         width: min(100%, 360px);
         padding: 16px 14px;
@@ -2902,13 +2680,32 @@
         font-size: 16px;
     }
 
+    .profile-header .headline {
+        font-size: 30px;
+    }
+
     .metric-large {
         font-size: 52px;
     }
 
+    .cta-banner h3 {
+        font-size: 34px;
+    }
+
     .booking-pre .cta-banner {
-        padding: 14px 16px;
-        font-size: 15px;
+        padding: 16px 14px;
+        border-radius: 20px;
+    }
+
+    .booking-pre .cta-banner h3 {
+        font-size: 28px;
+    }
+
+    .booking-pre .cta-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        font-size: 32px;
     }
 
     .homework-task-title {
@@ -2932,12 +2729,9 @@
         margin-bottom: 10px;
     }
 
-    .homework-meta-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .homework-detail-block {
-        padding: 14px;
+    .homework-meta-row {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     .record-headline h4 {
@@ -2955,20 +2749,6 @@
 
     .badge-card p {
         font-size: 18px;
-    }
-
-    .locale-en .badge-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .locale-en .badge-card p {
-        font-size: 15px;
-        min-height: 36px;
-    }
-
-    .locale-en .rank-name,
-    .locale-en .rank-value {
-        font-size: 16px;
     }
 }
 
@@ -3116,24 +2896,11 @@
 }
 
 @keyframes heroSweep {
-
-    0%,
-    20% {
-        transform: translateX(-140%);
-    }
-
-    60%,
-    100% {
-        transform: translateX(140%);
-    }
+    0%, 20% { transform: translateX(-140%); }
+    60%, 100% { transform: translateX(140%); }
 }
 
 @keyframes floatLogo {
-    from {
-        transform: translateY(0);
-    }
-
-    to {
-        transform: translateY(-4px);
-    }
+    from { transform: translateY(0); }
+    to { transform: translateY(-4px); }
 }

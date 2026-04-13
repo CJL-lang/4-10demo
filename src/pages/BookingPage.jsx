@@ -1,4 +1,3 @@
-import { Trans, useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { buildNextSessionISO, useAppContext } from "../context/AppContext";
 import { coachPost, coachesPre, courseAssetsByDate, scheduleDates } from "../data/mockData";
@@ -30,18 +29,8 @@ const qrPattern = [
     "111111101111001001110",
 ];
 
-function formatSessionTime(iso, language) {
+function formatSessionTime(iso) {
     const date = new Date(iso);
-    if (language === "en") {
-        return new Intl.DateTimeFormat("en-US", {
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-        }).format(date);
-    }
-
     const month = date.getMonth() + 1;
     const day = date.getDate();
     const hour = String(date.getHours()).padStart(2, "0");
@@ -50,7 +39,6 @@ function formatSessionTime(iso, language) {
 }
 
 export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, onToast }) {
-    const { t, i18n } = useTranslation();
     const { state, actions } = useAppContext();
     const timer = useCountdown(state.nextSessionISO);
     const [isNotificationExpanded, setIsNotificationExpanded] = useState(false);
@@ -68,12 +56,6 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
         () => selectedCourseAssets.find((item) => item.id === state.selectedCourseAssetId) || selectedCourseAssets[0] || null,
         [selectedCourseAssets, state.selectedCourseAssetId]
     );
-    const translatedSelectedCourseName = selectedCourseAsset?.id
-        ? t(`courseAssets.${selectedCourseAsset.id}.courseName`, { defaultValue: selectedCourseAsset.courseName })
-        : "";
-    const translatedSelectedCourseTitle = t(`schedule.${selectedSchedule.day}.courseTitle`, {
-        defaultValue: selectedSchedule.courseTitle,
-    });
 
     const bookedDay = state.bookedDate || state.selectedDate;
     const bookedSchedule = useMemo(
@@ -93,16 +75,13 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
 
     const bookedCoach = useMemo(() => {
         const primaryCoach = bookedCourseAsset || coachPost;
-        const translatedCourseName = primaryCoach.id
-            ? t(`courseAssets.${primaryCoach.id}.courseName`, { defaultValue: primaryCoach.courseName })
-            : primaryCoach.courseName;
         return {
             ...primaryCoach,
             score: undefined,
-            badge: t("booking.post.waiting"),
-            desc: `${translatedCourseName || t("booking.post.unselected")} · ${bookedSchedule.day}${i18n.resolvedLanguage === "en" ? "" : "号"} ${bookedSchedule.time}`,
+            badge: "等你来",
+            desc: `${primaryCoach.courseName || "已确认课程"} · ${bookedSchedule.day}号 ${bookedSchedule.time}`,
         };
-    }, [bookedCourseAsset, bookedSchedule.day, bookedSchedule.time, i18n.resolvedLanguage, t]);
+    }, [bookedCourseAsset, bookedSchedule.day, bookedSchedule.time]);
 
     const handlePickDate = (day) => {
         actions.setSelectedDate(day);
@@ -113,26 +92,18 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
         if (state.bookingStatus === "booked") {
             actions.setNextSession(buildNextSessionISO(day));
         }
-        onToast(t("booking.chooseDayToast", { day }));
+        onToast(`已选择 ${day} 号训练档期`);
     };
 
     const handlePickCourseAsset = (asset) => {
         actions.setSelectedCourseAsset(asset.id);
-        onToast(
-            t("booking.chooseCourseToast", {
-                name: t(`courseAssets.${asset.id}.courseName`, { defaultValue: asset.courseName }),
-            })
-        );
+        onToast(`已选择课程：${asset.courseName}`);
     };
 
     const handleToggleBookingStatus = () => {
         const newStatus = isPre ? "booked" : "pre";
         actions.setBookingStatus(newStatus);
-        onToast(
-            t("booking.statusToast", {
-                status: newStatus === "booked" ? t("booking.statusPost") : t("booking.statusPre"),
-            })
-        );
+        onToast(`已切换到${newStatus === "booked" ? "预约后" : "预约前"}界面`);
     };
 
     const isPre = state.bookingStatus === "pre";
@@ -149,15 +120,15 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                         </svg>
                     </div>
                     <div>
-                        <p className="small-label">{t("booking.venue")}</p>
-                        <h1 className="headline">{t("booking.title")}</h1>
+                        <p className="small-label">皇家球场</p>
+                        <h1 className="headline">Welcome Back</h1>
                     </div>
                 </div>
                 <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                    <button type="button" className="icon-btn" aria-label={t("booking.switchStatusAria")} onClick={handleToggleBookingStatus} title={isPre ? t("booking.switchToPost") : t("booking.switchToPre")}>
+                    <button type="button" className="icon-btn" aria-label="切换预约状态" onClick={handleToggleBookingStatus} title={isPre ? "切换到预约后" : "切换到预约前"}>
                         ⇄
                     </button>
-                    <button type="button" className="icon-btn" aria-label={t("booking.notificationAria")}>
+                    <button type="button" className="icon-btn" aria-label="通知">
                         ○
                     </button>
                 </div>
@@ -169,23 +140,23 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                         <div className="notification-header" onClick={() => setIsNotificationExpanded(!isNotificationExpanded)} style={{ cursor: 'pointer' }}>
                             <h3 className="notification-title">
                                 <span className="notification-dot"></span>
-                                {t("booking.pre.notificationTitle")}
+                                教练预约通知
                             </h3>
                             <div className="notification-header-right">
-                                <span className="notification-time">{t("booking.pre.notificationTime")}</span>
+                                <span className="notification-time">刚刚</span>
                                 <span className="expand-indicator"></span>
                             </div>
                         </div>
                         <div className="notification-content">
                             <p className="notification-body" style={{ marginBottom: '16px', lineHeight: '1.6' }}>
-                                <Trans i18nKey="booking.pre.notificationBody" components={{ strong: <strong /> }} />
+                                您的专属教练 <strong>David Chen</strong> 为您提交了下周二下午 14:00 的一对一训练课程预约请求，请确认是否同意。
                             </p>
 
                             <div style={{ marginBottom: '20px', background: 'var(--surface-container-high)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(80, 69, 51, 0.4)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                                     <div>
-                                        <h4 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 6px 0', color: 'var(--on-surface)' }}>{t("booking.pre.requestTitle")}</h4>
-                                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--tertiary)' }}>{t("booking.pre.requestDrill")}</p>
+                                        <h4 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 6px 0', color: 'var(--on-surface)' }}>木杆·专项突击一对一</h4>
+                                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--tertiary)' }}>专项训练：解决右曲与距离释放</p>
                                     </div>
                                     <span style={{ backgroundColor: 'rgba(255, 202, 104, 0.1)', color: 'var(--primary)', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>14:00-15:30</span>
                                 </div>
@@ -195,48 +166,48 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                                     <div style={{ flex: 1 }}>
                                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
                                             <h3 style={{ fontSize: '15px', fontWeight: '600', margin: 0, color: 'var(--on-surface)' }}>David Chen</h3>
-                                            <span style={{ color: 'var(--on-surface-variant)', fontSize: '12px' }}>{t("booking.pre.coachTitle")}</span>
+                                            <span style={{ color: 'var(--on-surface-variant)', fontSize: '12px' }}>PGA 认证高级教练</span>
                                         </div>
                                         <div style={{ display: 'flex', gap: '16px', color: 'var(--on-surface-variant)', fontSize: '12px' }}>
-                                            <span>📞 {t("booking.pre.coachPhone")}</span>
-                                            <span>🏆 {t("booking.pre.coachScore")}</span>
+                                            <span>📞 159 8888 8888</span>
+                                            <span>🏆 带队最佳: 66杆</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="notification-input-wrapper">
-                                <textarea
+                                <textarea 
                                     className="notification-input"
-                                    placeholder={t("booking.pre.rejectReasonPlaceholder")}
+                                    placeholder="如果拒绝，请填写理由 (选填)" 
                                 ></textarea>
                             </div>
                             <div className="notification-actions">
-                                <button className="primary-btn" onClick={(e) => { e.stopPropagation(); onToast(t("booking.approvedToast")); setIsNotificationExpanded(false); actions.setBookingStatus("booked"); }}>{t("booking.pre.approve")}</button>
-                                <button className="secondary-btn" onClick={(e) => { e.stopPropagation(); onToast(t("booking.rejectedToast")); setIsNotificationExpanded(false); }}>{t("booking.pre.reject")}</button>
+                                <button className="primary-btn" onClick={(e) => { e.stopPropagation(); onToast("已同意预约"); setIsNotificationExpanded(false); actions.setBookingStatus("booked"); }}>同意</button>
+                                <button className="secondary-btn" onClick={(e) => { e.stopPropagation(); onToast("已拒绝预约"); setIsNotificationExpanded(false); }}>拒绝</button>
                             </div>
                         </div>
                     </section>
 
                     <section className="split-grid card-gap">
                         <article className="panel stat-panel">
-                            <p className="section-title-sm">{t("booking.pre.totalCourses")}</p>
-                            <p className="metric-large">{t("booking.pre.totalCoursesValue")}</p>
-                            <p className="muted-text">{t("booking.pre.totalCoursesExpiry")}</p>
+                            <p className="section-title-sm">剩余总课数</p>
+                            <p className="metric-large">12</p>
+                            <p className="muted-text">有效期至 2027.12.31</p>
                         </article>
 
                         <article className="panel stat-panel panel-low">
-                            <p className="section-title-sm">{t("booking.pre.usedCourses")}</p>
-                            <p className="metric-large pale">{t("booking.pre.usedCoursesValue")}</p>
-                            <p className="accent-cold">{t("booking.pre.usedCoursesHint")}</p>
+                            <p className="section-title-sm">已消耗课数</p>
+                            <p className="metric-large pale">48</p>
+                            <p className="accent-cold">↗ 超越 85% 会员</p>
                         </article>
                     </section>
 
                     <section className="section-stack">
                         <div className="section-head">
-                            <h2 className="section-title-sm">{t("booking.pre.scheduleTitle")}</h2>
-                            <button type="button" className="link-btn" onClick={() => onToast(t("booking.demoListToast"))}>
-                                {t("booking.pre.viewAll")}
+                            <h2 className="section-title-sm">训练档期</h2>
+                            <button type="button" className="link-btn" onClick={() => onToast("演示版暂未开放完整列表")}>
+                                查看全部
                             </button>
                         </div>
                         <div className="date-row">
@@ -248,7 +219,7 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
 
                     <section className="section-stack">
                         <div className="section-head">
-                            <h2 className="section-title-sm">{t("booking.pre.coursesTitle")}</h2>
+                            <h2 className="section-title-sm">教练发布的课程</h2>
                             <button type="button" className="round-mini">⌘</button>
                         </div>
                         <div className="stack-list">
@@ -264,23 +235,18 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                         </div>
                     </section>
 
-                    <button
-                        type="button"
-                        className="cta-banner"
-                        onClick={onOpenBookingModal}
-                        aria-label={
-                            selectedCourseAsset?.courseName
-                                ? `${t("booking.pre.ctaPrefix")}：${translatedSelectedCourseName}`
-                                : `${t("booking.pre.ctaPrefix")} ${t("booking.pre.ctaSelectedSuffix")}`
-                        }
-                    >
-                        {`${t("booking.pre.ctaPrefix")}${translatedSelectedCourseName ? `「${translatedSelectedCourseName}」` : t("booking.pre.ctaSelectedSuffix")}`}
+                    <button type="button" className="cta-banner" style={{marginTop:'16px'}} onClick={onOpenBookingModal}>
+                        <div>
+                            <h3 style={{fontSize: '16px', fontWeight: 'bold', marginBottom: '4px'}}>立即预约下一次训练课程</h3>
+                            <p style={{fontSize: '12px', color: 'rgba(255,255,255,0.8)'}}>根据您的训练进度，建议本周预约</p>
+                        </div>
+                        <span className="cta-icon">+</span>
                     </button>
                 </>
             ) : (
                 <>
                     <article className="panel countdown-panel panel-elevated">
-                        <p className="section-title-sm">{t("booking.post.nextTeeTime")}</p>
+                        <p className="section-title-sm">下次发球时间</p>
                         <div className="countdown-row">
                             <div className="time-block">
                                 <span className="time-num">{timer.days}</span>
@@ -303,11 +269,11 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                             </div>
                         </div>
                         <div className="meta-row">
-                            <span className="muted-text">{t("booking.post.bookedAt", { date: formatSessionTime(state.nextSessionISO, i18n.resolvedLanguage), time: bookedSchedule.time })}</span>
-                            <span className="pill">{t("booking.post.confirmedDay", { day: bookedSchedule.day })}</span>
+                            <span className="muted-text">预约 {formatSessionTime(state.nextSessionISO)} · {bookedSchedule.time}</span>
+                            <span className="pill">{bookedSchedule.day}号已确认</span>
                         </div>
                         <p className="muted-text" style={{ marginTop: "8px" }}>
-                            {t("booking.post.bookedCourse", { name: bookedCourseAsset?.id ? t(`courseAssets.${bookedCourseAsset.id}.courseName`, { defaultValue: bookedCourseAsset.courseName }) : t("booking.post.unselected") })}
+                            已预约课程：{bookedCourseAsset?.courseName || "未选择"}
                         </p>
                     </article>
 
@@ -332,16 +298,16 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                                 </span>
                                 <p className="weather-number">24°C</p>
                             </div>
-                            <p className="muted-text weather-meta">{t("booking.post.weatherSummary")}</p>
-                            <p className="section-title-xs">{t("booking.post.aiSuggestionTitle")}</p>
+                            <p className="muted-text weather-meta">微风 3.2m/s · 绝佳挥杆天气</p>
+                            <p className="section-title-xs">AI练习建议</p>
                             <p className="muted-text">
-                                {t("booking.post.aiSuggestionBody")}
+                                侧风较大，建议今日练习中加强低平球控球稳定性，并注重重心转移。
                             </p>
                         </article>
                     </section>
 
                     <article className="panel qr-panel panel-elevated">
-                        <p className="section-title-sm">{t("booking.post.qrTitle")}</p>
+                        <p className="section-title-sm">上课核销码</p>
                         <div className="qr-shell">
                             <div className="qr-inner" aria-hidden="true">
                                 <div className="qr-grid">
@@ -356,16 +322,16 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                                 </div>
                             </div>
                         </div>
-                        <p className="qr-caption">{t("booking.post.qrCaption")}</p>
+                        <p className="qr-caption">CLASS VERIFICATION CODE • DYNAMIC UPDATE</p>
                     </article>
 
                     <button type="button" className="btn-primary wide" onClick={onOpenReviewInvite}>
-                        {t("booking.post.classFinished")}
+                        课程结束
                     </button>
 
                     <section className="section-stack">
                         <div className="section-head">
-                            <h2 className="section-title-sm">{t("booking.post.privateCoach")}</h2>
+                            <h2 className="section-title-sm">您的私人教练</h2>
                             <span className="pill">{bookedCoach.badge}</span>
                         </div>
                         <CoachCard coach={bookedCoach} compact />

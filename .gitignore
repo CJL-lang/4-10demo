@@ -3,3 +3,6 @@ dist/
 .vite/
 .DS_Store
 *.log
+
+# ui-ux-pro-max skill (Python)
+.cursor/skills/**/__pycache__/

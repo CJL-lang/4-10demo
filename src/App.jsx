@@ -9,10 +9,8 @@ import BookingPage from "./pages/BookingPage";
 import ClubPage from "./pages/ClubPage";
 import GrowthPage from "./pages/GrowthPage";
 import ProfilePage from "./pages/ProfilePage";
-import { useTranslation } from "react-i18next";
 
 export default function App() {
-    const { i18n, t } = useTranslation();
     const { state, actions } = useAppContext();
     const [bookingModalOpen, setBookingModalOpen] = useState(false);
     const [reviewInviteOpen, setReviewInviteOpen] = useState(false);
@@ -64,15 +62,13 @@ export default function App() {
 
     const reviewSessionInfo = useMemo(
         () => ({
-            dateLabel: t("growth.sessionDateLabel", { day: bookedSchedule.day, time: bookedSchedule.time }),
-            courseTitle: t(`schedule.${bookedSchedule.day}.courseTitle`, { defaultValue: bookedSchedule.courseTitle }),
-            courseAsset: bookedAsset?.id
-                ? t(`courseAssets.${bookedAsset.id}.courseName`, { defaultValue: bookedAsset.courseName })
-                : t("growth.unselectedCourse"),
-            coachName: bookedAsset?.name || t("growth.unassignedCoach"),
+            dateLabel: `${bookedSchedule.day}号 ${bookedSchedule.time}`,
+            courseTitle: bookedSchedule.courseTitle,
+            courseAsset: bookedAsset?.courseName || "未选择课程",
+            coachName: bookedAsset?.name || "待分配教练",
             coachTitle: bookedAsset?.title || "",
         }),
-        [bookedAsset, bookedSchedule, t]
+        [bookedAsset, bookedSchedule]
     );
 
     useEffect(() => {
@@ -108,7 +104,7 @@ export default function App() {
             return (
                 <GrowthPage
                     onSubmit={() => {
-                        setToastMessage(t("growth.submitReviewToast"));
+                        setToastMessage("评价已提交，感谢你的反馈");
                     }}
                     onToast={(message) => {
                         setToastMessage(message);
@@ -128,10 +124,10 @@ export default function App() {
                 onToast={(message) => setToastMessage(message)}
             />
         );
-    }, [actions, reviewSessionInfo, state.bookingStatus, state.currentTab, t]);
+    }, [actions, reviewSessionInfo, state.bookingStatus, state.currentTab]);
 
     return (
-        <div className={`app-stage ${i18n.resolvedLanguage === "en" ? "locale-en" : "locale-zh"}`}>
+        <div className="app-stage">
             <div className="device-shell">
                 <div className="device-glow" aria-hidden="true" />
 
@@ -157,7 +153,7 @@ export default function App() {
                     onConfirm={() => {
                         actions.bookNow();
                         setBookingModalOpen(false);
-                        setToastMessage(t("booking.modal.successToast", { day: bookingPreview.day, slot: bookingPreview.slot }));
+                        setToastMessage(`预约成功：${bookingPreview.day}号 ${bookingPreview.slot}`);
                     }}
                 />
 
@@ -169,7 +165,7 @@ export default function App() {
                         setReviewInviteOpen(false);
                         actions.setGrowthView("review");
                         actions.setTab("growth");
-                        setToastMessage(t("booking.reviewInvite.joinToast"));
+                        setToastMessage("已进入课后互评，请完成本次课程评价");
                     }}
                 />
 

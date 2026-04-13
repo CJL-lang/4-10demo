@@ -1,0 +1,25 @@
+---
+description: UI/UX 实现需遵循项目内 ui-ux-pro-max skill（设计系统检索与栈规范）
+globs: "**/src/**/*.{jsx,tsx,js,css,scss,vue,html}"
+alwaysApply: false
+---
+
+# UI UX Pro Max
+
+本仓库已安装 [ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)，完整流程见：
+
+`.cursor/skills/ui-ux-pro-max/SKILL.md`
+
+## 必须遵守
+
+1. **先做设计系统检索**：在实现或大幅调整界面、主题、布局前，从仓库根目录运行（需已安装 Python 3）：
+
+   `python skills/ui-ux-pro-max/scripts/search.py "<产品类型 行业 关键词>" --design-system [-p "项目名"]`
+
+   若 `python` 不可用，可尝试 `python3` 或 Windows 上的 `py`。
+
+2. **按栈补充规范**：按技术栈追加 `--stack`（如 `react`、`nextjs`、`html-tailwind`）；未指定栈时以 SKILL 中的默认为准。
+
+3. **已有设计主文档时**：若存在 `design-system/MASTER.md` 或 `design-system/pages/*.md`，实现对应页面前先读 MASTER，再读页面覆盖文件（若存在）。
+
+4. **输出**：将检索得到的颜色、字体、动效、反模式与自检项落实到代码；避免与行业反模式冲突（如金融场景滥用「AI 紫粉渐变」等）。
