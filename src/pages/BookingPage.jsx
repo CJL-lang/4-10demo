@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { sortBookingsByTime, useAppContext } from "../context/AppContext";
-import { ALL_SLOTS, coachPost, coachInfoCard, getSessionDisplay, getSlotById, openSlotsByDate, scheduleDates } from "../data/mockData";
+import { ALL_SLOTS, coachPost, coachInfoCard, courseAssetsByDate, getSessionDisplay, getSlotById, openSlotsByDate, scheduleDates } from "../data/mockData";
 import { useCountdown } from "../hooks/useCountdown";
 import CoachCard from "../components/CoachCard";
 import SessionCourseDetailCard from "../components/SessionCourseDetailCard";
@@ -120,6 +120,27 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
     );
 
     const sortedBookings = useMemo(() => sortBookingsByTime(state.bookings), [state.bookings]);
+    const bookingListItems = useMemo(() => {
+        if (sortedBookings.length !== 1) {
+            return sortedBookings;
+        }
+
+        const base = sortedBookings[0];
+        return [
+            {
+                ...base,
+                id: `${base.id}-confirmed-demo`,
+                courseConfirmedByCoach: true,
+                detailBookingId: base.id,
+            },
+            {
+                ...base,
+                id: `${base.id}-pending-demo`,
+                courseConfirmedByCoach: false,
+                detailBookingId: base.id,
+            },
+        ];
+    }, [sortedBookings]);
 
     const bookedCoach = useMemo(() => {
         if (!detailBooking) {
@@ -455,44 +476,73 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                                 <span className="pill">{t("booking.post.listCount", { count: sortedBookings.length })}</span>
                             </div>
                             <ul className="booking-post-card-list" role="list">
-                                {sortedBookings.map((b) => {
+                                {bookingListItems.map((b) => {
                                     const cardSession = getSessionDisplay(b.day, b.courseAssetId);
                                     const slot = getSlotById(b.courseAssetId);
+                                    const dayAssets = courseAssetsByDate[b.day] || [];
+                                    const fallbackAsset = dayAssets[0] || null;
                                     const coachEdited = b.courseConfirmedByCoach !== false;
                                     const courseLabel = coachEdited
                                         ? cardSession?.courseAssetId
                                             ? t(`courseAssets.${cardSession.courseAssetId}.courseName`, {
                                                   defaultValue: cardSession.courseName,
                                               })
-                                            : t(`schedule.${b.day}.courseTitle`, { defaultValue: cardSession?.courseName ?? "—" })
-                                        : t("booking.courseTitleUnknown");
-                                    const drillLabel = coachEdited
+                                            : t(`schedule.${b.day}.courseTitle`, {
+                                                  defaultValue: cardSession?.courseName ?? fallbackAsset?.courseName ?? "—",
+                                              })
+                                        : t("booking.post.listCourseRowPending");
+                                    const drillRaw = coachEdited
                                         ? cardSession?.courseAssetId
                                             ? t(`courseAssets.${cardSession.courseAssetId}.drill`, { defaultValue: cardSession?.drill ?? "" })
-                                            : t("growth.pendingCourseTopic", { defaultValue: cardSession?.drill ?? "" })
-                                        : `${t("sessionCourse.drillPrefix")}${t("growth.pendingCourseTopic", { defaultValue: cardSession?.drill ?? "" })}`;
+                                            : fallbackAsset?.id
+                                                ? t(`courseAssets.${fallbackAsset.id}.drill`, { defaultValue: fallbackAsset.drill })
+                                                : t("growth.pendingCourseTopic", { defaultValue: cardSession?.drill ?? "" })
+                                        : "";
+                                    const drillLabel = coachEdited
+                                        ? drillRaw
+                                            ? `${t("sessionCourse.drillPrefix")}${drillRaw}`
+                                            : ""
+                                        : t("growth.pendingCourseTopic", { defaultValue: cardSession?.drill ?? "" });
                                     return (
                                         <li key={b.id} role="listitem">
                                             <button
                                                 type="button"
-                                                className="booking-post-card panel panel-elevated"
-                                                onClick={() => actions.setDetailBooking(b.id)}
+                                                className={`booking-post-card panel panel-elevated ${
+                                                    coachEdited ? "booking-post-card--confirmed" : "booking-post-card--pending-coach"
+                                                }`}
+                                                onClick={() => actions.setDetailBooking(b.detailBookingId ?? b.id)}
                                             >
                                                 <div className="booking-post-card-top">
                                                     <span className="booking-post-card-date">
                                                         {formatBookingCardDate(b.nextSessionISO, i18n.resolvedLanguage || "zh")}
                                                     </span>
-                                                    <span className="booking-post-card-time">{slot?.range ?? "—"}</span>
+                                                    <div className="booking-post-card-meta">
+                                                        <span className="booking-post-card-time">{slot?.range ?? "—"}</span>
+                                                        <span
+                                                            className="booking-post-card-badge"
+                                                            data-state={coachEdited ? "confirmed" : "pending"}
+                                                        >
+                                                            {coachEdited
+                                                                ? t("booking.post.statusCoachConfirmed")
+                                                                : t("booking.post.statusCoachPending")}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                                 <p className="booking-post-card-course">{courseLabel}</p>
-                                                <p className="muted-text booking-post-card-drill">{drillLabel}</p>
+                                                {drillLabel ? (
+                                                    <p className="muted-text booking-post-card-drill">{drillLabel}</p>
+                                                ) : null}
                                                 <span className="booking-post-card-cta">{t("booking.post.openDetail")}</span>
                                             </button>
                                         </li>
                                     );
                                 })}
                             </ul>
-                            <p className="muted-text booking-post-list-hint">{t("booking.post.listHint")}</p>
+                            <p className="muted-text booking-post-list-hint">
+                                {bookingListItems.length > sortedBookings.length
+                                    ? `${t("booking.post.listHint")} 当前列表额外展示一张对照卡，用于区分教练已确认与待编辑两种状态。`
+                                    : t("booking.post.listHint")}
+                            </p>
                         </section>
                     ) : null}
 

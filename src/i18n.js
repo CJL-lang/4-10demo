@@ -145,6 +145,9 @@ const resources = {
                     listHint: "点击卡片查看该节课的倒计时、天气与核销码；返回预约前界面可继续新增预约。",
                     openDetail: "查看详情",
                     backToList: "返回预约列表",
+                    statusCoachConfirmed: "已确认",
+                    statusCoachPending: "待教练",
+                    listCourseRowPending: "待教练编辑",
                 },
                 modal: {
                     title: "确认发送预约申请？",
@@ -370,13 +373,6 @@ const resources = {
                     unlocked: "已解锁",
                     progress: "进行中",
                     locked: "未解锁",
-                },
-                settlement: {
-                    openButton: "本月结算",
-                    title: "本月结算",
-                    kicker: "学院排行榜",
-                    celebrateLine: "本月表现耀眼，继续保持这份荣耀！",
-                    cta: "收下荣誉",
                 },
             },
             achievements: {
@@ -676,6 +672,9 @@ const resources = {
                     listHint: "Open a card for countdown, weather, and check-in code. Switch to pre-booking to add another session.",
                     openDetail: "View details",
                     backToList: "Back to list",
+                    statusCoachConfirmed: "Confirmed",
+                    statusCoachPending: "Pending coach",
+                    listCourseRowPending: "Awaiting coach edit",
                 },
                 modal: {
                     title: "Send this booking request?",
@@ -901,13 +900,6 @@ const resources = {
                     unlocked: "Unlocked",
                     progress: "In Progress",
                     locked: "Locked",
-                },
-                settlement: {
-                    openButton: "Monthly recap",
-                    title: "Monthly settlement",
-                    kicker: "Academy leaderboard",
-                    celebrateLine: "You shone this month—carry this pride forward.",
-                    cta: "Claim the honor",
                 },
             },
             achievements: {

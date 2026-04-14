@@ -10,7 +10,7 @@ export default function ProfilePage() {
     const { t } = useTranslation();
     const { state, actions } = useAppContext();
     const [profileView, setProfileView] = useState("home");
-    const [settlementOpen, setSettlementOpen] = useState(false);
+    const [showSettlementModal, setShowSettlementModal] = useState(false);
 
     useEffect(() => {
         const scrollMain = document.querySelector(".scroll-main");
@@ -115,14 +115,14 @@ export default function ProfilePage() {
             </section>
 
             <section className="section-stack badge-wall">
-                <div className="section-head badge-wall-head">
+                <div className="section-head">
                     <h2 className="section-title-sm">{t("profile.badgeWall")}</h2>
                     <button
                         type="button"
-                        className="settlement-trigger"
-                        onClick={() => setSettlementOpen(true)}
+                        className="settlement-trigger-pill"
+                        onClick={() => setShowSettlementModal(true)}
                     >
-                        {t("profile.settlement.openButton")}
+                        ✦ 上月排名结算已出炉 →
                     </button>
                 </div>
 
@@ -190,8 +190,6 @@ export default function ProfilePage() {
                 </div>
             </section>
 
-            <MonthlySettlementModal open={settlementOpen} onClose={() => setSettlementOpen(false)} />
-
             {activeAchievement ? (
                 <div className="modal-mask" onClick={actions.closeAchievement}>
                     <section className="modal-card achievement-detail-modal" onClick={(event) => event.stopPropagation()}>
@@ -221,6 +219,10 @@ export default function ProfilePage() {
                     </section>
                 </div>
             ) : null}
+
+            {showSettlementModal && (
+                <MonthlySettlementModal onClose={() => setShowSettlementModal(false)} />
+            )}
         </section>
     );
 }

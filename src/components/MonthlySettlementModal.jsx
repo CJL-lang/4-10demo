@@ -1,83 +1,98 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { PROFILE_HERO_BADGE_LOGO_WEBP } from "../data/mockData";
 
-export default function MonthlySettlementModal({ open, onClose }) {
+export default function MonthlySettlementModal({ onClose }) {
     const { t } = useTranslation();
-    const [rendered, setRendered] = useState(open);
+    const [isClosing, setIsClosing] = useState(false);
+    const [particles, setParticles] = useState([]);
+    const [mountNode, setMountNode] = useState(null);
 
     useEffect(() => {
-        if (open) setRendered(true);
-    }, [open]);
+        // Generate random particles on mount
+        const generatedParticles = Array.from({ length: 15 }).map((_, i) => {
+            const left = `${Math.random() * 100}%`;
+            const duration = 2 + Math.random() * 3; // 2s to 5s
+            const delay = Math.random() * 2; // 0s to 2s
+            const size = 3 + Math.random() * 4; // 3px to 7px
+
+            return {
+                id: i,
+                left,
+                duration: `${duration}s`,
+                delay: `${delay}s`,
+                size: `${size}px`
+            };
+        });
+        setParticles(generatedParticles);
+    }, []);
 
     useEffect(() => {
-        if (!open) return undefined;
-        const onKeyDown = (event) => {
-            if (event.key === "Escape") {
-                event.preventDefault();
-                onClose();
-            }
-        };
-        document.addEventListener("keydown", onKeyDown);
-        return () => document.removeEventListener("keydown", onKeyDown);
-    }, [open, onClose]);
+        setMountNode(document.querySelector(".device-shell"));
+    }, []);
 
-    if (!rendered) return null;
+    const handleClose = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            onClose();
+        }, 300); // Matches settlementFadeOut duration
+    };
 
-    return (
+    if (!mountNode) {
+        return null;
+    }
+
+    return createPortal(
         <div
-            className={`modal-mask modal-mask--settlement${open ? "" : " modal-mask--closing"}`}
-            onClick={onClose}
-            onAnimationEnd={(e) => {
-                if (e.target === e.currentTarget && !open) setRendered(false);
-            }}
+            className={`settlement-modal-mask ${isClosing ? "settlement-modal-mask--closing" : ""}`}
+            onClick={handleClose}
+            role="dialog"
+            aria-modal="true"
         >
-            <div
-                className="settlement-overlay"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="settlement-dialog-title"
-                onClick={(event) => event.stopPropagation()}
-            >
-                <div className="settlement-bg" aria-hidden="true" />
-                <div className="settlement-sparkles" aria-hidden="true">
-                    {Array.from({ length: 14 }, (_, i) => (
-                        <span key={i} className={`settlement-spark settlement-spark--${i}`} />
-                    ))}
-                </div>
+            <div className="settlement-particles">
+                {particles.map((p) => (
+                    <div
+                        key={p.id}
+                        className="settlement-particle"
+                        style={{
+                            left: p.left,
+                            width: p.size,
+                            height: p.size,
+                            animation: `particleFloat ${p.duration} ease-in ${p.delay} infinite`
+                        }}
+                    />
+                ))}
+            </div>
 
-                <div className="settlement-inner">
-                    <h2 id="settlement-dialog-title" className="settlement-title">
-                        {t("profile.settlement.title")}
-                    </h2>
-                    <p className="settlement-kicker">{t("profile.settlement.kicker")}</p>
+            <div className="settlement-content">
+                <h2 className="settlement-title">全院综合排名</h2>
 
-                    <div className="settlement-hero">
-                        <div className="settlement-halo" aria-hidden="true" />
-                        <div className="settlement-emblem">
-                            <img
-                                src={PROFILE_HERO_BADGE_LOGO_WEBP}
-                                alt=""
-                                width={120}
-                                height={120}
-                                loading="eager"
-                                decoding="async"
-                                className="settlement-emblem-img"
-                            />
-                        </div>
+                <div className="settlement-center-stage">
+                    <div className="settlement-rays"></div>
+                    <div className="settlement-glow"></div>
+
+                    <div className="settlement-badge-wrapper">
+                        <img
+                            src={PROFILE_HERO_BADGE_LOGO_WEBP}
+                            alt="Badge"
+                            className="settlement-badge-img"
+                        />
                     </div>
 
-                    <p className="settlement-rank">{t("profile.rankingHero.value")}</p>
-                    <p className="settlement-tier">{t("profile.rankingHero.desc")}</p>
-                    <p className="settlement-label">{t("profile.rankingHero.label")}</p>
-
-                    <p className="settlement-celebrate">{t("profile.settlement.celebrateLine")}</p>
-
-                    <button type="button" className="btn-primary settlement-dismiss" onClick={onClose}>
-                        {t("profile.settlement.cta")}
-                    </button>
+                    <div className="settlement-ribbon-container">
+                        <div className="settlement-ribbon">
+                            <span className="settlement-rank-text">NO. 4</span>
+                        </div>
+                        <div className="settlement-subtitle">ELITE 级学员</div>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <div className="settlement-close-hint" onClick={handleClose}>
+                点击任意处关闭
+            </div>
+        </div>,
+        mountNode
     );
 }
