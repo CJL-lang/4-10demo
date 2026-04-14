@@ -1,5 +1,15 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from "react";
-import { courseAssetsByDate, defaultState, growthViewItems, navItems, practiceTasks, recordFilterItems, scheduleDates } from "../data/mockData";
+import {
+    ALL_SLOTS,
+    courseAssetsByDate,
+    defaultState,
+    getSlotById,
+    growthViewItems,
+    navItems,
+    practiceTasks,
+    recordFilterItems,
+    scheduleDates,
+} from "../data/mockData";
 
 const STORAGE_KEY = "academy-react-prototype-state";
 const LEGACY_STORAGE_KEY = "academy-prototype-state";
@@ -13,7 +23,8 @@ function validGrowthView(view) {
 }
 
 function validRecordFilter(filter) {
-    return recordFilterItems.some((item) => item.key === filter) ? filter : defaultState.recordFilter;
+    const normalized = filter === "技能" ? "skills" : filter;
+    return recordFilterItems.some((item) => item.key === normalized) ? normalized : defaultState.recordFilter;
 }
 
 function validScheduleDay(day, fallback) {
@@ -21,12 +32,19 @@ function validScheduleDay(day, fallback) {
     return scheduleDates.some((item) => item.day === num) ? num : fallback;
 }
 
-const validCourseAssetIds = Object.values(courseAssetsByDate)
-    .flatMap((items) => items)
-    .map((item) => item.id);
+const validCourseAssetIds = [
+    ...ALL_SLOTS.map((s) => s.id),
+    ...Object.values(courseAssetsByDate)
+        .flatMap((items) => items)
+        .map((item) => item.id),
+];
 
 function validCourseAssetId(id, fallback) {
-    return validCourseAssetIds.includes(id) ? id : fallback;
+    if (id === null || id === undefined || id === "") {
+        return fallback;
+    }
+    const str = String(id);
+    return validCourseAssetIds.includes(str) ? str : fallback;
 }
 
 function validRating(value, fallback) {
@@ -50,15 +68,78 @@ function sanitizeTaskDoneMap(input) {
     return baseMap;
 }
 
-export function buildNextSessionISO(day) {
+export function buildNextSessionISO(day, slotId) {
+    const slot = slotId ? getSlotById(slotId) : null;
     const target = new Date();
     target.setMonth(9);
     target.setDate(day);
-    target.setHours(14, 30, 0, 0);
+    if (slot) {
+        target.setHours(slot.startH, slot.startM, 0, 0);
+    } else {
+        target.setHours(14, 30, 0, 0);
+    }
     if (target.getTime() < Date.now()) {
         target.setFullYear(target.getFullYear() + 1);
     }
     return target.toISOString();
+}
+
+function makeBookingId() {
+    return `bk-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function normalizeBookingRow(row, fallbackSlot) {
+    if (!row || typeof row !== "object") {
+        return null;
+    }
+    const id = typeof row.id === "string" && row.id ? row.id : makeBookingId();
+    const day = validScheduleDay(row.day, defaultState.selectedDate);
+    const courseAssetId = validCourseAssetId(row.courseAssetId, fallbackSlot);
+    const nextSessionISO =
+        typeof row.nextSessionISO === "string" && row.nextSessionISO
+            ? row.nextSessionISO
+            : buildNextSessionISO(day, courseAssetId);
+    const courseConfirmedByCoach = row.courseConfirmedByCoach === false ? false : true;
+    return { id, day, courseAssetId, nextSessionISO, courseConfirmedByCoach };
+}
+
+function hydrateBookings(parsed) {
+    if (Array.isArray(parsed.bookings) && parsed.bookings.length) {
+        return parsed.bookings.map((r) => normalizeBookingRow(r, "slot-3")).filter(Boolean);
+    }
+    if (parsed.bookingStatus === "booked") {
+        const legacyDay = validScheduleDay(parsed.bookedDate ?? parsed.selectedDate, defaultState.selectedDate);
+        const legacySlot = validCourseAssetId(parsed.bookedCourseAssetId ?? parsed.selectedCourseAssetId, "slot-3");
+        const iso = parsed.nextSessionISO || buildNextSessionISO(legacyDay, legacySlot);
+        const row = normalizeBookingRow(
+            {
+                id: makeBookingId(),
+                day: legacyDay,
+                courseAssetId: legacySlot,
+                nextSessionISO: iso,
+                courseConfirmedByCoach: true,
+            },
+            "slot-3"
+        );
+        return row ? [row] : [];
+    }
+    return [];
+}
+
+function pushBooking(state, day, courseAssetId) {
+    const slotId = validCourseAssetId(courseAssetId, "slot-3");
+    const d = validScheduleDay(day, state.selectedDate);
+    const id = makeBookingId();
+    const iso = buildNextSessionISO(d, slotId);
+    return {
+        ...state,
+        bookingStatus: "booked",
+        bookings: [
+            ...state.bookings,
+            { id, day: d, courseAssetId: slotId, nextSessionISO: iso, courseConfirmedByCoach: false },
+        ],
+        detailBookingId: null,
+    };
 }
 
 function hydrateState() {
@@ -68,14 +149,25 @@ function hydrateState() {
             return defaultState;
         }
         const parsed = JSON.parse(raw);
+        const bookings = hydrateBookings(parsed);
+        const detailBookingId =
+            typeof parsed.detailBookingId === "string" && bookings.some((b) => b.id === parsed.detailBookingId)
+                ? parsed.detailBookingId
+                : null;
         return {
             currentTab: validTab(parsed.currentTab),
             bookingStatus: parsed.bookingStatus === "booked" ? "booked" : "pre",
             selectedDate: validScheduleDay(parsed.selectedDate, defaultState.selectedDate),
-            bookedDate: validScheduleDay(parsed.bookedDate ?? parsed.selectedDate, defaultState.bookedDate),
-            selectedCourseAssetId: validCourseAssetId(parsed.selectedCourseAssetId, defaultState.selectedCourseAssetId),
-            bookedCourseAssetId: validCourseAssetId(parsed.bookedCourseAssetId ?? parsed.selectedCourseAssetId, defaultState.bookedCourseAssetId),
-            nextSessionISO: parsed.nextSessionISO || defaultState.nextSessionISO,
+            selectedCourseAssetId: (() => {
+                const rawId = parsed.selectedCourseAssetId;
+                if (rawId === null || rawId === undefined || rawId === "") {
+                    return defaultState.selectedCourseAssetId;
+                }
+                const id = String(rawId);
+                return validCourseAssetIds.includes(id) ? id : null;
+            })(),
+            bookings,
+            detailBookingId,
             ratings: {
                 physical: validRating(parsed.ratings?.physical, defaultState.ratings.physical),
                 mental: validRating(parsed.ratings?.mental, defaultState.ratings.mental),
@@ -101,25 +193,43 @@ function appReducer(state, action) {
         case "SET_BOOKING_STATUS": {
             const nextStatus = action.payload === "booked" ? "booked" : "pre";
             if (nextStatus === "booked") {
-                return {
-                    ...state,
-                    bookingStatus: "booked",
-                    bookedDate: state.selectedDate,
-                    bookedCourseAssetId: state.selectedCourseAssetId,
-                    nextSessionISO: buildNextSessionISO(state.selectedDate),
-                };
+                if (state.bookings.length === 0) {
+                    return pushBooking(state, state.selectedDate, state.selectedCourseAssetId);
+                }
+                return { ...state, bookingStatus: "booked" };
             }
             return { ...state, bookingStatus: "pre" };
         }
+        case "SET_DETAIL_BOOKING":
+            return {
+                ...state,
+                detailBookingId:
+                    typeof action.payload === "string" && state.bookings.some((b) => b.id === action.payload)
+                        ? action.payload
+                        : null,
+            };
         case "SET_SELECTED_DATE":
             return { ...state, selectedDate: Number(action.payload) || state.selectedDate };
         case "SET_SELECTED_COURSE_ASSET":
+            if (action.payload === null || action.payload === undefined) {
+                return { ...state, selectedCourseAssetId: null };
+            }
             return {
                 ...state,
                 selectedCourseAssetId: validCourseAssetId(action.payload, state.selectedCourseAssetId),
             };
-        case "SET_NEXT_SESSION":
-            return { ...state, nextSessionISO: action.payload || state.nextSessionISO };
+        case "SET_NEXT_SESSION": {
+            const iso = action.payload;
+            if (!iso || !state.detailBookingId) {
+                return state;
+            }
+            return {
+                ...state,
+                bookings: state.bookings.map((b) =>
+                    b.id === state.detailBookingId ? { ...b, nextSessionISO: iso } : b
+                ),
+            };
+        }
         case "SET_RATING":
             return {
                 ...state,
@@ -172,15 +282,23 @@ function appReducer(state, action) {
                 ...state,
                 activeAchievementId: action.payload || null,
             };
-        case "BOOK_NOW":
+        case "BOOK_NOW": {
+            const next = pushBooking(state, state.selectedDate, state.selectedCourseAssetId);
+            return { ...next, currentTab: "booking" };
+        }
+        case "SET_BOOKING_COURSE_CONFIRMED": {
+            const id = action.payload?.id;
+            if (!id) {
+                return state;
+            }
+            const confirmed = Boolean(action.payload?.confirmed);
             return {
                 ...state,
-                bookingStatus: "booked",
-                currentTab: "booking",
-                bookedDate: state.selectedDate,
-                bookedCourseAssetId: state.selectedCourseAssetId,
-                nextSessionISO: buildNextSessionISO(state.selectedDate),
+                bookings: state.bookings.map((b) =>
+                    b.id === id ? { ...b, courseConfirmedByCoach: confirmed } : b
+                ),
             };
+        }
         default:
             return state;
     }
@@ -195,6 +313,12 @@ export function AppProvider({ children }) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }, [state]);
 
+    // Preload heavy assets globally to prevent animation pop-in
+    useEffect(() => {
+        const preloadImage = new Image();
+        preloadImage.src = "/logo.webp";
+    }, []);
+
     const actions = useMemo(
         () => ({
             setTab: (tab) => dispatch({ type: "SET_TAB", payload: tab }),
@@ -202,6 +326,7 @@ export function AppProvider({ children }) {
             setSelectedDate: (day) => dispatch({ type: "SET_SELECTED_DATE", payload: day }),
             setSelectedCourseAsset: (assetId) => dispatch({ type: "SET_SELECTED_COURSE_ASSET", payload: assetId }),
             setNextSession: (iso) => dispatch({ type: "SET_NEXT_SESSION", payload: iso }),
+            setDetailBooking: (id) => dispatch({ type: "SET_DETAIL_BOOKING", payload: id }),
             setRating: (group, value) => dispatch({ type: "SET_RATING", group, value }),
             setReviewText: (text) => dispatch({ type: "SET_REVIEW_TEXT", payload: text }),
             setGrowthView: (view) => dispatch({ type: "SET_GROWTH_VIEW", payload: view }),
@@ -212,6 +337,8 @@ export function AppProvider({ children }) {
             openAchievement: (id) => dispatch({ type: "SET_ACHIEVEMENT_MODAL", payload: id }),
             closeAchievement: () => dispatch({ type: "SET_ACHIEVEMENT_MODAL", payload: null }),
             bookNow: () => dispatch({ type: "BOOK_NOW" }),
+            setBookingCourseConfirmed: (id, confirmed) =>
+                dispatch({ type: "SET_BOOKING_COURSE_CONFIRMED", payload: { id, confirmed } }),
         }),
         []
     );
@@ -225,4 +352,20 @@ export function useAppContext() {
         throw new Error("useAppContext must be used within AppProvider");
     }
     return ctx;
+}
+
+/** 即将上课优先：用于课后评价等与「当前一节课」相关的展示 */
+export function sortBookingsByTime(bookings) {
+    return [...bookings].sort((a, b) => new Date(a.nextSessionISO) - new Date(b.nextSessionISO));
+}
+
+export function pickReviewBooking(state) {
+    const sorted = sortBookingsByTime(state.bookings);
+    if (state.detailBookingId) {
+        const d = sorted.find((b) => b.id === state.detailBookingId);
+        if (d) {
+            return d;
+        }
+    }
+    return sorted[0] ?? null;
 }

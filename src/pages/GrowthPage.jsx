@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import RecordCard from "../components/RecordCard";
+import RecordReportView from "../components/RecordReportView";
 import StarRating from "../components/StarRating";
-import { growthViewItems, practiceTasks, ratingLabels } from "../data/mockData";
+import { growthViewItems, practiceTasks, ratingLabels, records } from "../data/mockData";
 import { useAppContext } from "../context/AppContext";
 
 function RatingGroup({ name, value, onChange, label }) {
@@ -15,15 +18,18 @@ function RatingGroup({ name, value, onChange, label }) {
     );
 }
 
-function buildFallbackChecklist(task) {
-    return [
-        `完成目标：${task.target}`,
-        "上传训练视频（必传）",
-        "补充文字复盘或语音复盘（任选其一）",
-    ];
+function collectProjectItems(t, taskId) {
+    const items = [];
+    for (let i = 0; i < 12; i += 1) {
+        const line = t(`tasks.${taskId}.projectItems.${i}`, { defaultValue: "" });
+        if (!line) break;
+        items.push(line);
+    }
+    return items;
 }
 
 export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, reviewSessionInfo }) {
+    const { t } = useTranslation();
     const { state, actions } = useAppContext();
     const videoInputRef = useRef(null);
     const audioInputRef = useRef(null);
@@ -33,18 +39,40 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
         textNote: "",
         voiceFileName: "",
     });
+    const [reportRecord, setReportRecord] = useState(null);
+
+    const filteredRecords = useMemo(
+        () => records.filter((item) => item.type === state.recordFilter),
+        [state.recordFilter]
+    );
+
+    const visibleRecords = useMemo(
+        () => filteredRecords.slice(0, state.recordVisibleCount),
+        [filteredRecords, state.recordVisibleCount]
+    );
+
+    const hasMoreRecords = visibleRecords.length < filteredRecords.length;
 
     const tasks = useMemo(
         () =>
             practiceTasks.map((task) => {
                 const done = Boolean(state.taskDoneMap[task.id]);
+                const categoryLabel =
+                    task.categoryKey === "weekly" ? t("growth.categories.weekly") : t("growth.categories.history");
                 return {
                     ...task,
+                    title: t(`tasks.${task.id}.title`),
+                    reward: t(`tasks.${task.id}.reward`),
+                    coach: t(`tasks.${task.id}.coach`),
+                    projectRequirements: t(`tasks.${task.id}.projectRequirements`),
+                    projectItems: collectProjectItems(t, task.id),
+                    difficultyLabel: t(`growth.difficulty.${task.difficultyKey}`),
+                    categoryLabel,
                     done,
                     progress: done ? 100 : task.progress,
                 };
             }),
-        [state.taskDoneMap]
+        [state.taskDoneMap, t]
     );
 
     const activeTask = useMemo(
@@ -60,28 +88,32 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
 
     const taskGroups = useMemo(
         () => ({
-            weekly: tasks.filter((task) => task.category === "本周作业" && !task.done),
-            completed: tasks.filter((task) => task.category === "历史作业" || task.done),
+            weekly: tasks.filter((task) => task.categoryKey === "weekly" && !task.done),
+            completed: tasks.filter((task) => task.categoryKey === "history" || task.done),
         }),
         [tasks]
     );
 
-    const completedCount = taskGroups.completed.length;
-    const totalCount = tasks.length;
-
     useEffect(() => {
-        onDetailPageChange?.(detailMode);
+        const hideNav = detailMode || Boolean(reportRecord);
+        onDetailPageChange?.(hideNav);
         return () => {
             onDetailPageChange?.(false);
         };
-    }, [detailMode, onDetailPageChange]);
+    }, [detailMode, reportRecord, onDetailPageChange]);
+
+    useEffect(() => {
+        if (state.growthView !== "report") {
+            setReportRecord(null);
+        }
+    }, [state.growthView]);
 
     useEffect(() => {
         const scrollMain = document.querySelector(".scroll-main");
         if (scrollMain) {
             scrollMain.scrollTo({ top: 0, behavior: "auto" });
         }
-    }, [detailMode, state.growthView]);
+    }, [detailMode, state.growthView, reportRecord]);
 
     const openTaskDetail = (taskId) => {
         setActiveTaskId(taskId);
@@ -102,25 +134,25 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
         }
 
         if (!homeworkDraft.videoFileName) {
-            onToast?.("请先上传训练视频");
+            onToast?.(t("growth.uploadVideoToast"));
             return;
         }
 
         if (!homeworkDraft.textNote.trim() && !homeworkDraft.voiceFileName) {
-            onToast?.("请补充文字或语音复盘");
+            onToast?.(t("growth.addReflectionToast"));
             return;
         }
 
         actions.setTaskDone(activeTask.id, true);
         closeTaskDetail();
-        onToast?.("作业已提交，已完成课后任务");
+        onToast?.(t("growth.submitToast"));
     };
 
     const renderTaskGroup = (title, list, emptyText) => (
         <section className="section-stack" key={title}>
             <div className="section-head">
                 <h2 className="section-title-sm">{title}</h2>
-                <span className="tiny-text">{list.length} 条</span>
+                <span className="tiny-text">{t("growth.countItems", { count: list.length })}</span>
             </div>
             {list.length === 0 ? (
                 <article className="panel panel-low task-empty-card">
@@ -144,14 +176,18 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                         >
                             <div className="task-head">
                                 <h3>{task.title}</h3>
-                                <span className="task-difficulty">{task.difficulty}</span>
+                                <span className="task-difficulty">{task.difficultyLabel}</span>
                             </div>
                             <div className="task-meta-row task-time-row" style={{ marginTop: "8px", fontSize: "12px", color: "var(--outline)" }}>
-                                <span>发布：{task.publishTime}</span>
-                                <span>截止：{task.deadline}</span>
+                                <span>
+                                    {t("growth.taskPublish", { value: task.publishTime })}
+                                </span>
+                                <span>
+                                    {t("growth.taskDeadline", { value: task.deadline })}
+                                </span>
                             </div>
                             <div className="task-meta-row" style={{ marginTop: "4px" }}>
-                                <span>教练：{task.coach}</span>
+                                <span>{t("growth.taskCoach", { value: task.coach })}</span>
                                 <span>{task.reward}</span>
                             </div>
                             <div className="progress-track task-progress-track">
@@ -159,7 +195,7 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                             </div>
                             <div className="task-card-footer">
                                 <span className={`task-state-chip ${task.done ? "is-done" : "is-pending"}`}>
-                                    {task.done ? "已完成，可再次提交" : "点击进入作业提交"}
+                                    {task.done ? t("growth.taskResubmit") : t("growth.taskEnter")}
                                 </span>
                                 <span className="task-enter-arrow">→</span>
                             </div>
@@ -172,7 +208,7 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
 
     const renderTaskView = () => (
         <>
-            {renderTaskGroup("本周作业", taskGroups.weekly, "本周作业已空，非常棒！")}
+            {renderTaskGroup(t("growth.weeklyAssignments"), taskGroups.weekly, t("growth.emptyWeekly"))}
             <div className="section-bottom-gap" />
         </>
     );
@@ -182,50 +218,70 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
             <section className="section-stack section-bottom-gap homework-detail-wrap swing-3d-enter">
                 <article className="panel panel-elevated homework-brief-card">
                     <div className="homework-detail-topbar">
-                        <button type="button" className="icon-btn homework-back-btn" aria-label="返回任务列表" onClick={closeTaskDetail}>
+                        <button type="button" className="icon-btn homework-back-btn" aria-label={t("growth.taskBackAria")} onClick={closeTaskDetail}>
                             ←
                         </button>
-                        <span className="pill">{task.category}</span>
+                        <span className="pill homework-category-pill">{task.categoryLabel}</span>
                     </div>
-                    <div className="section-head">
-                        <h2 className="section-title-sm">课后作业</h2>
-                        <span className="tag">ASSIGNMENT</span>
+                    <div className="homework-hero">
+                        <div className="section-head homework-section-head">
+                            <h2 className="section-title-sm">{t("growth.assignmentLabel")}</h2>
+                            <span className="tag">{t("growth.assignmentTag")}</span>
+                        </div>
+                        <h3 className="homework-task-title">{task.title}</h3>
                     </div>
-                    <h3 className="homework-task-title">{task.title}</h3>
-                    <div className="homework-meta-row">
-                        <span>发布：{task.publishTime}</span>
-                        <span>截止：{task.deadline}</span>
+                    <div className="homework-meta-grid">
+                        <div className="homework-meta-card homework-meta-card--publish">
+                            <span className="homework-meta-label">{t("growth.publishTime")}</span>
+                            <strong>{task.publishTime}</strong>
+                        </div>
+                        <div className="homework-meta-card homework-meta-card--deadline">
+                            <span className="homework-meta-label">{t("growth.deadline")}</span>
+                            <strong>{task.deadline}</strong>
+                        </div>
                     </div>
 
-                    <div className="homework-project-info" style={{ marginTop: "16px", paddingTop: "12px", borderTop: "1px dashed rgba(80, 69, 51, 0.4)" }}>
-                        <h4 style={{ margin: "0 0 8px", fontSize: "14px", color: "var(--primary-fixed)" }}>作业项目</h4>
-                        <ul className="homework-checklist">
-                            {task.projectItems?.map((item) => (
-                                <li key={item}>{item}</li>
-                            ))}
-                        </ul>
+                    <div className="homework-project-info">
+                        <section className="homework-detail-block">
+                            <div className="homework-block-head">
+                                <h4 className="homework-block-title">{t("growth.projectItems")}</h4>
+                                <span className="pill">{t("growth.projectCount", { count: task.projectItems?.length ?? 0 })}</span>
+                            </div>
+                            <ul className="homework-checklist">
+                                {task.projectItems?.map((item) => (
+                                    <li key={item}>{item}</li>
+                                ))}
+                            </ul>
+                        </section>
 
-                        <h4 style={{ margin: "16px 0 8px", fontSize: "14px", color: "var(--primary-fixed)" }}>项目要求</h4>
-                        <p className="muted-text" style={{ fontSize: "13px", lineHeight: "1.6" }}>{task.projectRequirements}</p>
+                        <section className="homework-detail-block">
+                            <div className="homework-block-head">
+                                <h4 className="homework-block-title">{t("growth.projectRequirements")}</h4>
+                            </div>
+                            <p className="homework-requirement-text">{task.projectRequirements}</p>
+                        </section>
                     </div>
                 </article>
 
                 <article className="panel panel-low homework-submit-card">
                     <div className="submit-header">
-                        <h2 className="submit-title">作业交付</h2>
+                        <h2 className="submit-title">{t("growth.deliveryTitle")}</h2>
                     </div>
 
                     <div className="submit-actions-grid">
                         <button type="button" className={`submit-action-btn ${homeworkDraft.videoFileName ? "active" : ""}`} onClick={() => videoInputRef.current?.click()}>
                             <span className="action-icon">🎥</span>
-                            <span className="action-label">视频记录<span className="req-star">*</span></span>
-                            <span className="action-status">{homeworkDraft.videoFileName ? "已选" : "去拍摄"}</span>
+                            <span className="action-label">
+                                {t("growth.uploadVideo")}
+                                <span className="req-star">*</span>
+                            </span>
+                            <span className="action-status">{homeworkDraft.videoFileName ? t("growth.selected") : t("growth.goShoot")}</span>
                         </button>
-                        
+
                         <button type="button" className={`submit-action-btn ${homeworkDraft.voiceFileName ? "active" : ""}`} onClick={() => audioInputRef.current?.click()}>
                             <span className="action-icon">🎙️</span>
-                            <span className="action-label">语音反思</span>
-                            <span className="action-status">{homeworkDraft.voiceFileName ? "已录制" : "去录音"}</span>
+                            <span className="action-label">{t("growth.voiceReflection")}</span>
+                            <span className="action-status">{homeworkDraft.voiceFileName ? t("growth.recorded") : t("growth.goRecord")}</span>
                         </button>
                     </div>
 
@@ -263,7 +319,7 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                     <div className="submit-text-area">
                         <textarea
                             className="homework-textarea sleek-textarea"
-                            placeholder="写点什么，例如今天的挥杆节奏感..."
+                            placeholder={t("growth.textareaPlaceholder")}
                             value={homeworkDraft.textNote}
                             onChange={(event) => {
                                 setHomeworkDraft((prev) => ({
@@ -275,14 +331,14 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                     </div>
 
                     <div className="submit-footer">
-                        <p className="submit-req-hint">※ 需提交视频，并选填语音或文字内容方可提交流程</p>
+                        <p className="submit-req-hint">{t("growth.submitHint")}</p>
                         <button
                             type="button"
                             className="btn-submit-action"
                             disabled={!canSubmitHomework}
                             onClick={handleSubmitHomework}
                         >
-                            {canSubmitHomework ? "一键提交作业" : "完善内容以提交"}
+                            {canSubmitHomework ? t("growth.submitReady") : t("growth.submitDisabled")}
                         </button>
                     </div>
                 </article>
@@ -290,41 +346,66 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
         );
     };
 
+    const coachStarLabel =
+        state.ratings.coach > 0 ? t(`growth.coachRatingLabels.${state.ratings.coach}`) : "—";
+
     const renderReviewView = () => (
         <article className="panel feedback-panel panel-elevated section-bottom-gap">
             <header className="feedback-head">
-                <h2 className="headline">课后互评</h2>
-                <span className="tag">EVALUATION</span>
+                <h2 className="headline">{t("growth.reviewHeadline")}</h2>
+                <span className="tag">{t("growth.reviewTag")}</span>
             </header>
 
             <article className="panel panel-low review-session-card">
-                <p className="small-label">本次课程信息</p>
-                <h3>{reviewSessionInfo?.courseAsset || "课程信息待同步"}</h3>
-                <p className="muted-text">课程主题：{reviewSessionInfo?.courseTitle || "-"}</p>
-                <div className="review-session-meta">
-                    <span>教练：{reviewSessionInfo?.coachName || "-"}</span>
-                    <span>{reviewSessionInfo?.coachTitle || ""}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
+                    <div style={{ minWidth: 0 }}>
+                        <p className="small-label" style={{ marginBottom: "4px" }}>
+                            {t("growth.sessionInfo")}
+                        </p>
+                        <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "bold", color: "var(--on-surface)", wordBreak: "break-word" }}>
+                            {reviewSessionInfo?.courseName || t("growth.sessionSyncing")}
+                        </h3>
+                    </div>
+                    {reviewSessionInfo?.dateLabel && (
+                        <div className="review-session-meta" style={{ margin: 0, flexShrink: 0 }}>
+                            <span>{reviewSessionInfo.dateLabel}</span>
+                        </div>
+                    )}
                 </div>
-                <p className="muted-text">上课时间：{reviewSessionInfo?.dateLabel || "-"}</p>
+
+                {reviewSessionInfo?.coachName && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "16px", paddingTop: "12px", borderTop: "1px dashed rgba(255, 255, 255, 0.1)" }}>
+                        <img
+                            src={reviewSessionInfo.avatarUrl}
+                            alt=""
+                            style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }}
+                        />
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--on-surface)" }}>
+                                {reviewSessionInfo.coachName}
+                            </span>
+                            <span style={{ fontSize: "12px", color: "var(--on-surface-variant)" }}>
+                                {t("coachCard.coach")}
+                            </span>
+                        </div>
+                    </div>
+                )}
             </article>
 
             <RatingGroup
-                name="体能状态"
-                field="physical"
+                name={t("growth.physical")}
                 value={state.ratings.physical}
                 onChange={(value) => actions.setRating("physical", value)}
                 label={ratingLabels.physical[state.ratings.physical - 1] || "—"}
             />
             <RatingGroup
-                name="心理状态"
-                field="mental"
+                name={t("growth.mental")}
                 value={state.ratings.mental}
                 onChange={(value) => actions.setRating("mental", value)}
                 label={ratingLabels.mental[state.ratings.mental - 1] || "—"}
             />
             <RatingGroup
-                name="技能状态"
-                field="skill"
+                name={t("growth.skill")}
                 value={state.ratings.skill}
                 onChange={(value) => actions.setRating("skill", value)}
                 label={ratingLabels.skill[state.ratings.skill - 1] || "—"}
@@ -332,30 +413,68 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
 
             <div className="rating-group">
                 <div className="rating-head">
-                    <h3>匿名评价教练</h3>
-                    <span>{ratingLabels.coach[state.ratings.coach - 1] || "—"}</span>
+                    <h3>{t("growth.coachRating")}</h3>
+                    <span>{coachStarLabel}</span>
                 </div>
                 <StarRating value={state.ratings.coach} onChange={(value) => actions.setRating("coach", value)} />
             </div>
 
             <textarea
                 className="feedback-textarea"
-                placeholder="教学质量反馈..."
+                placeholder={t("growth.feedbackPlaceholder")}
                 value={state.reviewText}
                 onChange={(event) => actions.setReviewText(event.target.value)}
             />
 
             <button type="button" className="btn-primary wide" onClick={onSubmit}>
-                提交评价
+                {t("growth.submitReview")}
             </button>
         </article>
     );
 
     const renderReportView = () => (
-        <article className="panel panel-low task-empty-card" style={{ marginTop: '16px' }}>
-            <p className="muted-text">课后报告页面正在开发中...</p>
-        </article>
+        <section className="section-stack section-bottom-gap club-record-page">
+            <div className="stack-list">
+                {visibleRecords.map((record, index) => (
+                    <div
+                        key={record.id}
+                        className="record-card-enter-wrap"
+                        style={{ animationDelay: `${index * 420}ms` }}
+                    >
+                        <RecordCard
+                            record={record}
+                            onClick={(r) => {
+                                setReportRecord(r);
+                                onToast?.(t("club.toasts.openedReport"));
+                            }}
+                        />
+                    </div>
+                ))}
+            </div>
+
+            {hasMoreRecords ? (
+                <button
+                    type="button"
+                    className="btn-ghost small record-more-btn"
+                    onClick={() => {
+                        actions.loadMoreRecords();
+                        onToast?.(t("club.toasts.loadedMore"));
+                    }}
+                >
+                    {t("club.loadMore")}
+                </button>
+            ) : null}
+        </section>
     );
+
+    if (state.growthView === "report" && reportRecord) {
+        return (
+            <RecordReportView
+                record={reportRecord}
+                onBack={() => setReportRecord(null)}
+            />
+        );
+    }
 
     return (
         <section className={`screen fade-enter ${detailMode ? "homework-focus-screen" : ""}`}>
@@ -374,7 +493,7 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                                     }
                                 }}
                             >
-                                {item.label}
+                                {t(`growth.${item.key}`)}
                             </button>
                         ))}
                     </div>

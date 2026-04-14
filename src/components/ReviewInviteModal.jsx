@@ -1,50 +1,64 @@
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
 export default function ReviewInviteModal({ open, sessionInfo, onCancel, onJoin }) {
-    if (!open) {
-        return null;
-    }
+    const { t } = useTranslation();
+    const [rendered, setRendered] = useState(open);
+
+    useEffect(() => {
+        if (open) setRendered(true);
+    }, [open]);
+
+    if (!rendered) return null;
 
     return (
-        <div className="modal-mask" onClick={onCancel}>
+        <div
+            className={`modal-mask${open ? "" : " modal-mask--closing"}`}
+            onClick={onCancel}
+            onAnimationEnd={(e) => {
+                if (e.target === e.currentTarget && !open) setRendered(false);
+            }}
+        >
             <section className="modal-card review-invite-modal" onClick={(event) => event.stopPropagation()}>
                 <header className="review-remind-head">
                     <div className="review-remind-icon" aria-hidden="true">
                         ✓
                     </div>
                     <div>
-                        <p className="small-label">课程提醒</p>
-                        <h3>课程结束，去完成课后评价</h3>
+                        <p className="small-label">{t("booking.reviewInvite.label")}</p>
+                        <h3>{t("booking.reviewInvite.title")}</h3>
                     </div>
                 </header>
 
-                <p className="review-remind-desc">请为刚才课程打分并补充评价，帮助教练及时优化你的下节训练安排。</p>
+                <p className="review-remind-desc">{t("booking.reviewInvite.desc")}</p>
 
                 <div className="review-remind-grid">
                     <div className="review-remind-item">
-                        <span>课程主题</span>
-                        <strong>{sessionInfo?.courseTitle || "-"}</strong>
+                        <span>{t("booking.reviewInvite.courseTopic")}</span>
+                        <strong>{sessionInfo?.courseName || sessionInfo?.courseTitle || "-"}</strong>
                     </div>
                     <div className="review-remind-item">
-                        <span>课程内容</span>
-                        <strong>{sessionInfo?.courseAsset || "-"}</strong>
+                        <span>{t("booking.reviewInvite.courseContent")}</span>
+                        <strong>{sessionInfo?.drill ? `专项训练：${sessionInfo.drill}` : "-"}</strong>
                     </div>
                     <div className="review-remind-item">
-                        <span>教练信息</span>
+                        <span>{t("booking.reviewInvite.coachInfo")}</span>
                         <strong>{sessionInfo?.coachName || "-"}</strong>
                     </div>
                     <div className="review-remind-item">
-                        <span>上课时间</span>
+                        <span>{t("booking.reviewInvite.sessionTime")}</span>
                         <strong>{sessionInfo?.dateLabel || "-"}</strong>
                     </div>
                 </div>
 
-                <p className="review-remind-note">完成评价后将同步到你的进度记录中。</p>
+                <p className="review-remind-note">{t("booking.reviewInvite.note")}</p>
 
                 <div className="modal-actions review-invite-actions">
                     <button type="button" className="btn-ghost" onClick={onCancel}>
-                        稍后评价
+                        {t("booking.reviewInvite.later")}
                     </button>
                     <button type="button" className="btn-primary" onClick={onJoin}>
-                        加入评价
+                        {t("booking.reviewInvite.join")}
                     </button>
                 </div>
             </section>

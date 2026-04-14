@@ -3,73 +3,95 @@ import BottomNav from "./components/BottomNav";
 import BookingModal from "./components/BookingModal";
 import ReviewInviteModal from "./components/ReviewInviteModal";
 import Toast from "./components/Toast";
-import { useAppContext } from "./context/AppContext";
-import { courseAssetsByDate, scheduleDates } from "./data/mockData";
+import { pickReviewBooking, useAppContext } from "./context/AppContext";
+import { getSessionDisplay, getSlotById, scheduleDates } from "./data/mockData";
 import BookingPage from "./pages/BookingPage";
 import ClubPage from "./pages/ClubPage";
 import GrowthPage from "./pages/GrowthPage";
 import ProfilePage from "./pages/ProfilePage";
+import { useTranslation } from "react-i18next";
+
+const TAB_ORDER = ["club", "booking", "growth", "profile"];
 
 export default function App() {
+    const { i18n, t } = useTranslation();
     const { state, actions } = useAppContext();
     const [bookingModalOpen, setBookingModalOpen] = useState(false);
     const [reviewInviteOpen, setReviewInviteOpen] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
     const [hideBottomNav, setHideBottomNav] = useState(false);
+    const [slideDir, setSlideDir] = useState("");
     const scrollRef = useRef(null);
-    const viewKey = `${state.currentTab}-${state.currentTab === "booking" ? state.bookingStatus : "stable"}`;
+
+    const viewKey = `${state.currentTab}-${state.currentTab === "booking" ? `${state.bookingStatus}-${state.detailBookingId ?? "list"}` : "stable"}`;
     const selectedSchedule = useMemo(
         () => scheduleDates.find((item) => item.day === state.selectedDate) || scheduleDates[0],
         [state.selectedDate]
     );
 
-    const selectedAssets = useMemo(
-        () => courseAssetsByDate[state.selectedDate] || [],
-        [state.selectedDate]
-    );
-
-    const selectedAsset = useMemo(
-        () => selectedAssets.find((item) => item.id === state.selectedCourseAssetId) || selectedAssets[0] || null,
-        [selectedAssets, state.selectedCourseAssetId]
+    const selectedSlot = useMemo(
+        () => (state.selectedCourseAssetId ? getSlotById(state.selectedCourseAssetId) : null),
+        [state.selectedCourseAssetId]
     );
 
     const bookingPreview = useMemo(
         () => ({
             day: selectedSchedule.day,
-            slot: selectedSchedule.time,
-            courseTitle: selectedSchedule.courseTitle,
-            selectedCourseAsset: selectedAsset?.courseName || "系统自动分配",
+            slot: selectedSlot?.range ?? "—",
+            courseTitle: t("booking.modal.pendingTopic"),
         }),
-        [selectedAsset, selectedSchedule]
+        [selectedSchedule.day, selectedSlot, t]
     );
 
-    const bookedDay = state.bookedDate || state.selectedDate;
+    const reviewBooking = useMemo(() => pickReviewBooking(state), [state]);
+
+    const bookedDay = reviewBooking?.day ?? state.selectedDate;
 
     const bookedSchedule = useMemo(
         () => scheduleDates.find((item) => item.day === bookedDay) || selectedSchedule,
         [bookedDay, selectedSchedule]
     );
 
-    const bookedAssets = useMemo(
-        () => courseAssetsByDate[bookedDay] || selectedAssets,
-        [bookedDay, selectedAssets]
-    );
+    const bookedSlot = useMemo(() => getSlotById(reviewBooking?.courseAssetId), [reviewBooking?.courseAssetId]);
 
-    const bookedAsset = useMemo(
-        () => bookedAssets.find((item) => item.id === state.bookedCourseAssetId) || bookedAssets[0] || null,
-        [bookedAssets, state.bookedCourseAssetId]
-    );
+    const bookedSessionDisplay = useMemo(() => {
+        if (!reviewBooking) {
+            return null;
+        }
+        const raw = getSessionDisplay(reviewBooking.day, reviewBooking.courseAssetId);
+        if (!raw) {
+            return null;
+        }
+        if (reviewBooking.courseConfirmedByCoach === false) {
+            return {
+                ...raw,
+                courseName: t("booking.courseTitleUnknown"),
+                drill: t("growth.pendingCourseTopic", { defaultValue: raw.drill }),
+            };
+        }
+        return raw;
+    }, [reviewBooking, t]);
 
-    const reviewSessionInfo = useMemo(
-        () => ({
-            dateLabel: `${bookedSchedule.day}号 ${bookedSchedule.time}`,
-            courseTitle: bookedSchedule.courseTitle,
-            courseAsset: bookedAsset?.courseName || "未选择课程",
-            coachName: bookedAsset?.name || "待分配教练",
-            coachTitle: bookedAsset?.title || "",
-        }),
-        [bookedAsset, bookedSchedule]
-    );
+    const reviewSessionInfo = useMemo(() => {
+        const dateLabel = t("growth.sessionDateLabel", {
+            day: bookedSchedule.day,
+            time: bookedSlot?.range ?? bookedSchedule.time,
+        });
+        if (!bookedSessionDisplay) {
+            return {
+                dateLabel,
+                courseName: null,
+                drill: null,
+                range: null,
+                coachName: null,
+                coachTitle: null,
+                avatarUrl: null,
+                phone: null,
+                bestScoreShort: null,
+            };
+        }
+        return { ...bookedSessionDisplay, dateLabel };
+    }, [bookedSchedule.day, bookedSchedule.time, bookedSlot, bookedSessionDisplay, t]);
 
     useEffect(() => {
         if (!toastMessage) {
@@ -85,7 +107,7 @@ export default function App() {
         if (scrollRef.current) {
             scrollRef.current.scrollTo({ top: 0, behavior: "auto" });
         }
-    }, [state.currentTab, state.bookingStatus]);
+    }, [state.currentTab, state.bookingStatus, state.detailBookingId]);
 
     const content = useMemo(() => {
         if (state.currentTab === "club") {
@@ -104,7 +126,7 @@ export default function App() {
             return (
                 <GrowthPage
                     onSubmit={() => {
-                        setToastMessage("评价已提交，感谢你的反馈");
+                        setToastMessage(t("growth.submitReviewToast"));
                     }}
                     onToast={(message) => {
                         setToastMessage(message);
@@ -124,15 +146,15 @@ export default function App() {
                 onToast={(message) => setToastMessage(message)}
             />
         );
-    }, [actions, reviewSessionInfo, state.bookingStatus, state.currentTab]);
+    }, [actions, reviewSessionInfo, state.bookingStatus, state.currentTab, state.detailBookingId, t]);
 
     return (
-        <div className="app-stage">
+        <div className={`app-stage ${i18n.resolvedLanguage === "en" ? "locale-en" : "locale-zh"}`}>
             <div className="device-shell">
                 <div className="device-glow" aria-hidden="true" />
 
                 <main className={`scroll-main ${hideBottomNav ? "no-bottom-nav" : ""}`} ref={scrollRef}>
-                    <div key={viewKey} className="view-shell">
+                    <div key={viewKey} className={`view-shell${slideDir ? ` ${slideDir}` : ""}`}>
                         {content}
                     </div>
                 </main>
@@ -141,6 +163,9 @@ export default function App() {
                     <BottomNav
                         currentTab={state.currentTab}
                         onChange={(tab) => {
+                            const prev = TAB_ORDER.indexOf(state.currentTab);
+                            const next = TAB_ORDER.indexOf(tab);
+                            setSlideDir(next > prev ? "slide-from-right" : "slide-from-left");
                             actions.setTab(tab);
                         }}
                     />
@@ -153,7 +178,7 @@ export default function App() {
                     onConfirm={() => {
                         actions.bookNow();
                         setBookingModalOpen(false);
-                        setToastMessage(`预约成功：${bookingPreview.day}号 ${bookingPreview.slot}`);
+                        setToastMessage(t("booking.modal.successToast", { day: bookingPreview.day, slot: bookingPreview.slot }));
                     }}
                 />
 
@@ -165,7 +190,7 @@ export default function App() {
                         setReviewInviteOpen(false);
                         actions.setGrowthView("review");
                         actions.setTab("growth");
-                        setToastMessage("已进入课后互评，请完成本次课程评价");
+                        setToastMessage(t("booking.reviewInvite.joinToast"));
                     }}
                 />
 

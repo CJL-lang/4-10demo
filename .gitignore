@@ -4,5 +4,5 @@ dist/
 .DS_Store
 *.log
 
-# ui-ux-pro-max skill (Python)
-.cursor/skills/**/__pycache__/
+# Project Agent Skills — keep local only, do not commit
+.cursor/skills/

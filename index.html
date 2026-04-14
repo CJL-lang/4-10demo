@@ -5,8 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Academy App Prototype</title>
-    <!-- Profile 学院排名徽章：提前拉取 WebP，避免首进「我的」时 logo 晚出现 -->
-    <link rel="preload" href="/logo.webp" as="image" type="image/webp" />
+    <!-- Profile 学院排名徽章：预加载优化后的小图，避免首进「我的」时解码超大原图。 -->
+    <link rel="preload" href="/logo-256.webp" as="image" type="image/webp" />
 </head>
 
 <body>

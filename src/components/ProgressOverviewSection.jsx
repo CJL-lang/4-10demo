@@ -1,20 +1,32 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { growthOverview } from "../data/mockData";
 
-const TREND_SERIES_META = [
-    { key: "skill", label: "各项技能进阶趋势", color: "var(--primary)" },
-];
-
 const TREND_DAYS = ["D1", "D2", "D3", "D4", "D5", "D6", "D7"];
+const Y_LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const Y_MIN = 0.5;
+const Y_MAX = 9.5;
+
+const CHART_ORDER = ["irons", "woods", "putting", "scramble", "wedge"];
+const CHART_COLORS = {
+    irons: "var(--primary)",
+    woods: "#7ecaff",
+    putting: "#a8e6a3",
+    scramble: "#ffb86c",
+    wedge: "#c792ea",
+};
+
+const CHART_W = 260;
+const CHART_H = 120;
+const CARD_SPACING = 135;
+const DRAG_LOCK_THRESHOLD = 10;
+const DRAG_SNAP_THRESHOLD = 36;
 
 function buildSmoothPath(values, getX, getY) {
-    const points = values.map((value, index) => ({ x: getX(index), y: getY(value) }));
-    if (points.length < 2) {
-        return "";
-    }
-
+    const points = values.map((v, i) => ({ x: getX(i), y: getY(v) }));
+    if (points.length < 2) return "";
     let d = `M ${points[0].x} ${points[0].y}`;
-    for (let i = 0; i < points.length - 1; i += 1) {
+    for (let i = 0; i < points.length - 1; i++) {
         const p0 = points[i === 0 ? 0 : i - 1];
         const p1 = points[i];
         const p2 = points[i + 1];
@@ -28,66 +40,332 @@ function buildSmoothPath(values, getX, getY) {
     return d;
 }
 
-export default function ProgressOverviewSection({ withBottomGap = true }) {
-    const chartWidth = 324;
-    const chartHeight = 144;
+function getX(index) {
+    return (index / (TREND_DAYS.length - 1)) * CHART_W;
+}
 
-    const trendValues = useMemo(
-        () => TREND_SERIES_META.flatMap((series) => growthOverview.weeklyTrendSeries[series.key]),
-        []
-    );
+function getY(value) {
+    return CHART_H - ((value - Y_MIN) / (Y_MAX - Y_MIN)) * CHART_H;
+}
 
-    const trendMin = Math.min(...trendValues) - 4;
-    const trendMax = Math.max(...trendValues) + 4;
+function ChartCard({ chart, isActive, isDragging, offset, onClick, switchChartAriaLabel }) {
+    const absOffset = Math.abs(offset);
+    const values = growthOverview.weeklyTrendSeries[chart.key] || [];
+    const path = buildSmoothPath(values, getX, getY);
+    const latestLevel = values[values.length - 1] || 0;
+    const firstLevel = values[0] || 0;
+    const trend = latestLevel - firstLevel;
 
-    const getX = (index) => (index / (TREND_DAYS.length - 1)) * chartWidth;
-    const getY = (value) => {
-        if (trendMax === trendMin) {
-            return chartHeight / 2;
-        }
-        return chartHeight - ((value - trendMin) / (trendMax - trendMin)) * chartHeight;
+    const cardStyle = {
+        "--offset": offset,
+        "--offset-abs": absOffset,
+        zIndex: isActive ? 3 : 3 - absOffset,
     };
 
     return (
-        <article className={`panel panel-elevated trend-panel section-stack ${withBottomGap ? "section-bottom-gap" : ""}`}>
-            <div className="section-head">
-                <h2 className="section-title-sm">技能稳定度趋势</h2>
-                <span className="muted-text">最近 7 次训练</span>
+        <div
+            className={`chart-card${isActive ? " is-active" : ""}${isDragging ? " is-dragging" : ""}`}
+            style={cardStyle}
+            onClick={!isActive ? onClick : undefined}
+            role={!isActive ? "button" : undefined}
+            tabIndex={!isActive ? 0 : undefined}
+            onKeyDown={!isActive ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } : undefined}
+            aria-label={!isActive ? switchChartAriaLabel : undefined}
+        >
+            <div className="chart-card-header">
+                <span className="chart-card-label">{chart.label}</span>
+                <span className="chart-card-level" style={{ color: chart.color }}>
+                    L{latestLevel}
+                </span>
+                {trend > 0 && (
+                    <span className="chart-card-trend chart-card-trend--up">+{trend}</span>
+                )}
             </div>
-            <div className="trend-chart-wrap" aria-label="技能稳定度趋势曲线图">
-                <svg className="trend-chart" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
-                    {[0, 1, 2, 3].map((step) => {
-                            const y = (chartHeight / 3) * step;
-                            return <line key={step} className="trend-grid-line" x1="0" y1={y} x2={chartWidth} y2={y} />;
-                        })}
 
-                        {TREND_SERIES_META.map((series) => {
-                            const values = growthOverview.weeklyTrendSeries[series.key];
-                            const path = buildSmoothPath(values, getX, getY);
+            <svg
+                className="chart-card-svg"
+                viewBox={`0 0 ${CHART_W} ${CHART_H}`}
+                preserveAspectRatio="none"
+                aria-hidden="true"
+            >
+                {/* Grid lines at L3, L5, L7, L9 */}
+                {[3, 5, 7, 9].map((lvl) => (
+                    <line
+                        key={lvl}
+                        className="trend-grid-line"
+                        x1="0" y1={getY(lvl)}
+                        x2={CHART_W} y2={getY(lvl)}
+                    />
+                ))}
 
-                            return (
-                                <g key={series.key}>
-                                    <path d={path} className="trend-line" style={{ stroke: series.color }} />
-                                    {values.map((value, index) => (
-                                        <circle
-                                            key={`${series.key}-${index}`}
-                                            className="trend-point"
-                                            style={{ fill: series.color }}
-                                            cx={getX(index)}
-                                            cy={getY(value)}
-                                            r="3.4"
-                                        />
-                                    ))}
-                                </g>
-                            );
-                        })}
-                    </svg>
-                    <div className="trend-x-labels">
-                        {TREND_DAYS.map((day) => (
-                            <small key={day}>{day}</small>
-                        ))}
-                    </div>
+                {/* Area fill under the line */}
+                <defs>
+                    <linearGradient id={`grad-${chart.key}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={chart.color} stopOpacity="0.22" />
+                        <stop offset="100%" stopColor={chart.color} stopOpacity="0" />
+                    </linearGradient>
+                </defs>
+                {path && (
+                    <path
+                        d={`${path} L ${getX(values.length - 1)} ${CHART_H} L 0 ${CHART_H} Z`}
+                        fill={`url(#grad-${chart.key})`}
+                    />
+                )}
+
+                {/* Smooth line */}
+                <path
+                    d={path}
+                    pathLength="1"
+                    className={`trend-line${isActive ? " is-active-line" : ""}`}
+                    style={{ stroke: chart.color }}
+                />
+
+                {/* Data points */}
+                {isActive && values.map((v, i) => (
+                    <circle
+                        key={i}
+                        className="trend-point"
+                        style={{ fill: chart.color, animationDelay: `${120 + i * 60}ms` }}
+                        cx={getX(i)}
+                        cy={getY(v)}
+                        r="3.4"
+                    />
+                ))}
+            </svg>
+
+            {/* X-axis labels */}
+            <div className="chart-x-labels">
+                {TREND_DAYS.map((d) => <small key={d}>{d}</small>)}
+            </div>
+
+            {/* Y-axis level labels (active only) */}
+            {isActive && (
+                <div className="chart-y-labels" aria-hidden="true">
+                    {[9, 7, 5, 3, 1].map((lvl) => (
+                        <span key={lvl} style={{ top: `${((Y_MAX - lvl) / (Y_MAX - Y_MIN)) * 100}%` }}>
+                            L{lvl}
+                        </span>
+                    ))}
                 </div>
-            </article>
+            )}
+
+            {/* Fog overlay for non-active cards */}
+            {!isActive && <div className="chart-card-fog" aria-hidden="true" />}
+        </div>
+    );
+}
+
+export default function ProgressOverviewSection({ withBottomGap = true }) {
+    const { t } = useTranslation();
+    const charts = useMemo(
+        () =>
+            CHART_ORDER.map((key) => ({
+                key,
+                label: t(`progressCharts.${key}`),
+                color: CHART_COLORS[key],
+            })),
+        [t]
+    );
+    const [activeIndex, setActiveIndex] = useState(2);
+    const [dragOffsetPx, setDragOffsetPx] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
+    const trackRef = useRef(null);
+    const pointerStateRef = useRef({
+        pointerId: null,
+        startX: 0,
+        startY: 0,
+        dragX: 0,
+        axis: null,
+    });
+    const clickGuardUntilRef = useRef(0);
+
+    const prev = useCallback(() => setActiveIndex((i) => Math.max(0, i - 1)), []);
+    const next = useCallback(() => setActiveIndex((i) => Math.min(charts.length - 1, i + 1)), [charts.length]);
+
+    const clampIndex = useCallback(
+        (value) => Math.max(0, Math.min(charts.length - 1, value)),
+        [charts.length]
+    );
+
+    const applyEdgeResistance = useCallback(
+        (dx) => {
+            const draggingPastLeft = activeIndex === 0 && dx > 0;
+            const draggingPastRight = activeIndex === charts.length - 1 && dx < 0;
+            if (draggingPastLeft || draggingPastRight) {
+                return dx * 0.35;
+            }
+            return dx;
+        },
+        [activeIndex, charts.length]
+    );
+
+    const resetDrag = useCallback(() => {
+        pointerStateRef.current = {
+            pointerId: null,
+            startX: 0,
+            startY: 0,
+            dragX: 0,
+            axis: null,
+        };
+        setDragOffsetPx(0);
+        setIsDragging(false);
+    }, []);
+
+    const onPointerDown = (e) => {
+        pointerStateRef.current = {
+            pointerId: e.pointerId,
+            startX: e.clientX,
+            startY: e.clientY,
+            dragX: 0,
+            axis: null,
+        };
+    };
+
+    const onPointerMove = (e) => {
+        const pointer = pointerStateRef.current;
+        if (pointer.pointerId !== e.pointerId) return;
+
+        const dx = e.clientX - pointer.startX;
+        const dy = e.clientY - pointer.startY;
+
+        if (!pointer.axis) {
+            if (Math.abs(dx) < DRAG_LOCK_THRESHOLD && Math.abs(dy) < DRAG_LOCK_THRESHOLD) {
+                return;
+            }
+
+            if (Math.abs(dx) >= Math.abs(dy) * 0.85) {
+                pointer.axis = "x";
+                if (trackRef.current?.setPointerCapture) {
+                    trackRef.current.setPointerCapture(e.pointerId);
+                }
+                setIsDragging(true);
+            } else {
+                pointer.axis = "y";
+                return;
+            }
+        }
+
+        if (pointer.axis !== "x") return;
+
+        e.preventDefault();
+        const resistedDx = applyEdgeResistance(dx);
+        pointer.dragX = resistedDx;
+        setDragOffsetPx(resistedDx);
+    };
+
+    const finishDrag = useCallback(() => {
+        const pointer = pointerStateRef.current;
+        const deltaX = pointer.dragX;
+        const wasHorizontalDrag = pointer.axis === "x";
+
+        if (wasHorizontalDrag) {
+            const cardDelta = -deltaX / CARD_SPACING;
+            let targetIndex = clampIndex(Math.round(activeIndex + cardDelta));
+
+            if (targetIndex === activeIndex && Math.abs(deltaX) > DRAG_SNAP_THRESHOLD) {
+                targetIndex = clampIndex(activeIndex + (deltaX < 0 ? 1 : -1));
+            }
+
+            clickGuardUntilRef.current = Date.now() + 220;
+            setActiveIndex(targetIndex);
+        }
+
+        resetDrag();
+    }, [activeIndex, clampIndex, resetDrag]);
+
+    const onPointerUp = (e) => {
+        if (pointerStateRef.current.pointerId !== e.pointerId) return;
+        finishDrag();
+    };
+
+    const onPointerCancel = (e) => {
+        if (pointerStateRef.current.pointerId !== e.pointerId) return;
+        resetDrag();
+    };
+
+    // Keyboard
+    useEffect(() => {
+        const el = trackRef.current;
+        if (!el) return;
+        const onKey = (e) => {
+            if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+            if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+        };
+        el.addEventListener("keydown", onKey);
+        return () => el.removeEventListener("keydown", onKey);
+    }, [prev, next]);
+
+    return (
+        <article className={`panel panel-elevated trend-panel section-stack ${withBottomGap ? "section-bottom-gap" : ""}`}>
+            <div className="split-grid card-gap club-course-stats" role="region" aria-label={t("club.courseStatsAria")}>
+                <article className="panel stat-panel">
+                    <p className="section-title-sm">{t("booking.pre.totalCourses")}</p>
+                    <p className="metric-large">{t("booking.pre.totalCoursesValue")}</p>
+                    <p className="muted-text">{t("booking.pre.totalCoursesExpiry")}</p>
+                </article>
+                <article className="panel stat-panel panel-low">
+                    <p className="section-title-sm">{t("booking.pre.usedCourses")}</p>
+                    <p className="metric-large pale">{t("booking.pre.usedCoursesValue")}</p>
+                    <p className="accent-cold">{t("booking.pre.usedCoursesHint")}</p>
+                </article>
+            </div>
+
+            <div className="section-head">
+                <h2 className="section-title-sm">{t("progressOverview.title")}</h2>
+                <span className="muted-text">{t("progressOverview.subtitle")}</span>
+            </div>
+
+            <div
+                className="chart-carousel-outer"
+                role="region"
+                aria-label={t("progressOverview.aria")}
+                aria-roledescription="carousel"
+                ref={trackRef}
+                tabIndex={0}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                onPointerCancel={onPointerCancel}
+            >
+                {/* Left fog edge */}
+                <div className="chart-edge-fog chart-edge-fog--left" aria-hidden="true" />
+                {/* Right fog edge */}
+                <div className="chart-edge-fog chart-edge-fog--right" aria-hidden="true" />
+
+                {/* 3D track */}
+                <div className={`chart-carousel-track${isDragging ? " is-dragging" : ""}`} aria-live="polite">
+                    {charts.map((chart, i) => (
+                        <ChartCard
+                            key={chart.key}
+                            chart={chart}
+                            isActive={i === activeIndex}
+                            isDragging={isDragging}
+                            offset={i - activeIndex + dragOffsetPx / CARD_SPACING}
+                            switchChartAriaLabel={t("progressOverview.switchChartAria", { label: chart.label })}
+                            onClick={() => {
+                                if (Date.now() < clickGuardUntilRef.current || isDragging) return;
+                                setActiveIndex(i);
+                            }}
+                        />
+                    ))}
+                </div>
+
+                {/* Dot indicators */}
+                <div className="chart-dots" role="tablist" aria-label={t("progressOverview.chartDotsAria")}>
+                    {charts.map((chart, i) => (
+                        <button
+                            key={chart.key}
+                            type="button"
+                            role="tab"
+                            aria-selected={i === activeIndex}
+                            aria-label={chart.label}
+                            className={`chart-dot${i === activeIndex ? " is-active" : ""}`}
+                            style={i === activeIndex ? { background: charts[activeIndex].color } : {}}
+                            onClick={() => setActiveIndex(i)}
+                        />
+                    ))}
+                </div>
+            </div>
+        </article>
     );
 }
