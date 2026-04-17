@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { sortBookingsByTime, useAppContext } from "../context/AppContext";
-import { ALL_SLOTS, coachPost, coachInfoCard, courseAssetsByDate, getSessionDisplay, getSlotById, openSlotsByDate, scheduleDates } from "../data/mockData";
+import { ALL_SLOTS, coachInfoCard, courseAssetsByDate, getSessionDisplay, getSlotById, openSlotsByDate, scheduleDates } from "../data/mockData";
 import { useCountdown } from "../hooks/useCountdown";
-import CoachCard from "../components/CoachCard";
 import SessionCourseDetailCard from "../components/SessionCourseDetailCard";
 import DateChip from "../components/DateChip";
 import GolfVenueAvatar from "../components/GolfVenueAvatar";
@@ -53,7 +52,7 @@ function formatBookingCardDate(iso, locale) {
     }).format(date);
 }
 
-export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, onToast }) {
+export default function BookingPage({ onOpenBookingModal, onToast }) {
     const { t, i18n } = useTranslation();
     const { state, actions } = useAppContext();
     const detailBooking = useMemo(
@@ -141,61 +140,6 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
             },
         ];
     }, [sortedBookings]);
-
-    const bookedCoach = useMemo(() => {
-        if (!detailBooking) {
-            return null;
-        }
-        const primaryCoach = coachPost;
-        const base = { ...primaryCoach, score: undefined, badge: t("booking.post.waiting") };
-        const locale = i18n.resolvedLanguage || "zh";
-        const fmt = (iso) => formatSessionTime(iso, locale);
-        const coachTitle = t("booking.pre.coachTitle", { defaultValue: primaryCoach.title });
-        if (!bookedSession || !bookedSlot) {
-            return {
-                ...base,
-                title: coachTitle,
-                desc: bookedSlot
-                    ? t("booking.post.bookedAt", {
-                        date: fmt(detailBooking.nextSessionISO),
-                        time: bookedSlot.range,
-                    })
-                    : `${t("booking.post.coachReadyDesc")} · ${bookedSchedule.day}${t("booking.modal.daySuffix")} ${bookedSchedule.time}`,
-            };
-        }
-        if (detailBooking.courseConfirmedByCoach === false) {
-            return {
-                ...base,
-                courseName: t("booking.courseTitleUnknown"),
-                drill: t("growth.pendingCourseTopic", { defaultValue: bookedSession.drill }),
-                time: bookedSession.range,
-                avatarUrl: bookedSession.avatarUrl,
-                title: coachTitle,
-                desc: t("booking.post.bookedAt", {
-                    date: fmt(detailBooking.nextSessionISO),
-                    time: bookedSlot.range,
-                }),
-            };
-        }
-        const courseName = bookedSession.courseAssetId
-            ? t(`courseAssets.${bookedSession.courseAssetId}.courseName`, { defaultValue: bookedSession.courseName })
-            : t(`schedule.${bookedSession.scheduleDay}.courseTitle`, { defaultValue: bookedSession.courseName });
-        const drill = bookedSession.courseAssetId
-            ? t(`courseAssets.${bookedSession.courseAssetId}.drill`, { defaultValue: bookedSession.drill })
-            : t("growth.pendingCourseTopic", { defaultValue: bookedSession.drill });
-        return {
-            ...base,
-            courseName,
-            drill,
-            time: bookedSession.range,
-            avatarUrl: bookedSession.avatarUrl,
-            title: coachTitle,
-            desc: t("booking.post.bookedAt", {
-                date: fmt(detailBooking.nextSessionISO),
-                time: bookedSlot.range,
-            }),
-        };
-    }, [detailBooking, bookedSession, bookedSlot, bookedSchedule.day, bookedSchedule.time, t, i18n.resolvedLanguage]);
 
     const handlePickDate = (day) => {
         actions.setSelectedDate(day);
@@ -541,113 +485,125 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
 
                     {showPostDetail ? (
                         <div className="booking-post-detail-body">
-                            <article className="panel countdown-panel panel-elevated booking-countdown-hero">
-                                <p className="section-title-sm booking-countdown-hero__title">{t("booking.post.nextTeeTime")}</p>
-                                <div className="countdown-row">
-                                    <div className="time-block">
-                                        <span className="time-num">{timer.days}</span>
-                                        <span className="time-label">DAYS</span>
+                            <div className="booking-detail-stack">
+                                <section className="booking-detail-hero booking-detail-hero--combined panel countdown-panel panel-elevated booking-countdown-hero">
+                                    <header className="booking-detail-hero-top">
+                                        <p className="booking-detail-hero-eyebrow">{t("booking.post.detailHeroEyebrow")}</p>
+                                        <h2 className="booking-detail-hero-title">{t("booking.post.nextTeeTime")}</h2>
+                                    </header>
+                                    <div className="booking-detail-countdown-grid" role="timer" aria-live="polite">
+                                        {[
+                                            { value: timer.days, label: t("booking.post.countdownUnitDay") },
+                                            { value: timer.hours, label: t("booking.post.countdownUnitHour") },
+                                            { value: timer.minutes, label: t("booking.post.countdownUnitMin") },
+                                            { value: timer.seconds, label: t("booking.post.countdownUnitSec") },
+                                        ].map((cell) => (
+                                            <div key={cell.label} className="booking-detail-countdown-cell">
+                                                <span className="booking-detail-countdown-value">{cell.value}</span>
+                                                <span className="booking-detail-countdown-label">{cell.label}</span>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <span className="time-colon">:</span>
-                                    <div className="time-block">
-                                        <span className="time-num">{timer.hours}</span>
-                                        <span className="time-label">HOURS</span>
-                                    </div>
-                                    <span className="time-colon">:</span>
-                                    <div className="time-block">
-                                        <span className="time-num">{timer.minutes}</span>
-                                        <span className="time-label">MIN</span>
-                                    </div>
-                                    <span className="time-colon">:</span>
-                                    <div className="time-block">
-                                        <span className="time-num">{timer.seconds}</span>
-                                        <span className="time-label">SEC</span>
-                                    </div>
-                                </div>
-                                <div className="meta-row">
-                                    <span className="muted-text">
-                                        {t("booking.post.bookedAt", {
-                                            date: formatSessionTime(detailBooking.nextSessionISO, i18n.resolvedLanguage || "zh"),
-                                            time: bookedSlot?.range ?? bookedSchedule.time,
-                                        })}
-                                    </span>
-                                    <span className="pill">{t("booking.post.confirmedDay", { day: bookedSchedule.day })}</span>
-                                </div>
-                                <p className="muted-text" style={{ marginTop: "8px" }}>
-                                    {bookedSlot
-                                        ? t("booking.post.bookedSlotOnly", { range: bookedSlot.range })
-                                        : t("booking.post.bookedCourse", { name: t("booking.post.unselected") })}
-                                </p>
-                            </article>
-
-                            {bookedSession ? (
-                                <section className="card-gap">
-                                    <SessionCourseDetailCard
-                                        session={bookedSession}
-                                        coachHasEditedCourse={detailBooking.courseConfirmedByCoach !== false}
-                                    />
-                                </section>
-                            ) : null}
-
-                            <section className="card-gap">
-                                <article className="panel panel-low weather-ai-card">
-                                    <div className="weather-head">
-                                        <span className="weather-icon" aria-hidden="true">
-                                            <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <circle cx="13" cy="13" r="6" fill="currentColor" fillOpacity="0.9" />
-                                                <path
-                                                    d="M18 23.5C18 20.46 20.46 18 23.5 18C26 18 28.12 19.68 28.8 22H29C31.21 22 33 23.79 33 26C33 28.21 31.21 30 29 30H18.5C16.57 30 15 28.43 15 26.5C15 24.57 16.57 23 18.5 23H18"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                />
-                                                <path d="M13 3V0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                                <path d="M13 26V23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                                <path d="M3 13H0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                                <path d="M26 13H23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                            </svg>
-                                        </span>
-                                        <p className="weather-number">24°C</p>
-                                    </div>
-                                    <p className="muted-text weather-meta">{t("booking.post.weatherSummary")}</p>
-                                    <p className="section-title-xs">{t("booking.post.aiSuggestionTitle")}</p>
-                                    <p className="muted-text">{t("booking.post.aiSuggestionBody")}</p>
-                                </article>
-                            </section>
-
-                            <article className="panel qr-panel panel-elevated">
-                                <p className="section-title-sm">{t("booking.post.qrTitle")}</p>
-                                <div className="qr-shell">
-                                    <div className="qr-inner" aria-hidden="true">
-                                        <div className="qr-grid">
-                                            {qrPattern.flatMap((row, rowIndex) =>
-                                                row.split("").map((cell, cellIndex) => (
-                                                    <span
-                                                        key={`${rowIndex}-${cellIndex}`}
-                                                        className={`qr-cell ${cell === "1" ? "on" : "off"}`}
-                                                    />
-                                                ))
-                                            )}
+                                    <div className="booking-detail-meta-card">
+                                        <div className="booking-detail-meta-row">
+                                            <p className="booking-detail-meta-primary">
+                                                {t("booking.post.bookedAt", {
+                                                    date: formatSessionTime(detailBooking.nextSessionISO, i18n.resolvedLanguage || "zh"),
+                                                    time: bookedSlot?.range ?? bookedSchedule.time,
+                                                })}
+                                            </p>
+                                            <span className="pill booking-detail-meta-pill">
+                                                {t("booking.post.confirmedDay", { day: bookedSchedule.day })}
+                                            </span>
                                         </div>
+                                        <p className="booking-detail-meta-note">
+                                            {bookedSlot
+                                                ? t("booking.post.bookedSlotOnly", { range: bookedSlot.range })
+                                                : t("booking.post.bookedCourse", { name: t("booking.post.unselected") })}
+                                        </p>
                                     </div>
-                                </div>
-                                <p className="qr-caption">{t("booking.post.qrCaption")}</p>
-                            </article>
 
-                            <button type="button" className="btn-primary wide" onClick={onOpenReviewInvite}>
-                                {t("booking.post.classFinished")}
-                            </button>
-
-                            {bookedCoach ? (
-                                <section className="section-stack booking-post-detail-coach">
-                                    <div className="section-head">
-                                        <h2 className="section-title-sm">{t("booking.post.privateCoach")}</h2>
-                                        <span className="pill">{bookedCoach.badge}</span>
+                                    <div className="booking-detail-hero-venue">
+                                        <article className="weather-ai-card booking-detail-weather booking-detail-weather--embedded">
+                                            <div className="booking-detail-weather-top">
+                                                <div className="weather-head booking-detail-weather-head">
+                                                    <span className="weather-icon" aria-hidden="true">
+                                                        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <circle cx="13" cy="13" r="6" fill="currentColor" fillOpacity="0.9" />
+                                                            <path
+                                                                d="M18 23.5C18 20.46 20.46 18 23.5 18C26 18 28.12 19.68 28.8 22H29C31.21 22 33 23.79 33 26C33 28.21 31.21 30 29 30H18.5C16.57 30 15 28.43 15 26.5C15 24.57 16.57 23 18.5 23H18"
+                                                                stroke="currentColor"
+                                                                strokeWidth="2"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                            />
+                                                            <path d="M13 3V0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                                            <path d="M13 26V23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                                            <path d="M3 13H0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                                            <path d="M26 13H23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                                        </svg>
+                                                    </span>
+                                                    <p className="weather-number">24°C</p>
+                                                </div>
+                                                <p className="booking-detail-weather-wind muted-text">{t("booking.post.weatherSummary")}</p>
+                                            </div>
+                                            <div className="booking-detail-ai-block">
+                                                <p className="booking-detail-ai-label">{t("booking.post.aiSuggestionTitle")}</p>
+                                                <p className="muted-text booking-detail-ai-body">{t("booking.post.aiSuggestionBody")}</p>
+                                            </div>
+                                        </article>
                                     </div>
-                                    <CoachCard coach={bookedCoach} compact />
                                 </section>
-                            ) : null}
+
+                                {bookedSession ? (
+                                    <section
+                                        className="booking-detail-section booking-detail-section--session"
+                                        aria-labelledby="booking-detail-session-heading"
+                                    >
+                                        <div className="booking-detail-section-head">
+                                            <span className="booking-detail-section-marker" aria-hidden="true" />
+                                            <h3 id="booking-detail-session-heading" className="booking-detail-section-title">
+                                                {t("booking.post.detailSectionSession")}
+                                            </h3>
+                                        </div>
+                                        <SessionCourseDetailCard
+                                            className="booking-detail-session-card"
+                                            session={bookedSession}
+                                            coachHasEditedCourse={detailBooking.courseConfirmedByCoach !== false}
+                                        />
+                                    </section>
+                                ) : null}
+
+                                <section
+                                    className="booking-detail-section booking-detail-section--entry"
+                                    aria-labelledby="booking-detail-entry-heading"
+                                >
+                                    <div className="booking-detail-section-head">
+                                        <span className="booking-detail-section-marker booking-detail-section-marker--gold" aria-hidden="true" />
+                                        <h3 id="booking-detail-entry-heading" className="booking-detail-section-title">
+                                            {t("booking.post.detailSectionEntry")}
+                                        </h3>
+                                    </div>
+                                    <article className="panel qr-panel panel-elevated booking-detail-qr">
+                                        <p className="section-title-sm booking-detail-qr-title">{t("booking.post.qrTitle")}</p>
+                                        <div className="qr-shell">
+                                            <div className="qr-inner" aria-hidden="true">
+                                                <div className="qr-grid">
+                                                    {qrPattern.flatMap((row, rowIndex) =>
+                                                        row.split("").map((cell, cellIndex) => (
+                                                            <span
+                                                                key={`${rowIndex}-${cellIndex}`}
+                                                                className={`qr-cell ${cell === "1" ? "on" : "off"}`}
+                                                            />
+                                                        ))
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p className="qr-caption">{t("booking.post.qrCaption")}</p>
+                                    </article>
+                                </section>
+                            </div>
                         </div>
                     ) : null}
                 </>

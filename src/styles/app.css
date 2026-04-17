@@ -1791,6 +1791,29 @@
     min-height: 210px;
 }
 
+.chart-progress-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.chart-progress-head-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+}
+
+.chart-carousel-hint {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--outline);
+    letter-spacing: 0.02em;
+}
+
 .trend-legend {
     margin-top: 8px;
     display: flex;
@@ -1866,19 +1889,95 @@
 .chart-carousel-outer {
     position: relative;
     height: 210px;
-    margin-top: 12px;
+    margin-top: 4px;
     overflow: hidden;
+    border-radius: 20px;
     /* perspective lives here so child 3D transforms compose correctly */
-    perspective: 900px;
-    perspective-origin: 50% 45%;
+    perspective: 920px;
+    perspective-origin: 50% 42%;
     cursor: grab;
     user-select: none;
     outline: none;
     touch-action: pan-y;
+    background:
+        radial-gradient(120% 90% at 50% -10%, rgba(255, 202, 104, 0.06), transparent 52%),
+        linear-gradient(165deg, rgba(22, 18, 12, 0.55) 0%, rgba(10, 8, 5, 0.35) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 12px 32px rgba(0, 0, 0, 0.22);
+    transition: box-shadow 280ms ease, border-color 280ms ease;
+}
+
+.chart-carousel-outer:hover {
+    border-color: rgba(255, 202, 104, 0.12);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 16px 36px rgba(0, 0, 0, 0.28);
+}
+
+.chart-carousel-outer:focus-visible {
+    outline: 2px solid rgba(255, 202, 104, 0.55);
+    outline-offset: 2px;
 }
 
 .chart-carousel-outer:active {
     cursor: grabbing;
+}
+
+.chart-carousel-nav {
+    position: absolute;
+    top: 50%;
+    z-index: 12;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid rgba(255, 202, 104, 0.22);
+    border-radius: 50%;
+    background: rgba(12, 10, 7, 0.72);
+    color: var(--primary);
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition:
+        background-color 200ms ease,
+        border-color 200ms ease,
+        color 200ms ease,
+        transform 200ms ease,
+        opacity 200ms ease;
+}
+
+.chart-carousel-nav:hover:not(:disabled) {
+    background: rgba(255, 202, 104, 0.12);
+    border-color: rgba(255, 202, 104, 0.38);
+    transform: scale(1.04);
+}
+
+.chart-carousel-nav:focus-visible {
+    outline: 2px solid rgba(255, 202, 104, 0.65);
+    outline-offset: 2px;
+}
+
+.chart-carousel-nav:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+.chart-carousel-nav:disabled {
+    opacity: 0.28;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.chart-carousel-nav--prev {
+    left: 10px;
+}
+
+.chart-carousel-nav--next {
+    right: 10px;
 }
 
 .chart-carousel-track {
@@ -1909,9 +2008,11 @@
     filter:
         blur(calc(var(--offset-abs, 0) * 1.8px)) saturate(calc(1 - var(--offset-abs, 0) * 0.18)) brightness(calc(1 - var(--offset-abs, 0) * 0.14));
     transition:
-        transform 420ms cubic-bezier(0.25, 0.88, 0.32, 1),
-        opacity 420ms ease,
-        filter 420ms ease;
+        transform 480ms cubic-bezier(0.22, 0.95, 0.28, 1),
+        opacity 420ms cubic-bezier(0.25, 0.82, 0.35, 1),
+        filter 420ms ease,
+        box-shadow 420ms ease,
+        border-color 420ms ease;
     will-change: transform, opacity;
     backface-visibility: hidden;
     pointer-events: all;
@@ -1924,11 +2025,29 @@
 .chart-card.is-active {
     cursor: default;
     pointer-events: none;
-    border-color: rgba(255, 255, 255, 0.18);
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 202, 104, 0.38);
+    background:
+        radial-gradient(120% 85% at 85% 0%, rgba(255, 202, 104, 0.1), transparent 58%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%);
+    box-shadow:
+        0 14px 44px rgba(0, 0, 0, 0.42),
+        0 0 0 1px rgba(255, 202, 104, 0.22),
+        0 0 32px rgba(255, 202, 104, 0.14);
     opacity: 1;
     filter: none;
+}
+
+@supports (color: color-mix(in srgb, white, black)) {
+    .chart-card.is-active {
+        border-color: color-mix(in srgb, var(--chart-color, var(--primary)) 48%, rgba(255, 255, 255, 0.1));
+        background:
+            radial-gradient(120% 85% at 85% 0%, color-mix(in srgb, var(--chart-color, var(--primary)) 20%, transparent), transparent 58%),
+            linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%);
+        box-shadow:
+            0 14px 44px rgba(0, 0, 0, 0.42),
+            0 0 0 1px color-mix(in srgb, var(--chart-color, var(--primary)) 32%, transparent),
+            0 0 34px color-mix(in srgb, var(--chart-color, var(--primary)) 18%, transparent);
+    }
 }
 
 /* Header row */
@@ -1986,6 +2105,11 @@
     color: var(--on-surface-variant);
     opacity: 0.5;
     font-variant-numeric: tabular-nums;
+    transition: opacity 320ms ease;
+}
+
+.chart-card.is-active .chart-x-labels small {
+    opacity: 0.78;
 }
 
 /* Y-axis labels (absolute, active card only) */
@@ -2035,39 +2159,67 @@
 
 .chart-edge-fog--left {
     left: 0;
-    background: linear-gradient(to right, var(--surface-high, #1a1610), transparent);
+    background: linear-gradient(to right, rgba(14, 11, 7, 0.96) 0%, rgba(14, 11, 7, 0.4) 45%, transparent 100%);
 }
 
 .chart-edge-fog--right {
     right: 0;
-    background: linear-gradient(to left, var(--surface-high, #1a1610), transparent);
+    background: linear-gradient(to left, rgba(14, 11, 7, 0.96) 0%, rgba(14, 11, 7, 0.4) 45%, transparent 100%);
 }
 
 /* Dot indicators */
 .chart-dots {
     position: absolute;
-    bottom: 4px;
+    bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 6px;
+    gap: 7px;
     align-items: center;
-    z-index: 10;
+    z-index: 11;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(8, 6, 4, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .chart-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.22);
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
     border: none;
     padding: 0;
     cursor: pointer;
-    transition: background 300ms, transform 300ms;
+    transition:
+        width 320ms cubic-bezier(0.22, 0.95, 0.28, 1),
+        background-color 280ms ease,
+        transform 280ms ease,
+        opacity 280ms ease;
+}
+
+.chart-dot:hover:not(.is-active) {
+    background: rgba(255, 255, 255, 0.38);
+    transform: scale(1.08);
+}
+
+.chart-dot:focus-visible {
+    outline: 2px solid rgba(255, 202, 104, 0.65);
+    outline-offset: 2px;
 }
 
 .chart-dot.is-active {
-    transform: scale(1.35);
+    width: 22px;
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(255, 202, 104, 0.45);
+}
+
+@supports (color: color-mix(in srgb, white, black)) {
+    .chart-dot.is-active {
+        box-shadow: 0 0 14px color-mix(in srgb, var(--dot-color, var(--primary)) 42%, transparent);
+    }
 }
 
 /* Reduced motion: disable 3D, use simple fade */
@@ -2075,6 +2227,29 @@
     .chart-card {
         transition: opacity 300ms ease;
         transform: translateX(calc(-50% + var(--offset, 0) * 135px)) !important;
+    }
+
+    .chart-carousel-nav:hover:not(:disabled) {
+        transform: none;
+    }
+
+    .trend-line.is-active-line {
+        animation: none;
+        stroke-dashoffset: 0;
+    }
+
+    .trend-point {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+
+    .chart-dot {
+        transition: background-color 200ms ease, opacity 200ms ease;
+    }
+
+    .chart-dot.is-active {
+        width: 7px;
     }
 }
 
@@ -2837,6 +3012,730 @@
     margin-top: 14px;
 }
 
+.profile-hero__stage {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 4px;
+    padding-bottom: 72px;
+}
+
+/* —— 佩戴勋章：挂绳奖牌（颈部下垂） —— */
+.profile-hero-medal {
+    position: absolute;
+    left: 50%;
+    bottom: -6px;
+    transform: translateX(-50%);
+    z-index: 2;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.profile-hero-medal--worn {
+    /* 112px 头像高度：绳结约在头像下缘（颈部） */
+    top: 107px;
+    bottom: auto;
+    z-index: 3;
+    animation: medalPinOn 520ms cubic-bezier(0.22, 0.95, 0.28, 1) both;
+}
+
+.profile-hero-medal--worn .profile-hero-medal__pendulum {
+    animation: medalPendulum 4.2s ease-in-out infinite 620ms;
+    transform-origin: 50% 0;
+}
+
+/* 短按：奖牌被拨动一下（与 idle 摆动切换） */
+.profile-hero-medal--worn .profile-hero-medal__pendulum.is-tapping {
+    animation: medalTouched 0.58s cubic-bezier(0.33, 1.18, 0.52, 1) forwards;
+}
+
+.profile-hero-medal__pendulum {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 64px;
+}
+
+.profile-hero-medal__lanyard {
+    display: block;
+    flex-shrink: 0;
+    margin-bottom: -4px;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
+}
+
+.profile-hero-medal__shine {
+    position: absolute;
+    width: 52px;
+    height: 52px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.35), transparent 52%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 触碰时：牌面金光扫过 */
+.profile-hero-medal__gold-glint {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 4;
+    opacity: 0;
+    background: linear-gradient(
+        118deg,
+        transparent 0%,
+        transparent 36%,
+        rgba(255, 252, 235, 0.98) 49.5%,
+        rgba(255, 236, 160, 0.75) 51%,
+        transparent 64%,
+        transparent 100%
+    );
+    background-size: 240% 100%;
+    background-position: 130% 50%;
+    mix-blend-mode: screen;
+}
+
+.profile-hero-medal__pendulum.is-tapping .profile-hero-medal__gold-glint {
+    animation: medalGoldGlint 0.58s ease-out forwards;
+}
+
+.profile-hero-medal__pendulum.is-tapping .profile-hero-medal__coin {
+    animation: medalCoinGoldAura 0.58s ease-out forwards;
+}
+
+/* 触碰时：弥散金雾 + 曲线流光（替代均匀光点） */
+.profile-hero-medal__sparkles {
+    position: absolute;
+    left: 50%;
+    bottom: -8px;
+    width: 104px;
+    height: 78px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 6;
+    overflow: visible;
+}
+
+.profile-hero-medal__sparkles-bloom {
+    position: absolute;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0;
+    will-change: transform, opacity;
+}
+
+.profile-hero-medal__sparkles-bloom--a {
+    width: 76px;
+    height: 58px;
+    left: 50%;
+    top: 50%;
+    margin: -29px 0 0 -38px;
+    filter: blur(18px);
+    border-radius: 50%;
+    background: radial-gradient(ellipse 100% 85% at 42% 40%, rgba(255, 238, 195, 0.9) 0%, rgba(255, 200, 95, 0.35) 48%, transparent 72%);
+    transform: scale(0.55) rotate(-10deg) translate(0, 6px);
+}
+
+.profile-hero-medal__sparkles-bloom--b {
+    width: 64px;
+    height: 52px;
+    left: 50%;
+    top: 50%;
+    margin: -26px 0 0 -32px;
+    filter: blur(14px);
+    border-radius: 50%;
+    background: radial-gradient(ellipse 90% 100% at 58% 55%, rgba(255, 250, 220, 0.75) 0%, rgba(255, 185, 70, 0.22) 55%, transparent 78%);
+    transform: scale(0.4) rotate(18deg) translate(-4px, -2px);
+}
+
+.profile-hero-medal__sparkles-bloom--c {
+    width: 88px;
+    height: 44px;
+    left: 50%;
+    top: 50%;
+    margin: -22px 0 0 -44px;
+    filter: blur(22px);
+    border-radius: 50%;
+    background: radial-gradient(ellipse 100% 70% at 50% 50%, rgba(255, 225, 150, 0.55) 0%, transparent 68%);
+    transform: scale(0.65) rotate(0deg);
+}
+
+.profile-hero-medal__pendulum.is-tapping .profile-hero-medal__sparkles-bloom--a {
+    animation: medalBloomBreathA 0.62s cubic-bezier(0.22, 1.15, 0.38, 1) forwards;
+}
+
+.profile-hero-medal__pendulum.is-tapping .profile-hero-medal__sparkles-bloom--b {
+    animation: medalBloomBreathB 0.68s cubic-bezier(0.3, 0.95, 0.35, 1.05) 0.05s forwards;
+}
+
+.profile-hero-medal__pendulum.is-tapping .profile-hero-medal__sparkles-bloom--c {
+    animation: medalBloomBreathC 0.75s cubic-bezier(0.2, 0.85, 0.25, 1) 0.1s forwards;
+}
+
+.profile-hero-medal__sparkles-rivers {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 100px;
+    height: 80px;
+    transform: translateX(-50%);
+    overflow: visible;
+}
+
+.profile-hero-medal__sparkles-path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.1;
+    opacity: 0;
+    vector-effect: non-scaling-stroke;
+}
+
+.profile-hero-medal__sparkles-path--1 {
+    stroke-dasharray: 36 118;
+    stroke-dashoffset: 154;
+}
+
+.profile-hero-medal__sparkles-path--2 {
+    stroke-dasharray: 28 108;
+    stroke-dashoffset: 136;
+}
+
+.profile-hero-medal__sparkles-path--3 {
+    stroke-dasharray: 32 100;
+    stroke-dashoffset: 132;
+}
+
+.profile-hero-medal__pendulum.is-tapping .profile-hero-medal__sparkles-path--1 {
+    animation: medalRiverFlow 0.64s cubic-bezier(0.2, 0.85, 0.15, 1) forwards;
+}
+
+.profile-hero-medal__pendulum.is-tapping .profile-hero-medal__sparkles-path--2 {
+    animation: medalRiverFlow2 0.66s cubic-bezier(0.25, 0.75, 0.2, 1) 0.07s forwards;
+}
+
+.profile-hero-medal__pendulum.is-tapping .profile-hero-medal__sparkles-path--3 {
+    animation: medalRiverFlow3 0.62s cubic-bezier(0.18, 1, 0.32, 1) 0.12s forwards;
+}
+
+.profile-hero-medal__coin {
+    position: relative;
+    z-index: 2;
+    width: 48px;
+    height: 48px;
+    transform-origin: center center;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: -2px auto 0;
+    background:
+        radial-gradient(circle at 32% 28%, rgba(255, 248, 220, 0.95) 0%, transparent 42%),
+        linear-gradient(155deg, #ffe8b8 0%, var(--primary) 42%, #b8860c 100%);
+    border: 1px solid rgba(255, 226, 164, 0.45);
+    box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -6px 12px rgba(120, 80, 10, 0.28),
+        0 10px 20px rgba(0, 0, 0, 0.35);
+}
+
+.profile-hero-medal__coin .badge-rank__eyebrow {
+    font-size: 7px;
+    letter-spacing: 0.12em;
+}
+
+.profile-hero-medal__coin .badge-rank__level {
+    font-size: 15px;
+}
+
+.profile-hero-medal--empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    min-width: 72px;
+    padding: 4px 8px 6px;
+    border-radius: 14px;
+    border: 1px dashed rgba(255, 202, 104, 0.35);
+    background: rgba(0, 0, 0, 0.18);
+    transition:
+        border-color 200ms ease,
+        background-color 200ms ease,
+        transform 200ms ease;
+}
+
+.profile-hero-medal--empty:hover {
+    border-color: rgba(255, 202, 104, 0.55);
+    background: rgba(255, 202, 104, 0.08);
+    transform: translateX(-50%) translateY(-1px);
+}
+
+.profile-hero-medal--empty .profile-hero-medal__empty-lanyard {
+    color: rgba(255, 202, 104, 0.55);
+    line-height: 0;
+    margin-bottom: -2px;
+}
+
+.profile-hero-medal--empty .profile-hero-medal__empty-icon {
+    color: rgba(255, 202, 104, 0.75);
+    display: grid;
+    place-items: center;
+}
+
+.profile-hero-medal--empty .profile-hero-medal__empty-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: rgba(255, 214, 150, 0.88);
+}
+
+.profile-hero-medal:focus-visible {
+    outline: 2px solid rgba(255, 202, 104, 0.65);
+    outline-offset: 3px;
+    border-radius: 999px;
+}
+
+@keyframes medalPinOn {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(12px) scale(0.65);
+    }
+
+    70% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-3px) scale(1.06);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+@keyframes medalPendulum {
+
+    0%,
+    100% {
+        transform: rotate(-2.6deg);
+    }
+
+    50% {
+        transform: rotate(2.6deg);
+    }
+}
+
+@keyframes medalTouched {
+    0% {
+        transform: rotate(-2.6deg) scale(1);
+    }
+
+    22% {
+        transform: rotate(11deg) scale(1.04);
+    }
+
+    48% {
+        transform: rotate(-8deg) scale(1.02);
+    }
+
+    72% {
+        transform: rotate(4deg) scale(1);
+    }
+
+    100% {
+        transform: rotate(-2.6deg) scale(1);
+    }
+}
+
+@keyframes medalGoldGlint {
+    0% {
+        opacity: 0;
+        background-position: 135% 50%;
+    }
+
+    18% {
+        opacity: 0.92;
+    }
+
+    100% {
+        opacity: 0;
+        background-position: -50% 50%;
+    }
+}
+
+@keyframes medalCoinGoldAura {
+
+    0%,
+    100% {
+        box-shadow:
+            inset 0 2px 0 rgba(255, 255, 255, 0.55),
+            inset 0 -6px 12px rgba(120, 80, 10, 0.28),
+            0 10px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    40% {
+        box-shadow:
+            inset 0 2px 0 rgba(255, 255, 255, 0.55),
+            inset 0 -6px 12px rgba(120, 80, 10, 0.28),
+            0 10px 20px rgba(0, 0, 0, 0.35),
+            0 0 18px 5px rgba(255, 215, 120, 0.92),
+            0 0 34px 11px rgba(255, 185, 50, 0.48);
+    }
+}
+
+@keyframes medalBloomBreathA {
+    0% {
+        opacity: 0;
+        transform: scale(0.48) rotate(-10deg) translate(0, 8px);
+    }
+
+    40% {
+        opacity: 0.9;
+        transform: scale(1.06) rotate(5deg) translate(-4px, -5px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.18) rotate(16deg) translate(2px, -14px);
+    }
+}
+
+@keyframes medalBloomBreathB {
+    0% {
+        opacity: 0;
+        transform: scale(0.38) rotate(18deg) translate(-6px, -2px);
+    }
+
+    45% {
+        opacity: 0.78;
+        transform: scale(1.12) rotate(-8deg) translate(5px, 3px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.05) rotate(-18deg) translate(-2px, -10px);
+    }
+}
+
+@keyframes medalBloomBreathC {
+    0% {
+        opacity: 0;
+        transform: scale(0.55) rotate(0deg) translate(0, 4px);
+    }
+
+    50% {
+        opacity: 0.55;
+        transform: scale(1.02) rotate(0deg) translate(0, -2px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.08) rotate(0deg) translate(0, -8px);
+    }
+}
+
+@keyframes medalRiverFlow {
+    0% {
+        opacity: 0;
+        stroke-dashoffset: 154;
+    }
+
+    24% {
+        opacity: 0.95;
+    }
+
+    100% {
+        opacity: 0;
+        stroke-dashoffset: -48;
+    }
+}
+
+@keyframes medalRiverFlow2 {
+    0% {
+        opacity: 0;
+        stroke-dashoffset: 136;
+    }
+
+    28% {
+        opacity: 0.88;
+    }
+
+    100% {
+        opacity: 0;
+        stroke-dashoffset: -52;
+    }
+}
+
+@keyframes medalRiverFlow3 {
+    0% {
+        opacity: 0;
+        stroke-dashoffset: 132;
+    }
+
+    30% {
+        opacity: 0.82;
+    }
+
+    100% {
+        opacity: 0;
+        stroke-dashoffset: -44;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .profile-hero-medal--worn {
+        animation: none;
+        opacity: 1;
+        transform: translateX(-50%);
+    }
+
+    .profile-hero-medal--worn .profile-hero-medal__pendulum {
+        animation: none;
+    }
+
+    .profile-hero-medal--worn .profile-hero-medal__pendulum.is-tapping {
+        animation: medalTouchedReduced 0.4s ease forwards;
+    }
+
+    .profile-hero-medal__pendulum.is-tapping .profile-hero-medal__gold-glint {
+        animation: medalGoldGlintReduced 0.38s ease forwards;
+    }
+
+    .profile-hero-medal__pendulum.is-tapping .profile-hero-medal__coin {
+        animation: medalCoinGoldAuraReduced 0.4s ease-out forwards;
+    }
+
+    .profile-hero-medal__pendulum.is-tapping .profile-hero-medal__sparkles-bloom--a,
+    .profile-hero-medal__pendulum.is-tapping .profile-hero-medal__sparkles-bloom--b,
+    .profile-hero-medal__pendulum.is-tapping .profile-hero-medal__sparkles-bloom--c {
+        animation: medalBloomMistReduced 0.42s ease forwards;
+    }
+
+    .profile-hero-medal__pendulum.is-tapping .profile-hero-medal__sparkles-path--1,
+    .profile-hero-medal__pendulum.is-tapping .profile-hero-medal__sparkles-path--2,
+    .profile-hero-medal__pendulum.is-tapping .profile-hero-medal__sparkles-path--3 {
+        animation: medalRiverReduced 0.42s ease forwards;
+    }
+}
+
+@keyframes medalTouchedReduced {
+
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(-1.2deg);
+    }
+}
+
+@keyframes medalGoldGlintReduced {
+
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0.45;
+    }
+}
+
+@keyframes medalCoinGoldAuraReduced {
+
+    0%,
+    100% {
+        box-shadow:
+            inset 0 2px 0 rgba(255, 255, 255, 0.55),
+            inset 0 -6px 12px rgba(120, 80, 10, 0.28),
+            0 10px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    50% {
+        box-shadow:
+            inset 0 2px 0 rgba(255, 255, 255, 0.55),
+            inset 0 -6px 12px rgba(120, 80, 10, 0.28),
+            0 10px 20px rgba(0, 0, 0, 0.35),
+            0 0 10px 2px rgba(255, 215, 120, 0.45);
+    }
+}
+
+@keyframes medalBloomMistReduced {
+
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0.38;
+    }
+}
+
+@keyframes medalRiverReduced {
+
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0.32;
+    }
+}
+
+/* 勋章选择器（底部卡片） */
+.profile-medal-picker-mask {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.profile-medal-picker {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 22px 22px 0 0;
+    max-height: min(78vh, 560px);
+    display: flex;
+    flex-direction: column;
+    padding: 18px 16px 16px;
+    animation: profileSheetUp 380ms cubic-bezier(0.22, 0.88, 0.32, 1) both;
+}
+
+.profile-medal-picker h3 {
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+}
+
+.profile-medal-picker__hint {
+    margin: 0 0 12px;
+    font-size: 12px;
+}
+
+.profile-medal-picker__list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.profile-medal-picker__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--on-surface);
+    cursor: pointer;
+    transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+.profile-medal-picker__row:hover:not(:disabled) {
+    border-color: rgba(255, 202, 104, 0.25);
+    background: rgba(255, 202, 104, 0.06);
+}
+
+.profile-medal-picker__row.is-active {
+    border-color: rgba(255, 202, 104, 0.45);
+    background: rgba(255, 202, 104, 0.1);
+    box-shadow: 0 0 0 1px rgba(255, 202, 104, 0.12);
+}
+
+.profile-medal-picker__row.is-locked {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.profile-medal-picker__row-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.profile-medal-picker__mini {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.profile-medal-picker__mini .badge-rank__eyebrow {
+    font-size: 7px;
+}
+
+.profile-medal-picker__mini .badge-rank__level {
+    font-size: 13px;
+}
+
+.profile-medal-picker__row-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.profile-medal-picker__row-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.profile-medal-picker__locked {
+    font-size: 11px;
+    color: var(--outline);
+    font-weight: 600;
+}
+
+.profile-medal-picker__footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: 4px;
+}
+
+.achievement-detail-modal__actions {
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+@keyframes profileSheetUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .profile-medal-picker {
+        animation: none;
+    }
+}
+
 .portrait {
     width: 112px;
     height: 112px;
@@ -2871,22 +3770,6 @@
     z-index: 0;
 }
 
-.portrait em {
-    position: absolute;
-    right: -8px;
-    top: -8px;
-    z-index: 1;
-    width: 36px;
-    height: 36px;
-    border-radius: 11px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-container));
-    color: #5f4200;
-    font-style: normal;
-    display: grid;
-    place-items: center;
-    font-size: 18px;
-}
-
 .profile-name {
     margin-top: 4px;
     font-size: 26px;
@@ -2895,146 +3778,147 @@
     color: var(--on-surface);
 }
 
-.member-pill {
-    display: inline-block;
-    margin-top: 6px;
-    border-radius: 999px;
-    border: 1px solid rgba(80, 69, 51, 0.65);
-    background: rgba(59, 52, 38, 0.5);
-    color: var(--primary);
-    padding: 5px 12px;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 0.08em;
-}
-
 .badge-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
+    gap: 10px;
 }
 
 .badge-card {
+    position: relative;
     text-align: center;
-    padding: 8px 6px;
+    padding: 0;
     cursor: pointer;
-    transition: transform var(--transition-fast), border-color var(--transition-fast), opacity var(--transition-fast);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 202, 104, 0.16);
+    background:
+        radial-gradient(120% 85% at 50% 0%, rgba(255, 202, 104, 0.1), transparent 58%),
+        linear-gradient(168deg, rgba(34, 28, 16, 0.96) 0%, rgba(12, 10, 6, 0.99) 100%);
+    box-shadow:
+        0 14px 32px rgba(0, 0, 0, 0.38),
+        inset 0 1px 0 rgba(255, 243, 208, 0.07);
+    transition:
+        transform 220ms cubic-bezier(0.22, 0.88, 0.32, 1),
+        border-color 220ms ease,
+        box-shadow 220ms ease;
+    overflow: hidden;
+}
+
+.badge-card__worn-pill {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 2;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: rgba(20, 16, 8, 0.95);
+    background: linear-gradient(135deg, rgba(255, 214, 150, 0.95), rgba(255, 202, 104, 0.85));
+    border: 1px solid rgba(255, 226, 164, 0.5);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.badge-card--worn {
+    border-color: rgba(255, 202, 104, 0.42);
+    box-shadow:
+        0 14px 32px rgba(0, 0, 0, 0.38),
+        0 0 0 1px rgba(255, 202, 104, 0.12);
+}
+
+.badge-card__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px 11px;
+    gap: 1px;
 }
 
 .badge-card:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    border-color: rgba(255, 202, 104, 0.34);
+    box-shadow:
+        0 20px 42px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(255, 202, 104, 0.08),
+        inset 0 1px 0 rgba(255, 243, 208, 0.08);
 }
 
 .badge-card:focus-visible {
-    outline: 2px solid rgba(255, 202, 104, 0.7);
+    outline: 2px solid rgba(255, 202, 104, 0.72);
     outline-offset: 2px;
 }
 
-/* 使所有勋章外观保持一致 */
-.badge-card {
-    border-radius: 16px;
-    border-color: rgba(255, 202, 104, 0.58);
-}
-
+/* 圆形勋章：克制金属高光，避免循环闪动 */
 .badge-rank {
-    width: 62px;
-    height: 62px;
-    margin: 0 auto 6px;
-    border-radius: 15px;
-    background: linear-gradient(145deg, #ffde9a 0%, var(--primary) 46%, var(--primary-container) 100%);
-    border: 1px solid rgba(255, 226, 164, 0.52);
-    color: #6c4d10;
-    display: grid;
-    place-items: center;
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 8px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 32% 28%, rgba(255, 248, 220, 0.95) 0%, transparent 42%),
+        linear-gradient(155deg, #ffe8b8 0%, var(--primary) 42%, #b8860c 100%);
+    border: 1px solid rgba(255, 226, 164, 0.45);
+    color: #4a3408;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
     position: relative;
     overflow: hidden;
-    line-height: 1.1;
+    line-height: 1;
     box-shadow:
-        inset 0 1px 0 rgba(255, 243, 208, 0.72),
-        inset 0 -10px 18px rgba(146, 98, 8, 0.18),
-        0 10px 18px rgba(236, 171, 19, 0.22);
-    animation: goldShine 2.5s ease-in-out infinite;
-    /* 所有等级添加发光效果 */
+        inset 0 2px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -8px 16px rgba(120, 80, 10, 0.28),
+        0 8px 16px rgba(0, 0, 0, 0.28);
+}
+
+.badge-rank__ring {
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 243, 208, 0.4),
+        inset 0 4px 8px rgba(255, 255, 255, 0.15);
+    pointer-events: none;
 }
 
 .badge-rank::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%), linear-gradient(130deg, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0) 48%);
-    background-size: 200% 100%, 100% 100%;
-    background-position: -200% 0, 0 0;
-    pointer-events: none;
-    animation: sweepShine 3s infinite;
-}
-
-@keyframes sweepShine {
-    0% {
-        background-position: -200% 0, 0 0;
-    }
-
-    30%,
-    100% {
-        background-position: 200% 0, 0 0;
-    }
-}
-
-@keyframes goldShine {
-
-    0%,
-    100% {
-        box-shadow:
-            inset 0 1px 0 rgba(255, 243, 208, 0.72),
-            inset 0 -10px 18px rgba(146, 98, 8, 0.18),
-            0 10px 18px rgba(236, 171, 19, 0.22),
-            0 0 0 transparent;
-    }
-
-    50% {
-        box-shadow:
-            inset 0 1px 0 rgba(255, 243, 208, 0.9),
-            inset 0 -10px 18px rgba(146, 98, 8, 0.3),
-            0 10px 25px rgba(236, 171, 19, 0.5),
-            0 0 20px rgba(255, 202, 104, 0.4);
-    }
-}
-
-.badge-rank::after {
-    content: "";
-    position: absolute;
-    left: 10px;
-    right: 10px;
-    bottom: 9px;
-    height: 8px;
-    border-radius: 999px;
-    background: rgba(111, 75, 8, 0.22);
-    filter: blur(2px);
+    border-radius: 50%;
+    background: linear-gradient(125deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 46%);
+    opacity: 0.5;
     pointer-events: none;
 }
 
-.badge-rank small {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    opacity: 0.78;
-    display: block;
+.badge-rank__eyebrow {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    opacity: 0.82;
     position: relative;
     z-index: 1;
 }
 
-.badge-rank strong {
-    font-size: 20px;
-    letter-spacing: -0.01em;
-    line-height: 0.95;
+.badge-rank__level {
+    margin: 2px 0 0;
+    font-size: 19px;
+    letter-spacing: -0.03em;
+    line-height: 1;
     font-family: var(--font-display);
+    font-weight: 800;
     position: relative;
     z-index: 1;
 }
 
-.badge-card p {
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.2;
+.badge-card__title {
+    margin: 2px 0 0;
+    width: 100%;
+    font-size: 13px;
+    line-height: 1.25;
     font-weight: 800;
     color: var(--on-surface);
     white-space: nowrap;
@@ -3043,11 +3927,20 @@
 }
 
 .badge-state-text {
-    display: inline-block;
-    margin-top: 3px;
-    color: var(--outline);
-    font-size: 11px;
+    display: block;
+    margin-top: 5px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    color: rgba(245, 240, 230, 0.65);
+    font-size: 10px;
     font-weight: 700;
+    letter-spacing: 0.04em;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .achievement-detail-modal p {
@@ -5234,11 +6127,257 @@
 }
 
 .booking-post-detail-body {
+    margin-top: 4px;
+    padding-bottom: 20px;
+}
+
+.booking-detail-stack {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 22px;
+}
+
+.booking-detail-stack > .booking-detail-hero,
+.booking-detail-stack > .booking-detail-section {
+    animation: bookingDetailReveal 560ms cubic-bezier(0.22, 0.88, 0.32, 1) both;
+}
+
+.booking-detail-stack > *:nth-child(1) {
+    animation-delay: 0ms;
+}
+
+.booking-detail-stack > *:nth-child(2) {
+    animation-delay: 70ms;
+}
+
+.booking-detail-stack > *:nth-child(3) {
+    animation-delay: 140ms;
+}
+
+.booking-detail-stack > *:nth-child(4) {
+    animation-delay: 210ms;
+}
+
+@keyframes bookingDetailReveal {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.booking-detail-hero-top {
+    text-align: center;
+}
+
+.booking-detail-hero-eyebrow {
+    margin: 0 0 6px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 214, 150, 0.78);
+}
+
+.booking-detail-hero-title {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--on-surface);
+}
+
+.booking-detail-countdown-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.booking-detail-countdown-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 86px;
+    padding: 10px 6px 12px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 202, 104, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.booking-detail-countdown-value {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 5.5vw, 1.85rem);
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: #ffe7a8;
+    text-shadow:
+        0 0 22px rgba(236, 171, 19, 0.42),
+        0 2px 0 rgba(90, 58, 8, 0.35);
+}
+
+.booking-detail-countdown-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(245, 240, 230, 0.72);
+}
+
+.booking-detail-meta-card {
+    margin-top: 18px;
+    padding: 14px 14px 12px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 1px 0 rgba(255, 243, 208, 0.05);
+}
+
+.booking-detail-meta-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.booking-detail-meta-primary {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: rgba(245, 240, 230, 0.92);
+}
+
+.booking-detail-meta-pill {
+    flex-shrink: 0;
+    align-self: flex-start;
+}
+
+.booking-detail-meta-note {
+    margin: 10px 0 0;
+    padding-top: 10px;
+    border-top: 1px solid rgba(80, 69, 51, 0.35);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--on-surface-variant);
+}
+
+.booking-detail-hero-venue {
     margin-top: 4px;
-    padding-bottom: 12px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.booking-post--detail .booking-detail-hero .booking-detail-weather--embedded {
+    margin-top: 0;
+    border-radius: 18px;
+    padding: 14px 14px 16px;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 243, 208, 0.05),
+        0 8px 22px rgba(0, 0, 0, 0.18);
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(12, 10, 6, 0.48) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.booking-detail-section-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.booking-detail-section-marker {
+    width: 4px;
+    align-self: stretch;
+    min-height: 18px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--primary) 0%, rgba(255, 202, 104, 0.35) 100%);
+    box-shadow: 0 0 14px rgba(255, 202, 104, 0.25);
+}
+
+.booking-detail-section-marker--sky {
+    background: linear-gradient(180deg, #7ecaff 0%, rgba(126, 202, 255, 0.35) 100%);
+    box-shadow: 0 0 14px rgba(126, 202, 255, 0.22);
+}
+
+.booking-detail-section-marker--gold {
+    background: linear-gradient(180deg, #ffd88a 0%, rgba(255, 202, 104, 0.4) 100%);
+}
+
+.booking-detail-section-title {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(245, 240, 230, 0.88);
+}
+
+.booking-detail-session-card {
+    margin-bottom: 0 !important;
+}
+
+.booking-detail-weather-top {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+@media (min-width: 380px) {
+    .booking-detail-weather-top {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .booking-detail-weather-wind {
+        text-align: right;
+        max-width: 52%;
+    }
+}
+
+.booking-detail-weather-wind {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.booking-detail-ai-block {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.booking-detail-ai-label {
+    margin: 0 0 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 202, 104, 0.88);
+}
+
+.booking-detail-ai-body {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.55;
+}
+
+.booking-detail-qr-title {
+    text-align: center;
 }
 
 .booking-post-detail-body .card-gap {
@@ -5281,62 +6420,30 @@
     animation: none;
 }
 
-.booking-post--detail .booking-countdown-hero__title {
-    margin: 0;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: rgba(255, 214, 150, 0.72);
+.booking-post--detail .booking-detail-hero-title {
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.35);
 }
 
-.booking-post--detail .countdown-row {
-    margin-top: 16px;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px 6px;
-}
-
-.booking-post--detail .time-block {
-    padding: 8px 6px 6px;
-    min-width: 56px;
-    border-radius: 14px;
-    background: rgba(0, 0, 0, 0.18);
-    border: 1px solid rgba(255, 202, 104, 0.12);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.booking-post--detail .time-num {
-    font-size: 34px;
-    color: #ffe7a8;
-    text-shadow:
-        0 0 24px rgba(236, 171, 19, 0.45),
-        0 2px 0 rgba(90, 58, 8, 0.35);
-}
-
-.booking-post--detail .time-label {
-    margin-top: 6px;
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    opacity: 0.88;
-}
-
-.booking-post--detail .time-colon {
-    margin-bottom: 18px;
-    color: rgba(255, 202, 104, 0.45);
-    font-weight: 300;
-}
-
-.booking-post--detail .countdown-panel .meta-row {
-    margin-top: 18px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(80, 69, 51, 0.45);
-}
-
-.booking-post--detail .countdown-panel .meta-row .pill {
+.booking-post--detail .booking-detail-meta-pill {
     border-color: rgba(255, 202, 104, 0.35);
     background: linear-gradient(135deg, rgba(255, 202, 104, 0.14), rgba(236, 171, 19, 0.06));
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 359px) {
+    .booking-detail-countdown-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .booking-detail-stack > .booking-detail-hero,
+    .booking-detail-stack > .booking-detail-section {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
 }
 
 .booking-post--detail .session-course-detail-card {
@@ -5621,6 +6728,13 @@
     background: var(--surface-container-highest);
     padding: 20px;
     animation: cardSlideIn 320ms cubic-bezier(0.34, 1.3, 0.64, 1) forwards;
+}
+
+.modal-card.profile-medal-picker {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 22px 22px 0 0;
 }
 
 .modal-mask--closing .modal-card {
@@ -5957,8 +7071,8 @@
         font-size: 24px;
     }
 
-    .badge-card p {
-        font-size: 13px;
+    .badge-card__title {
+        font-size: 12px;
     }
 }
 

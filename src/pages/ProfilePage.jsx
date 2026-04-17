@@ -6,6 +6,7 @@ import MyCoachScreen from "../components/MyCoachScreen";
 import GolfVenueAvatar from "../components/GolfVenueAvatar";
 import LanguageToggle from "../components/LanguageToggle";
 import MonthlySettlementModal from "../components/MonthlySettlementModal";
+import ProfileHeroMedal from "../components/ProfileHeroMedal";
 import { achievementItems, MAIN_COACH, PROFILE_HERO_BADGE_LOGO_WEBP, PROFILE_PORTRAIT_URL, rankingGroups } from "../data/mockData";
 import { useAppContext } from "../context/AppContext";
 
@@ -26,6 +27,8 @@ export default function ProfilePage({ onToast }) {
     const [showSettlementModal, setShowSettlementModal] = useState(false);
     const [profileLayout, setProfileLayout] = useState(readStoredProfileLayout);
     const [achievementModalRoot, setAchievementModalRoot] = useState(null);
+    const [showMedalPicker, setShowMedalPicker] = useState(false);
+    const [pickerDraftId, setPickerDraftId] = useState(null);
 
     useEffect(() => {
         try {
@@ -40,6 +43,19 @@ export default function ProfilePage({ onToast }) {
     }, []);
 
     useEffect(() => {
+        if (!showMedalPicker) {
+            return undefined;
+        }
+        const onKey = (e) => {
+            if (e.key === "Escape") {
+                setShowMedalPicker(false);
+            }
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [showMedalPicker]);
+
+    useEffect(() => {
         const scrollMain = document.querySelector(".scroll-main");
         if (scrollMain) {
             scrollMain.scrollTo({ top: 0, behavior: "auto" });
@@ -47,6 +63,10 @@ export default function ProfilePage({ onToast }) {
     }, [profileView]);
 
     const activeAchievement = achievementItems.find((item) => item.id === state.activeAchievementId) || null;
+    const wornAchievement = useMemo(
+        () => achievementItems.find((item) => item.id === state.wornAchievementId) || null,
+        [state.wornAchievementId]
+    );
 
     const portraitSources = useMemo(() => [PROFILE_PORTRAIT_URL, MAIN_COACH.avatarUrl], []);
     const [portraitSrcIndex, setPortraitSrcIndex] = useState(0);
@@ -175,14 +195,11 @@ export default function ProfilePage({ onToast }) {
             </header>
 
             <section className="profile-hero">
-                <div className="portrait">
-                    {showPortraitInitials ? (
-                        <>
+                <div className="profile-hero__stage">
+                    <div className="portrait">
+                        {showPortraitInitials ? (
                             <span className="portrait-fallback-initials">{t("profile.portraitInitial")}</span>
-                            <em aria-hidden="true">★</em>
-                        </>
-                    ) : (
-                        <>
+                        ) : (
                             <img
                                 className="portrait-photo"
                                 src={portraitSources[portraitSrcIndex]}
@@ -194,12 +211,17 @@ export default function ProfilePage({ onToast }) {
                                 referrerPolicy="no-referrer"
                                 onError={() => setPortraitSrcIndex((i) => i + 1)}
                             />
-                            <em aria-hidden="true">★</em>
-                        </>
-                    )}
+                        )}
+                    </div>
+                    <ProfileHeroMedal
+                        item={wornAchievement}
+                        onOpenPicker={() => {
+                            setPickerDraftId(state.wornAchievementId ?? null);
+                            setShowMedalPicker(true);
+                        }}
+                    />
                 </div>
                 <h2 className="headline profile-name">{t("profile.studentName")}</h2>
-                <span className="member-pill">{t("profile.memberPill")}</span>
             </section>
 
             <section className="section-stack badge-wall">
@@ -318,7 +340,7 @@ export default function ProfilePage({ onToast }) {
 
                         return (
                             <article
-                                className="panel badge-card"
+                                className={`panel badge-card${item.id === state.wornAchievementId ? " badge-card--worn" : ""}`}
                                 key={item.id}
                                 role="button"
                                 tabIndex={0}
@@ -330,12 +352,20 @@ export default function ProfilePage({ onToast }) {
                                     }
                                 }}
                             >
-                                <div className="badge-rank" style={{ filter: `brightness(${brightness})` }}>
-                                    <small>LEVEL</small>
-                                    <strong>{item.rank}</strong>
+                                <div className="badge-card__inner">
+                                    {item.id === state.wornAchievementId ? (
+                                        <span className="badge-card__worn-pill">{t("profile.medalEquipped")}</span>
+                                    ) : null}
+                                    <div className="badge-rank" style={{ filter: `brightness(${brightness})` }}>
+                                        <span className="badge-rank__ring" aria-hidden="true" />
+                                        <small className="badge-rank__eyebrow">LEVEL</small>
+                                        <strong className="badge-rank__level">{item.rank}</strong>
+                                    </div>
+                                    <p className="badge-card__title">
+                                        {t(`achievements.${item.id}.label`, { defaultValue: item.label })}
+                                    </p>
+                                    <span className="badge-state-text">{item.levelScale}</span>
                                 </div>
-                                <p>{t(`achievements.${item.id}.label`, { defaultValue: item.label })}</p>
-                                <span className="badge-state-text">{item.levelScale}</span>
                             </article>
                         );
                     })}
@@ -410,12 +440,153 @@ export default function ProfilePage({ onToast }) {
                                         : t("profile.achievementStatus.locked")}
                               </p>
                               <p>{t(`achievements.${activeAchievement.id}.milestone`, { defaultValue: activeAchievement.milestone })}</p>
-                              <div className="modal-actions">
+                              <div className="modal-actions achievement-detail-modal__actions">
+                                  {activeAchievement.status !== "locked" && state.wornAchievementId === activeAchievement.id ? (
+                                      <button
+                                          type="button"
+                                          className="btn-ghost"
+                                          onClick={() => {
+                                              actions.clearWornAchievement();
+                                              toast(t("profile.toastMedalRemoved"));
+                                              actions.closeAchievement();
+                                          }}
+                                      >
+                                          {t("profile.removeMedal")}
+                                      </button>
+                                  ) : null}
+                                  {activeAchievement.status !== "locked" && state.wornAchievementId !== activeAchievement.id ? (
+                                      <button
+                                          type="button"
+                                          className="btn-primary"
+                                          onClick={() => {
+                                              actions.setWornAchievement(activeAchievement.id);
+                                              toast(t("profile.toastMedalEquipped"));
+                                              actions.closeAchievement();
+                                          }}
+                                      >
+                                          {t("profile.wearThisMedal")}
+                                      </button>
+                                  ) : null}
                                   <button type="button" className="btn-ghost" onClick={actions.closeAchievement}>
                                       {t("common.close")}
                                   </button>
                                   <button type="button" className="btn-primary" onClick={actions.closeAchievement}>
                                       {t("common.gotIt")}
+                                  </button>
+                              </div>
+                          </section>
+                      </div>,
+                      achievementModalRoot
+                  )
+                : null}
+
+            {achievementModalRoot && showMedalPicker
+                ? createPortal(
+                      <div
+                          className="modal-mask profile-medal-picker-mask"
+                          role="presentation"
+                          onClick={() => setShowMedalPicker(false)}
+                      >
+                          <section
+                              className="modal-card profile-medal-picker"
+                              role="dialog"
+                              aria-modal="true"
+                              aria-labelledby="medal-picker-title"
+                              onClick={(event) => event.stopPropagation()}
+                          >
+                              <h3 id="medal-picker-title">{t("profile.medalPickerTitle")}</h3>
+                              <p className="profile-medal-picker__hint muted-text">{t("profile.medalPickerHint")}</p>
+                              <div className="profile-medal-picker__list" role="radiogroup" aria-label={t("profile.medalPickerTitle")}>
+                                  <button
+                                      type="button"
+                                      role="radio"
+                                      aria-checked={pickerDraftId === null}
+                                      className={`profile-medal-picker__row${pickerDraftId === null ? " is-active" : ""}`}
+                                      onClick={() => setPickerDraftId(null)}
+                                  >
+                                      <span className="profile-medal-picker__row-label">{t("profile.medalPickerNone")}</span>
+                                  </button>
+                                  {achievementItems.map((item) => {
+                                      const levelNum = parseInt(String(item.rank).replace(/\D/g, ""), 10) || 1;
+                                      const brightness = 0.5 + levelNum * 0.1;
+                                      const locked = item.status === "locked";
+                                      return (
+                                          <button
+                                              key={item.id}
+                                              type="button"
+                                              role="radio"
+                                              aria-checked={pickerDraftId === item.id}
+                                              aria-disabled={locked}
+                                              disabled={locked}
+                                              className={`profile-medal-picker__row${pickerDraftId === item.id ? " is-active" : ""}${
+                                                  locked ? " is-locked" : ""
+                                              }`}
+                                              onClick={() => {
+                                                  if (!locked) {
+                                                      setPickerDraftId(item.id);
+                                                  }
+                                              }}
+                                          >
+                                              <div
+                                                  className="badge-rank profile-medal-picker__mini"
+                                                  style={{ filter: `brightness(${brightness})` }}
+                                                  aria-hidden="true"
+                                              >
+                                                  <span className="badge-rank__ring" />
+                                                  <small className="badge-rank__eyebrow">LEVEL</small>
+                                                  <strong className="badge-rank__level">{item.rank}</strong>
+                                              </div>
+                                              <div className="profile-medal-picker__row-main">
+                                                  <span className="profile-medal-picker__row-title">
+                                                      {t(`achievements.${item.id}.label`, { defaultValue: item.label })}
+                                                  </span>
+                                                  {locked ? (
+                                                      <span className="profile-medal-picker__locked">{t("profile.medalLockedHint")}</span>
+                                                  ) : null}
+                                              </div>
+                                          </button>
+                                      );
+                                  })}
+                              </div>
+                              <div className="profile-medal-picker__footer">
+                                  <button type="button" className="btn-ghost" onClick={() => setShowMedalPicker(false)}>
+                                      {t("profile.medalPickerCancel")}
+                                  </button>
+                                  {state.wornAchievementId ? (
+                                      <button
+                                          type="button"
+                                          className="btn-ghost"
+                                          onClick={() => {
+                                              actions.clearWornAchievement();
+                                              toast(t("profile.toastMedalRemoved"));
+                                              setShowMedalPicker(false);
+                                          }}
+                                      >
+                                          {t("profile.medalRemove")}
+                                      </button>
+                                  ) : null}
+                                  <button
+                                      type="button"
+                                      className="btn-primary"
+                                      onClick={() => {
+                                          if (pickerDraftId === null) {
+                                              if (state.wornAchievementId) {
+                                                  actions.clearWornAchievement();
+                                                  toast(t("profile.toastMedalRemoved"));
+                                              }
+                                              setShowMedalPicker(false);
+                                              return;
+                                          }
+                                          const sel = achievementItems.find((x) => x.id === pickerDraftId);
+                                          if (!sel || sel.status === "locked") {
+                                              return;
+                                          }
+                                          actions.setWornAchievement(pickerDraftId);
+                                          toast(t("profile.toastMedalEquipped"));
+                                          setShowMedalPicker(false);
+                                      }}
+                                  >
+                                      {t("profile.medalPickerApply")}
                                   </button>
                               </div>
                           </section>

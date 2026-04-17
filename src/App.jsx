@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import BottomNav from "./components/BottomNav";
 import BookingModal from "./components/BookingModal";
-import ReviewInviteModal from "./components/ReviewInviteModal";
 import Toast from "./components/Toast";
 import { pickReviewBooking, useAppContext } from "./context/AppContext";
 import { getSessionDisplay, getSlotById, scheduleDates } from "./data/mockData";
@@ -18,7 +17,6 @@ export default function App() {
     const { i18n, t } = useTranslation();
     const { state, actions } = useAppContext();
     const [bookingModalOpen, setBookingModalOpen] = useState(false);
-    const [reviewInviteOpen, setReviewInviteOpen] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
     const [hideBottomNav, setHideBottomNav] = useState(false);
     const [slideDir, setSlideDir] = useState("");
@@ -143,7 +141,6 @@ export default function App() {
         return (
             <BookingPage
                 onOpenBookingModal={() => setBookingModalOpen(true)}
-                onOpenReviewInvite={() => setReviewInviteOpen(true)}
                 onToast={(message) => setToastMessage(message)}
             />
         );
@@ -188,18 +185,6 @@ export default function App() {
                         actions.bookNow();
                         setBookingModalOpen(false);
                         setToastMessage(t("booking.modal.successToast", { day: bookingPreview.day, slot: bookingPreview.slot }));
-                    }}
-                />
-
-                <ReviewInviteModal
-                    open={reviewInviteOpen}
-                    sessionInfo={reviewSessionInfo}
-                    onCancel={() => setReviewInviteOpen(false)}
-                    onJoin={() => {
-                        setReviewInviteOpen(false);
-                        actions.setGrowthView("review");
-                        actions.setTab("growth");
-                        setToastMessage(t("booking.reviewInvite.joinToast"));
                     }}
                 />
 

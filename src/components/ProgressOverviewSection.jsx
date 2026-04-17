@@ -57,6 +57,7 @@ function ChartCard({ chart, isActive, isDragging, offset, onClick, switchChartAr
     const trend = latestLevel - firstLevel;
 
     const cardStyle = {
+        "--chart-color": chart.color,
         "--offset": offset,
         "--offset-abs": absOffset,
         zIndex: isActive ? 3 : 3 - absOffset,
@@ -310,9 +311,12 @@ export default function ProgressOverviewSection({ withBottomGap = true }) {
                 </article>
             </div>
 
-            <div className="section-head">
-                <h2 className="section-title-sm">{t("progressOverview.title")}</h2>
-                <span className="muted-text">{t("progressOverview.subtitle")}</span>
+            <div className="section-head chart-progress-head">
+                <div className="chart-progress-head-top">
+                    <h2 className="section-title-sm">{t("progressOverview.title")}</h2>
+                    <span className="muted-text">{t("progressOverview.subtitle")}</span>
+                </div>
+                <p className="chart-carousel-hint">{t("progressOverview.swipeHint")}</p>
             </div>
 
             <div
@@ -327,6 +331,41 @@ export default function ProgressOverviewSection({ withBottomGap = true }) {
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerCancel}
             >
+                <button
+                    type="button"
+                    className="chart-carousel-nav chart-carousel-nav--prev"
+                    aria-label={t("progressOverview.prevChartAria")}
+                    disabled={activeIndex <= 0}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={() => {
+                        if (activeIndex > 0) prev();
+                    }}
+                >
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                        <path
+                            d="M14.2 5.3a1 1 0 0 0-1.4 0l-5 5a1 1 0 0 0 0 1.4l5 5a1 1 0 1 0 1.4-1.4L10.4 12l3.8-3.8a1 1 0 0 0 0-1.4Z"
+                            fill="currentColor"
+                        />
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    className="chart-carousel-nav chart-carousel-nav--next"
+                    aria-label={t("progressOverview.nextChartAria")}
+                    disabled={activeIndex >= charts.length - 1}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={() => {
+                        if (activeIndex < charts.length - 1) next();
+                    }}
+                >
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                        <path
+                            d="M9.8 5.3a1 1 0 0 1 1.4 0l5 5a1 1 0 0 1 0 1.4l-5 5a1 1 0 1 1-1.4-1.4L13.6 12l-3.8-3.8a1 1 0 0 1 0-1.4Z"
+                            fill="currentColor"
+                        />
+                    </svg>
+                </button>
+
                 {/* Left fog edge */}
                 <div className="chart-edge-fog chart-edge-fog--left" aria-hidden="true" />
                 {/* Right fog edge */}
@@ -360,7 +399,14 @@ export default function ProgressOverviewSection({ withBottomGap = true }) {
                             aria-selected={i === activeIndex}
                             aria-label={chart.label}
                             className={`chart-dot${i === activeIndex ? " is-active" : ""}`}
-                            style={i === activeIndex ? { background: charts[activeIndex].color } : {}}
+                            style={
+                                i === activeIndex
+                                    ? {
+                                          background: charts[activeIndex].color,
+                                          "--dot-color": charts[activeIndex].color,
+                                      }
+                                    : { "--dot-color": chart.color }
+                            }
                             onClick={() => setActiveIndex(i)}
                         />
                     ))}

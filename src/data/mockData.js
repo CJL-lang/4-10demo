@@ -474,6 +474,9 @@ export const achievementItems = [
     },
 ];
 
+/** Profile「佩戴勋章」等校验用 */
+export const achievementIds = achievementItems.map((item) => item.id);
+
 export const badges = achievementItems.slice(0, 3).map((item) => ({
     rank: item.rank,
     label: item.label,
@@ -539,7 +542,10 @@ export const defaultState = {
     recordFilter: "skills",
     recordVisibleCount: 4,
     taskDoneMap: defaultTaskDoneMap,
+    /** 成就详情弹窗当前打开的成就 id（勿与佩戴勋章混淆） */
     activeAchievementId: null,
+    /** 个人主页头像处佩戴展示的勋章，对应 achievementItems[].id */
+    wornAchievementId: null,
     /** 从其它页跳转时打开对应课后作业（如课程记录） */
     pendingHomeworkTaskId: null,
 };

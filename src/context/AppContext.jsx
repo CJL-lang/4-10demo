@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from "react";
 import {
     ALL_SLOTS,
+    achievementIds,
     courseAssetsByDate,
     defaultState,
     getSlotById,
@@ -80,6 +81,13 @@ function validHomeworkTaskId(id) {
     }
     const str = String(id);
     return practiceTasks.some((t) => t.id === str) ? str : null;
+}
+
+function validWornAchievementId(raw) {
+    if (typeof raw !== "string" || raw === "") {
+        return null;
+    }
+    return achievementIds.includes(raw) ? raw : null;
 }
 
 function sanitizeTaskDoneMap(input) {
@@ -210,6 +218,7 @@ function hydrateState() {
             recordVisibleCount: Number(parsed.recordVisibleCount) > 0 ? Number(parsed.recordVisibleCount) : defaultState.recordVisibleCount,
             taskDoneMap: sanitizeTaskDoneMap(parsed.taskDoneMap),
             activeAchievementId: typeof parsed.activeAchievementId === "string" ? parsed.activeAchievementId : null,
+            wornAchievementId: validWornAchievementId(parsed.wornAchievementId),
             pendingHomeworkTaskId: null,
         };
     } catch {
@@ -320,6 +329,16 @@ function appReducer(state, action) {
                 ...state,
                 activeAchievementId: action.payload || null,
             };
+        case "SET_WORN_ACHIEVEMENT": {
+            if (action.payload === null || action.payload === undefined || action.payload === "") {
+                return { ...state, wornAchievementId: null };
+            }
+            const wid = String(action.payload);
+            return {
+                ...state,
+                wornAchievementId: achievementIds.includes(wid) ? wid : null,
+            };
+        }
         case "BOOK_NOW": {
             const next = pushBooking(state, state.selectedDate, state.selectedCourseAssetId);
             return { ...next, currentTab: "booking" };
@@ -403,6 +422,8 @@ export function AppProvider({ children }) {
             setTaskDone: (taskId, done) => dispatch({ type: "SET_TASK_DONE", taskId, done }),
             openAchievement: (id) => dispatch({ type: "SET_ACHIEVEMENT_MODAL", payload: id }),
             closeAchievement: () => dispatch({ type: "SET_ACHIEVEMENT_MODAL", payload: null }),
+            setWornAchievement: (id) => dispatch({ type: "SET_WORN_ACHIEVEMENT", payload: id }),
+            clearWornAchievement: () => dispatch({ type: "SET_WORN_ACHIEVEMENT", payload: null }),
             bookNow: () => dispatch({ type: "BOOK_NOW" }),
             setBookingCourseConfirmed: (id, confirmed) =>
                 dispatch({ type: "SET_BOOKING_COURSE_CONFIRMED", payload: { id, confirmed } }),
