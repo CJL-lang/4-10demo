@@ -8,6 +8,7 @@ import { getSessionDisplay, getSlotById, scheduleDates } from "./data/mockData";
 import BookingPage from "./pages/BookingPage";
 import ClubPage from "./pages/ClubPage";
 import GrowthPage from "./pages/GrowthPage";
+import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 import { useTranslation } from "react-i18next";
 
@@ -137,7 +138,7 @@ export default function App() {
             );
         }
         if (state.currentTab === "profile") {
-            return <ProfilePage />;
+            return <ProfilePage onToast={(message) => setToastMessage(message)} />;
         }
         return (
             <BookingPage
@@ -147,6 +148,14 @@ export default function App() {
             />
         );
     }, [actions, reviewSessionInfo, state.bookingStatus, state.currentTab, state.detailBookingId, t]);
+
+    if (!state.auth.isLoggedIn) {
+        return (
+            <div className={`app-stage ${i18n.resolvedLanguage === "en" ? "locale-en" : "locale-zh"}`}>
+                <LoginPage />
+            </div>
+        );
+    }
 
     return (
         <div className={`app-stage ${i18n.resolvedLanguage === "en" ? "locale-en" : "locale-zh"}`}>

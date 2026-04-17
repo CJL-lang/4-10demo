@@ -13,6 +13,28 @@ import {
 
 const STORAGE_KEY = "academy-react-prototype-state";
 const LEGACY_STORAGE_KEY = "academy-prototype-state";
+const AUTH_STORAGE_KEY = "academy-react-prototype-auth";
+
+function validRole(role) {
+    return role === "parent" ? "parent" : "student";
+}
+
+/** 无记录时视为已登录学生，兼容旧版本地数据 */
+function hydrateAuth() {
+    try {
+        const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (!raw) {
+            return { isLoggedIn: true, role: "student" };
+        }
+        const parsed = JSON.parse(raw);
+        return {
+            isLoggedIn: parsed.isLoggedIn !== false,
+            role: validRole(parsed.role),
+        };
+    } catch {
+        return { isLoggedIn: true, role: "student" };
+    }
+}
 
 function validTab(tab) {
     return navItems.some((item) => item.key === tab) ? tab : defaultState.currentTab;
@@ -50,6 +72,14 @@ function validCourseAssetId(id, fallback) {
 function validRating(value, fallback) {
     const num = Number(value);
     return num >= 0 && num <= 5 ? num : fallback;
+}
+
+function validHomeworkTaskId(id) {
+    if (id === null || id === undefined || id === "") {
+        return null;
+    }
+    const str = String(id);
+    return practiceTasks.some((t) => t.id === str) ? str : null;
 }
 
 function sanitizeTaskDoneMap(input) {
@@ -180,6 +210,7 @@ function hydrateState() {
             recordVisibleCount: Number(parsed.recordVisibleCount) > 0 ? Number(parsed.recordVisibleCount) : defaultState.recordVisibleCount,
             taskDoneMap: sanitizeTaskDoneMap(parsed.taskDoneMap),
             activeAchievementId: typeof parsed.activeAchievementId === "string" ? parsed.activeAchievementId : null,
+            pendingHomeworkTaskId: null,
         };
     } catch {
         return defaultState;
@@ -242,6 +273,13 @@ function appReducer(state, action) {
             return { ...state, reviewText: action.payload };
         case "SET_GROWTH_VIEW":
             return { ...state, growthView: validGrowthView(action.payload) };
+        case "SET_PENDING_HOMEWORK_TASK": {
+            if (action.payload === null || action.payload === undefined || action.payload === "") {
+                return { ...state, pendingHomeworkTaskId: null };
+            }
+            const tid = validHomeworkTaskId(action.payload);
+            return { ...state, pendingHomeworkTaskId: tid };
+        }
         case "SET_RECORD_FILTER":
             return {
                 ...state,
@@ -299,19 +337,47 @@ function appReducer(state, action) {
                 ),
             };
         }
+        case "LOGIN":
+            return {
+                ...state,
+                auth: {
+                    isLoggedIn: true,
+                    role: validRole(action.payload?.role),
+                },
+            };
+        case "LOGOUT":
+            return {
+                ...state,
+                auth: {
+                    ...state.auth,
+                    isLoggedIn: false,
+                },
+            };
         default:
             return state;
     }
 }
 
+function hydrateFullState() {
+    return {
+        ...hydrateState(),
+        auth: hydrateAuth(),
+    };
+}
+
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
-    const [state, dispatch] = useReducer(appReducer, defaultState, hydrateState);
+    const [state, dispatch] = useReducer(appReducer, defaultState, hydrateFullState);
 
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        const { auth: _a, ...rest } = state;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(rest));
     }, [state]);
+
+    useEffect(() => {
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state.auth));
+    }, [state.auth]);
 
     // Preload heavy assets globally to prevent animation pop-in
     useEffect(() => {
@@ -330,6 +396,7 @@ export function AppProvider({ children }) {
             setRating: (group, value) => dispatch({ type: "SET_RATING", group, value }),
             setReviewText: (text) => dispatch({ type: "SET_REVIEW_TEXT", payload: text }),
             setGrowthView: (view) => dispatch({ type: "SET_GROWTH_VIEW", payload: view }),
+            setPendingHomeworkTask: (taskId) => dispatch({ type: "SET_PENDING_HOMEWORK_TASK", payload: taskId }),
             setRecordFilter: (filter) => dispatch({ type: "SET_RECORD_FILTER", payload: filter }),
             loadMoreRecords: () => dispatch({ type: "LOAD_MORE_RECORDS" }),
             toggleTaskDone: (taskId) => dispatch({ type: "TOGGLE_TASK_DONE", taskId }),
@@ -339,6 +406,8 @@ export function AppProvider({ children }) {
             bookNow: () => dispatch({ type: "BOOK_NOW" }),
             setBookingCourseConfirmed: (id, confirmed) =>
                 dispatch({ type: "SET_BOOKING_COURSE_CONFIRMED", payload: { id, confirmed } }),
+            login: (role) => dispatch({ type: "LOGIN", payload: { role } }),
+            logout: () => dispatch({ type: "LOGOUT" }),
         }),
         []
     );

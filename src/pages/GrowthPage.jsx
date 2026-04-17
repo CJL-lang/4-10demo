@@ -57,17 +57,13 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
         () =>
             practiceTasks.map((task) => {
                 const done = Boolean(state.taskDoneMap[task.id]);
-                const categoryLabel =
-                    task.categoryKey === "weekly" ? t("growth.categories.weekly") : t("growth.categories.history");
+                const record = records.find((r) => r.id === task.recordId) || null;
                 return {
                     ...task,
+                    record,
                     title: t(`tasks.${task.id}.title`),
-                    reward: t(`tasks.${task.id}.reward`),
-                    coach: t(`tasks.${task.id}.coach`),
                     projectRequirements: t(`tasks.${task.id}.projectRequirements`),
                     projectItems: collectProjectItems(t, task.id),
-                    difficultyLabel: t(`growth.difficulty.${task.difficultyKey}`),
-                    categoryLabel,
                     done,
                     progress: done ? 100 : task.progress,
                 };
@@ -88,8 +84,8 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
 
     const taskGroups = useMemo(
         () => ({
-            weekly: tasks.filter((task) => task.categoryKey === "weekly" && !task.done),
-            completed: tasks.filter((task) => task.categoryKey === "history" || task.done),
+            pending: tasks.filter((task) => !task.done && task.record),
+            completed: tasks.filter((task) => task.done && task.record),
         }),
         [tasks]
     );
@@ -103,10 +99,18 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
     }, [detailMode, reportRecord, onDetailPageChange]);
 
     useEffect(() => {
-        if (state.growthView !== "report") {
-            setReportRecord(null);
+        if (!state.pendingHomeworkTaskId) {
+            return;
         }
-    }, [state.growthView]);
+        const id = state.pendingHomeworkTaskId;
+        actions.setPendingHomeworkTask(null);
+        setActiveTaskId(id);
+        setHomeworkDraft({
+            videoFileName: "",
+            textNote: "",
+            voiceFileName: "",
+        });
+    }, [state.pendingHomeworkTaskId, actions]);
 
     useEffect(() => {
         const scrollMain = document.querySelector(".scroll-main");
@@ -148,8 +152,8 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
         onToast?.(t("growth.submitToast"));
     };
 
-    const renderTaskGroup = (title, list, emptyText) => (
-        <section className="section-stack" key={title}>
+    const renderTaskGroup = (groupKey, title, list, emptyText, withBottomGap) => (
+        <section className={`section-stack club-record-page ${withBottomGap ? "section-bottom-gap" : ""}`} key={groupKey}>
             <div className="section-head">
                 <h2 className="section-title-sm">{title}</h2>
                 <span className="tiny-text">{t("growth.countItems", { count: list.length })}</span>
@@ -160,46 +164,14 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                 </article>
             ) : (
                 <div className="stack-list">
-                    {list.map((task) => (
-                        <article
-                            className={`panel panel-low task-card task-card-clickable ${task.done ? "is-done" : ""}`}
+                    {list.map((task, index) => (
+                        <div
                             key={task.id}
-                            role="button"
-                            tabIndex={0}
-                            onClick={() => openTaskDetail(task.id)}
-                            onKeyDown={(event) => {
-                                if (event.key === "Enter" || event.key === " ") {
-                                    event.preventDefault();
-                                    openTaskDetail(task.id);
-                                }
-                            }}
+                            className="record-card-enter-wrap"
+                            style={{ animationDelay: `${index * 420}ms` }}
                         >
-                            <div className="task-head">
-                                <h3>{task.title}</h3>
-                                <span className="task-difficulty">{task.difficultyLabel}</span>
-                            </div>
-                            <div className="task-meta-row task-time-row" style={{ marginTop: "8px", fontSize: "12px", color: "var(--outline)" }}>
-                                <span>
-                                    {t("growth.taskPublish", { value: task.publishTime })}
-                                </span>
-                                <span>
-                                    {t("growth.taskDeadline", { value: task.deadline })}
-                                </span>
-                            </div>
-                            <div className="task-meta-row" style={{ marginTop: "4px" }}>
-                                <span>{t("growth.taskCoach", { value: task.coach })}</span>
-                                <span>{task.reward}</span>
-                            </div>
-                            <div className="progress-track task-progress-track">
-                                <span style={{ width: `${task.progress}%` }} />
-                            </div>
-                            <div className="task-card-footer">
-                                <span className={`task-state-chip ${task.done ? "is-done" : "is-pending"}`}>
-                                    {task.done ? t("growth.taskResubmit") : t("growth.taskEnter")}
-                                </span>
-                                <span className="task-enter-arrow">→</span>
-                            </div>
-                        </article>
+                            <RecordCard record={task.record} onHomework={() => openTaskDetail(task.id)} />
+                        </div>
                     ))}
                 </div>
             )}
@@ -208,7 +180,8 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
 
     const renderTaskView = () => (
         <>
-            {renderTaskGroup(t("growth.weeklyAssignments"), taskGroups.weekly, t("growth.emptyWeekly"))}
+            {renderTaskGroup("pending", t("growth.pendingHomework"), taskGroups.pending, t("growth.emptyPendingHomework"), true)}
+            {renderTaskGroup("completed", t("growth.completedHomework"), taskGroups.completed, t("growth.emptyCompletedHomework"), false)}
             <div className="section-bottom-gap" />
         </>
     );
@@ -221,22 +194,25 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                         <button type="button" className="icon-btn homework-back-btn" aria-label={t("growth.taskBackAria")} onClick={closeTaskDetail}>
                             ←
                         </button>
-                        <span className="pill homework-category-pill">{task.categoryLabel}</span>
                     </div>
                     <div className="homework-hero">
-                        <div className="section-head homework-section-head">
-                            <h2 className="section-title-sm">{t("growth.assignmentLabel")}</h2>
-                            <span className="tag">{t("growth.assignmentTag")}</span>
-                        </div>
-                        <h3 className="homework-task-title">{task.title}</h3>
+                        <h3 className="homework-task-title">
+                            {task.record
+                                ? t(`records.${task.record.id}.title`, { defaultValue: task.record.title })
+                                : task.title}
+                        </h3>
                     </div>
                     <div className="homework-meta-grid">
                         <div className="homework-meta-card homework-meta-card--publish">
-                            <span className="homework-meta-label">{t("growth.publishTime")}</span>
-                            <strong>{task.publishTime}</strong>
+                            <span className="homework-meta-label">{t("growth.courseSession")}</span>
+                            <strong>
+                                {task.record
+                                    ? `${task.record.date}${task.record.time ? ` ${task.record.time}` : ""}`
+                                    : task.publishTime}
+                            </strong>
                         </div>
                         <div className="homework-meta-card homework-meta-card--deadline">
-                            <span className="homework-meta-label">{t("growth.deadline")}</span>
+                            <span className="homework-meta-label">{t("growth.homeworkDeadline")}</span>
                             <strong>{task.deadline}</strong>
                         </div>
                     </div>
@@ -443,7 +419,7 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                     >
                         <RecordCard
                             record={record}
-                            onClick={(r) => {
+                            onReport={(r) => {
                                 setReportRecord(r);
                                 onToast?.(t("club.toasts.openedReport"));
                             }}
@@ -467,7 +443,7 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
         </section>
     );
 
-    if (state.growthView === "report" && reportRecord) {
+    if (reportRecord) {
         return (
             <RecordReportView
                 record={reportRecord}

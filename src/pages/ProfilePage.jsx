@@ -1,16 +1,43 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+import CourseRecordsScreen from "../components/CourseRecordsScreen";
+import MyCoachScreen from "../components/MyCoachScreen";
 import GolfVenueAvatar from "../components/GolfVenueAvatar";
 import LanguageToggle from "../components/LanguageToggle";
 import MonthlySettlementModal from "../components/MonthlySettlementModal";
 import { achievementItems, MAIN_COACH, PROFILE_HERO_BADGE_LOGO_WEBP, PROFILE_PORTRAIT_URL, rankingGroups } from "../data/mockData";
 import { useAppContext } from "../context/AppContext";
 
-export default function ProfilePage() {
+const PROFILE_LAYOUT_STORAGE_KEY = "academy-react-prototype-profile-layout";
+
+function readStoredProfileLayout() {
+    try {
+        return localStorage.getItem(PROFILE_LAYOUT_STORAGE_KEY) === "legacy" ? "legacy" : "new";
+    } catch {
+        return "new";
+    }
+}
+
+export default function ProfilePage({ onToast }) {
     const { t } = useTranslation();
     const { state, actions } = useAppContext();
     const [profileView, setProfileView] = useState("home");
     const [showSettlementModal, setShowSettlementModal] = useState(false);
+    const [profileLayout, setProfileLayout] = useState(readStoredProfileLayout);
+    const [achievementModalRoot, setAchievementModalRoot] = useState(null);
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(PROFILE_LAYOUT_STORAGE_KEY, profileLayout);
+        } catch {
+            /* ignore */
+        }
+    }, [profileLayout]);
+
+    useLayoutEffect(() => {
+        setAchievementModalRoot(document.querySelector(".device-shell"));
+    }, []);
 
     useEffect(() => {
         const scrollMain = document.querySelector(".scroll-main");
@@ -24,6 +51,57 @@ export default function ProfilePage() {
     const portraitSources = useMemo(() => [PROFILE_PORTRAIT_URL, MAIN_COACH.avatarUrl], []);
     const [portraitSrcIndex, setPortraitSrcIndex] = useState(0);
     const showPortraitInitials = portraitSrcIndex >= portraitSources.length;
+
+    const toast = typeof onToast === "function" ? onToast : () => {};
+
+    const profileMenuItems = useMemo(
+        () => [
+            {
+                id: "messages",
+                icon: "💬",
+                label: t("profile.entries.messages.title"),
+                onClick: () => toast(t("profile.comingSoon")),
+            },
+            {
+                id: "package",
+                icon: "🎫",
+                label: t("profile.entries.package.title"),
+                onClick: () => toast(t("profile.comingSoon")),
+            },
+            {
+                id: "courseRecords",
+                icon: "📋",
+                label: t("profile.entries.courseRecords.title"),
+                onClick: () => {
+                    setProfileView("records");
+                    toast(t("profile.enteredCourseRecords"));
+                },
+            },
+            {
+                id: "myCoach",
+                icon: "🏌️",
+                label: t("profile.entries.myCoach.title"),
+                onClick: () => {
+                    setProfileView("coach");
+                    toast(t("profile.enteredMyCoach"));
+                },
+            },
+        ],
+        [t, toast, setProfileView]
+    );
+
+    if (profileView === "coach") {
+        return <MyCoachScreen onBack={() => setProfileView("home")} />;
+    }
+
+    if (profileView === "records") {
+        return (
+            <CourseRecordsScreen
+                onBack={() => setProfileView("home")}
+                onToast={toast}
+            />
+        );
+    }
 
     if (profileView === "ranking") {
         return (
@@ -83,7 +161,17 @@ export default function ProfilePage() {
                         <h1 className="headline">{t("profile.title")}</h1>
                     </div>
                 </div>
-                <LanguageToggle className="icon-btn profile-lang-toggle" />
+                <div className="header-actions">
+                    <LanguageToggle className="icon-btn profile-lang-toggle" />
+                    <button
+                        type="button"
+                        className="icon-btn profile-layout-toggle"
+                        aria-label={profileLayout === "new" ? t("profile.profileLayoutToggle.switchToLegacy") : t("profile.profileLayoutToggle.switchToNew")}
+                        onClick={() => setProfileLayout((prev) => (prev === "new" ? "legacy" : "new"))}
+                    >
+                        {profileLayout === "new" ? t("profile.profileLayoutToggle.buttonToLegacy") : t("profile.profileLayoutToggle.buttonToNew")}
+                    </button>
+                </div>
             </header>
 
             <section className="profile-hero">
@@ -99,8 +187,8 @@ export default function ProfilePage() {
                                 className="portrait-photo"
                                 src={portraitSources[portraitSrcIndex]}
                                 alt=""
-                                width={152}
-                                height={152}
+                                width={112}
+                                height={112}
                                 loading="lazy"
                                 decoding="async"
                                 referrerPolicy="no-referrer"
@@ -122,41 +210,105 @@ export default function ProfilePage() {
                         className="settlement-trigger-pill"
                         onClick={() => setShowSettlementModal(true)}
                     >
-                        ✦ 上月排名结算已出炉 →
+                        {profileLayout === "new" ? t("profile.settlementPill.talent") : t("profile.settlementPill.ranking")}
                     </button>
                 </div>
 
                 <article
-                    className="badge-hero-card"
-                    onClick={() => setProfileView("ranking")}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
-                            setProfileView("ranking");
-                        }
-                    }}
+                    className={
+                        profileLayout === "new"
+                            ? "badge-hero-card badge-hero-card--dual-medals badge-hero-card--non-interactive"
+                            : "badge-hero-card"
+                    }
+                    {...(profileLayout === "legacy"
+                        ? {
+                              role: "button",
+                              tabIndex: 0,
+                              "aria-label": t("profile.rankingEntry.desc"),
+                              onClick: () => setProfileView("ranking"),
+                              onKeyDown: (event) => {
+                                  if (event.key === "Enter" || event.key === " ") {
+                                      event.preventDefault();
+                                      setProfileView("ranking");
+                                  }
+                              },
+                          }
+                        : {})}
                 >
-                    <div className="hero-badge-visual">
-                        <img
-                            src={PROFILE_HERO_BADGE_LOGO_WEBP}
-                            alt={t("profile.rankingHero.logoAlt")}
-                            className="hero-badge-logo"
-                            width={84}
-                            height={84}
-                            loading="eager"
-                            decoding="async"
-                            fetchPriority="high"
-                        />
-                        <div className="hero-badge-glow"></div>
-                    </div>
-                    <div className="hero-badge-info">
-                        <p className="hero-badge-label">{t("profile.rankingHero.label")}</p>
-                        <h3 className="hero-badge-value">{t("profile.rankingHero.value")}</h3>
-                        <p className="hero-badge-desc">{t("profile.rankingHero.desc")}</p>
-                    </div>
-                    <span className="hero-badge-arrow">→</span>
+                    {profileLayout === "legacy" ? (
+                        <>
+                            <div className="hero-badge-visual">
+                                <img
+                                    src={PROFILE_HERO_BADGE_LOGO_WEBP}
+                                    alt={t("profile.rankingHero.logoAlt")}
+                                    className="hero-badge-logo"
+                                    width={72}
+                                    height={72}
+                                    loading="eager"
+                                    decoding="async"
+                                    fetchPriority="high"
+                                />
+                                <div className="hero-badge-glow"></div>
+                            </div>
+                            <div className="hero-badge-info">
+                                <p className="hero-badge-label">{t("profile.rankingHero.label")}</p>
+                                <h3 className="hero-badge-value">{t("profile.rankingHero.value")}</h3>
+                                <p className="hero-badge-desc">{t("profile.rankingHero.desc")}</p>
+                            </div>
+                            <span className="hero-badge-arrow" aria-hidden="true">
+                                →
+                            </span>
+                        </>
+                    ) : (
+                        <>
+                            <div className="badge-hero-dual-medals">
+                                <div className="profile-medal-tile">
+                                    <div className="profile-medal-tile__stage">
+                                        <div className="settlement-badge-wrapper">
+                                            <img
+                                                src={PROFILE_HERO_BADGE_LOGO_WEBP}
+                                                alt=""
+                                                className="settlement-badge-img"
+                                                width={88}
+                                                height={88}
+                                                loading="eager"
+                                                decoding="async"
+                                            />
+                                        </div>
+                                        <div className="settlement-ribbon-container settlement-ribbon-container--profile-medal">
+                                            <div className="settlement-ribbon settlement-ribbon--profile-compact">
+                                                <span className="settlement-rank-text settlement-rank-text--profile-compact">
+                                                    {t("profile.medals.progress")}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="profile-medal-tile">
+                                    <div className="profile-medal-tile__stage">
+                                        <div className="settlement-badge-wrapper">
+                                            <img
+                                                src={PROFILE_HERO_BADGE_LOGO_WEBP}
+                                                alt=""
+                                                className="settlement-badge-img"
+                                                width={88}
+                                                height={88}
+                                                loading="eager"
+                                                decoding="async"
+                                            />
+                                        </div>
+                                        <div className="settlement-ribbon-container settlement-ribbon-container--profile-medal">
+                                            <div className="settlement-ribbon settlement-ribbon--profile-compact">
+                                                <span className="settlement-rank-text settlement-rank-text--profile-compact">
+                                                    {t("profile.medals.talent")}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </article>
 
                 <div className="badge-grid">
@@ -190,35 +342,87 @@ export default function ProfilePage() {
                 </div>
             </section>
 
-            {activeAchievement ? (
-                <div className="modal-mask" onClick={actions.closeAchievement}>
-                    <section className="modal-card achievement-detail-modal" onClick={(event) => event.stopPropagation()}>
-                        <h3>{t(`achievements.${activeAchievement.id}.label`, { defaultValue: activeAchievement.label })}</h3>
-                        <p>{t(`achievements.${activeAchievement.id}.detail`, { defaultValue: activeAchievement.detail })}</p>
-                        <p>{t(`achievements.${activeAchievement.id}.rule`, { defaultValue: activeAchievement.rule })}</p>
-                        <p>
-                            {t("common.level")}：{activeAchievement.rank} / {activeAchievement.levelScale}
-                        </p>
-                        <p>
-                            {t("common.status")}：
-                            {activeAchievement.status === "unlocked"
-                                ? t("profile.achievementStatus.unlocked")
-                                : activeAchievement.status === "progress"
-                                    ? t("profile.achievementStatus.progress")
-                                    : t("profile.achievementStatus.locked")}
-                        </p>
-                        <p>{t(`achievements.${activeAchievement.id}.milestone`, { defaultValue: activeAchievement.milestone })}</p>
-                        <div className="modal-actions">
-                            <button type="button" className="btn-ghost" onClick={actions.closeAchievement}>
-                                {t("common.close")}
+            <section className="section-stack profile-menu-section" aria-labelledby="profile-menu-heading">
+                <h2 id="profile-menu-heading" className="profile-menu-heading">
+                    <span className="profile-menu-heading__accent" aria-hidden />
+                    {t("profile.menuHeading")}
+                </h2>
+                <ul className="profile-menu-list">
+                    {profileMenuItems.map((item) => (
+                        <li key={item.id}>
+                            <button
+                                type="button"
+                                className="profile-menu-tile"
+                                aria-label={item.label}
+                                onClick={item.onClick}
+                            >
+                                <span className="profile-menu-tile__icon" aria-hidden>
+                                    {item.icon}
+                                </span>
+                                <span className="profile-menu-tile__label">{item.label}</span>
+                                <span className="profile-menu-tile__chevron" aria-hidden>
+                                    ›
+                                </span>
                             </button>
-                            <button type="button" className="btn-primary" onClick={actions.closeAchievement}>
-                                {t("common.gotIt")}
-                            </button>
-                        </div>
-                    </section>
-                </div>
-            ) : null}
+                        </li>
+                    ))}
+                </ul>
+            </section>
+
+            <section className="section-stack profile-actions-section" aria-label={t("profile.logoutSectionAria")}>
+                <button
+                    type="button"
+                    className="profile-logout-btn wide"
+                    aria-label={t("profile.logoutAria")}
+                    onClick={() => actions.logout()}
+                >
+                    {t("profile.logout")}
+                </button>
+            </section>
+
+            {activeAchievement && achievementModalRoot
+                ? createPortal(
+                      <div
+                          className="modal-mask"
+                          role="dialog"
+                          aria-modal="true"
+                          aria-labelledby="achievement-detail-title"
+                          onClick={actions.closeAchievement}
+                      >
+                          <section
+                              className="modal-card achievement-detail-modal"
+                              onClick={(event) => event.stopPropagation()}
+                          >
+                              <h3 id="achievement-detail-title">
+                                  {t(`achievements.${activeAchievement.id}.label`, { defaultValue: activeAchievement.label })}
+                              </h3>
+                              <p>{t(`achievements.${activeAchievement.id}.detail`, { defaultValue: activeAchievement.detail })}</p>
+                              <p>{t(`achievements.${activeAchievement.id}.rule`, { defaultValue: activeAchievement.rule })}</p>
+                              <p>
+                                  {t("common.level")}：{activeAchievement.rank} / {activeAchievement.levelScale}
+                              </p>
+                              <p>
+                                  {t("common.status")}：
+                                  {activeAchievement.status === "unlocked"
+                                      ? t("profile.achievementStatus.unlocked")
+                                      : activeAchievement.status === "progress"
+                                        ? t("profile.achievementStatus.progress")
+                                        : t("profile.achievementStatus.locked")}
+                              </p>
+                              <p>{t(`achievements.${activeAchievement.id}.milestone`, { defaultValue: activeAchievement.milestone })}</p>
+                              <div className="modal-actions">
+                                  <button type="button" className="btn-ghost" onClick={actions.closeAchievement}>
+                                      {t("common.close")}
+                                  </button>
+                                  <button type="button" className="btn-primary" onClick={actions.closeAchievement}>
+                                      {t("common.gotIt")}
+                                  </button>
+                              </div>
+                          </section>
+                      </div>,
+                      achievementModalRoot
+                  )
+                : null}
 
             {showSettlementModal && (
                 <MonthlySettlementModal onClose={() => setShowSettlementModal(false)} />

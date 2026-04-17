@@ -213,6 +213,29 @@ export const records = [
         target: "目标 7/10",
         advice: "下节课增加逆风条件练习，保持节奏稳定。",
         reportMedia: [{ kind: "image" }, { kind: "image" }],
+        liveFeedEntries: [
+            {
+                id: "rr-240328-3",
+                timestamp: "10:52",
+                type: "text",
+                content: "击球点稳定回到甜蜜区，7号铁方向控制明显更收敛。",
+                coachName: MAIN_COACH.name,
+            },
+            {
+                id: "rr-240328-2",
+                timestamp: "10:36",
+                type: "image",
+                content: "侧面动作抓拍：送杆更完整，重心留在左侧更自然。",
+                coachName: MAIN_COACH.name,
+            },
+            {
+                id: "rr-240328-1",
+                timestamp: "10:12",
+                type: "text",
+                content: "完成热身后进入7号铁目标区练习，今天节奏进入状态很快。",
+                coachName: MAIN_COACH.name,
+            },
+        ],
         coachReview:
             "本节课重点练习 7 号铁杆面角度与击球瞬间的杆身前倾。从 TRACKMAN 与侧面视频看，你的击球点已明显向甜蜜区集中，目标区命中率稳定在 8/10，且送杆时重心能留在左脚内侧，这是非常好的趋势。\n\n建议巩固：继续用「半挥杆—全挥杆」两段式节奏找触感，下节课我们会加入轻度逆风下的弹道管理，请保持今天这种从容的节奏。",
     },
@@ -230,6 +253,29 @@ export const records = [
         target: "目标 10 球 7 次落点命中",
         advice: "增加不同草况下的切杆触地反馈练习。",
         reportMedia: [{ kind: "video" }, { kind: "image" }],
+        liveFeedEntries: [
+            {
+                id: "rr-240307-3",
+                timestamp: "15:18",
+                type: "text",
+                content: "切杆第一落点更集中，连续几球都能落进预设圈内。",
+                coachName: MAIN_COACH.name,
+            },
+            {
+                id: "rr-240307-2",
+                timestamp: "14:58",
+                type: "video",
+                content: "短视频记录：厚草位切杆时，出杆节奏比上次更顺。",
+                coachName: MAIN_COACH.name,
+            },
+            {
+                id: "rr-240307-1",
+                timestamp: "14:37",
+                type: "text",
+                content: "已开始30码内切杆节奏训练，今天触地反馈整体不错。",
+                coachName: MAIN_COACH.name,
+            },
+        ],
         coachReview:
             "本场在 30 码内切杆上，你的上杆幅度与杆面释放一致性比去年明显提高：第一落点圆心散布缩小，10 球中 7 球落在预设圆内，达标。\n\n草皮略厚时触地略浅，下次带练时会加入「略早释放、略多送杆」的想象，帮助你在湿草上也能稳定打起球。",
     },
@@ -247,9 +293,59 @@ export const records = [
         target: "目标 10 球 6 次纯击球",
         advice: "增加慢动作节奏练习，先稳后快。",
         reportMedia: [],
+        liveFeedEntries: [
+            {
+                id: "rr-240215-3",
+                timestamp: "15:05",
+                type: "text",
+                content: "纯击球次数已经来到6/10，压缩感开始稳定出现。",
+                coachName: MAIN_COACH.name,
+            },
+            {
+                id: "rr-240215-2",
+                timestamp: "14:42",
+                type: "text",
+                content: "下盘启动更清楚，但出杆前半段还需要再慢一点。",
+                coachName: MAIN_COACH.name,
+            },
+            {
+                id: "rr-240215-1",
+                timestamp: "14:16",
+                type: "text",
+                content: "进入铁杆重心转移练习，先用慢挥确认杆身前倾感觉。",
+                coachName: MAIN_COACH.name,
+            },
+        ],
         coachReview:
             "这节课我们盯住铁杆「挤压」与杆身前倾：前 9 球你已经能在慢镜里看到手腕延迟释放，纯击球次数升至 6/10，属于部分达标。\n\n接下来一周请每天做 20 次无球慢挥，只在脑子里回放「左脚踏稳—胸中转向—杆头滞后通过球」三件事。节奏先稳，距离自然会回来。",
     },
+];
+
+/** 家长端「课堂实时动态」本节课卡片：与预约通知同一套 session 数据（4/16 演示对齐木杆 14:00 时段）。 */
+export const liveFeedCourseSession = getSessionDisplay(15, "slot-3");
+
+export const liveFeedData = [
+    {
+        id: "lf-3",
+        timestamp: "14:45",
+        type: "text",
+        content: "纠正了下杆节奏，右曲情况有明显改善，击球更扎实了。",
+        coachName: "David Chen",
+    },
+    {
+        id: "lf-2",
+        timestamp: "14:30",
+        type: "image",
+        content: "挥杆动作抓拍：重心转移比上节课更流畅。",
+        coachName: "David Chen",
+    },
+    {
+        id: "lf-1",
+        timestamp: "14:15",
+        type: "text",
+        content: "热身完毕，今天状态不错，准备开始木杆练习。",
+        coachName: "David Chen",
+    }
 ];
 
 export const recordFilterItems = [{ key: "skills" }];
@@ -278,9 +374,8 @@ export const growthOverview = {
 export const practiceTasks = [
     {
         id: "w-2024-week16",
+        recordId: "r-240328",
         title: "第 16 周：果岭周边短杆控制",
-        categoryKey: "weekly",
-        difficultyKey: "challenge",
         publishTime: "2024-04-15 09:00",
         deadline: "2024-04-21 23:59",
         projectItems: [
@@ -295,9 +390,8 @@ export const practiceTasks = [
     },
     {
         id: "w-2024-week15",
+        recordId: "r-240307",
         title: "第 15 周：中长铁与下盘稳定",
-        categoryKey: "history",
-        difficultyKey: "advanced",
         publishTime: "2024-04-08 09:00",
         deadline: "2024-04-14 23:59",
         projectItems: [
@@ -312,9 +406,8 @@ export const practiceTasks = [
     },
     {
         id: "w-2024-week14",
+        recordId: "r-240215",
         title: "第 14 周：赛前心态与推杆节奏",
-        categoryKey: "history",
-        difficultyKey: "basic",
         publishTime: "2024-04-01 09:00",
         deadline: "2024-04-07 23:59",
         projectItems: [
@@ -447,4 +540,6 @@ export const defaultState = {
     recordVisibleCount: 4,
     taskDoneMap: defaultTaskDoneMap,
     activeAchievementId: null,
+    /** 从其它页跳转时打开对应课后作业（如课程记录） */
+    pendingHomeworkTaskId: null,
 };

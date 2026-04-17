@@ -18,56 +18,22 @@ function getCoachAvatarLabel(coachName) {
     return tokens[0].slice(0, 2).toUpperCase();
 }
 
-function getResultClass(result) {
-    if (result === "passed" || result === "达标") {
-        return "is-good";
-    }
-    if (result === "partial" || result === "部分达标") {
-        return "is-mid";
-    }
-    if (result === "failed" || result === "未达标") {
-        return "is-alert";
-    }
-    return "";
-}
-
-export default function RecordCard({ record, onClick }) {
+export default function RecordCard({ record, onReport, onHomework }) {
     const { t } = useTranslation();
-    const isInteractive = typeof onClick === "function";
+    const hasReport = typeof onReport === "function";
+    const hasHomework = typeof onHomework === "function";
+    const showActions = hasReport || hasHomework;
+    const singleAction = (hasReport && !hasHomework) || (!hasReport && hasHomework);
     const coachAvatar = getCoachAvatarLabel(record.coach);
-    const resultClass = getResultClass(record.result);
     const translatedRecord = {
         date: t(`records.${record.id}.date`, { defaultValue: record.date }),
         title: t(`records.${record.id}.title`, { defaultValue: record.title }),
         drill: t(`records.${record.id}.drill`, { defaultValue: record.drill }),
         note: t(`records.${record.id}.note`, { defaultValue: record.note }),
     };
-    const translatedResult =
-        record.result === "passed" || record.result === "达标"
-            ? t("recordCard.result.passed")
-            : record.result === "partial" || record.result === "部分达标"
-              ? t("recordCard.result.partial")
-              : record.result === "failed" || record.result === "未达标"
-                ? t("recordCard.result.failed")
-                : record.result;
 
     return (
-        <article
-            className={`record-card ${isInteractive ? "record-card-clickable" : ""}`}
-            role={isInteractive ? "button" : undefined}
-            tabIndex={isInteractive ? 0 : undefined}
-            onClick={isInteractive ? () => onClick(record) : undefined}
-            onKeyDown={
-                isInteractive
-                    ? (event) => {
-                          if (event.key === "Enter" || event.key === " ") {
-                              event.preventDefault();
-                              onClick(record);
-                          }
-                      }
-                    : undefined
-            }
-        >
+        <article className={`record-card ${showActions ? "record-card--has-actions" : ""}`}>
             <div className="record-date">
                 <span>{translatedRecord.date}</span>
                 {record.time && (
@@ -106,11 +72,36 @@ export default function RecordCard({ record, onClick }) {
                     <p className="record-coach-label">{t("recordCard.headCoach")}</p>
                     <div className="record-coach">{record.coach}</div>
                 </div>
-                {record.result ? <span className={`record-result-chip ${resultClass}`}>{translatedResult}</span> : null}
             </div>
 
             <p className="record-note">{translatedRecord.note}</p>
-            {isInteractive ? <p className="record-report-entry-hint">{t("recordCard.viewReport")}</p> : null}
+
+            {showActions ? (
+                <div
+                    className={`record-card-actions ${singleAction ? "record-card-actions--single" : ""}`}
+                    role="group"
+                    aria-label={t("recordCard.actionsGroupAria")}
+                >
+                    {hasReport ? (
+                        <button
+                            type="button"
+                            className="record-card-action-btn record-card-action-btn--report"
+                            onClick={() => onReport(record)}
+                        >
+                            {t("recordCard.viewReport")}
+                        </button>
+                    ) : null}
+                    {hasHomework ? (
+                        <button
+                            type="button"
+                            className="record-card-action-btn record-card-action-btn--homework"
+                            onClick={() => onHomework(record)}
+                        >
+                            {t("recordCard.viewHomework")}
+                        </button>
+                    ) : null}
+                </div>
+            ) : null}
         </article>
     );
 }

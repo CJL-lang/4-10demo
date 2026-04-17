@@ -157,9 +157,9 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                 title: coachTitle,
                 desc: bookedSlot
                     ? t("booking.post.bookedAt", {
-                          date: fmt(detailBooking.nextSessionISO),
-                          time: bookedSlot.range,
-                      })
+                        date: fmt(detailBooking.nextSessionISO),
+                        time: bookedSlot.range,
+                    })
                     : `${t("booking.post.coachReadyDesc")} · ${bookedSchedule.day}${t("booking.modal.daySuffix")} ${bookedSchedule.time}`,
             };
         }
@@ -455,7 +455,7 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
             ) : (
                 <>
                     {showPostEmpty ? (
-                        <article className="panel panel-elevated booking-post-empty">
+                        <article className="booking-post-empty">
                             <p className="section-title-sm">{t("booking.post.emptyTitle")}</p>
                             <p className="muted-text">{t("booking.post.emptyHint")}</p>
                             <button
@@ -485,11 +485,11 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                                     const courseLabel = coachEdited
                                         ? cardSession?.courseAssetId
                                             ? t(`courseAssets.${cardSession.courseAssetId}.courseName`, {
-                                                  defaultValue: cardSession.courseName,
-                                              })
+                                                defaultValue: cardSession.courseName,
+                                            })
                                             : t(`schedule.${b.day}.courseTitle`, {
-                                                  defaultValue: cardSession?.courseName ?? fallbackAsset?.courseName ?? "—",
-                                              })
+                                                defaultValue: cardSession?.courseName ?? fallbackAsset?.courseName ?? "—",
+                                            })
                                         : t("booking.post.listCourseRowPending");
                                     const drillRaw = coachEdited
                                         ? cardSession?.courseAssetId
@@ -507,9 +507,8 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                                         <li key={b.id} role="listitem">
                                             <button
                                                 type="button"
-                                                className={`booking-post-card panel panel-elevated ${
-                                                    coachEdited ? "booking-post-card--confirmed" : "booking-post-card--pending-coach"
-                                                }`}
+                                                className={`booking-post-card ${coachEdited ? "booking-post-card--confirmed" : "booking-post-card--pending-coach"
+                                                    }`}
                                                 onClick={() => actions.setDetailBooking(b.detailBookingId ?? b.id)}
                                             >
                                                 <div className="booking-post-card-top">
@@ -532,24 +531,18 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                                                 {drillLabel ? (
                                                     <p className="muted-text booking-post-card-drill">{drillLabel}</p>
                                                 ) : null}
-                                                <span className="booking-post-card-cta">{t("booking.post.openDetail")}</span>
                                             </button>
                                         </li>
                                     );
                                 })}
                             </ul>
-                            <p className="muted-text booking-post-list-hint">
-                                {bookingListItems.length > sortedBookings.length
-                                    ? `${t("booking.post.listHint")} 当前列表额外展示一张对照卡，用于区分教练已确认与待编辑两种状态。`
-                                    : t("booking.post.listHint")}
-                            </p>
                         </section>
                     ) : null}
 
                     {showPostDetail ? (
-                        <>
-                            <article className="panel countdown-panel panel-elevated">
-                                <p className="section-title-sm">{t("booking.post.nextTeeTime")}</p>
+                        <div className="booking-post-detail-body">
+                            <article className="panel countdown-panel panel-elevated booking-countdown-hero">
+                                <p className="section-title-sm booking-countdown-hero__title">{t("booking.post.nextTeeTime")}</p>
                                 <div className="countdown-row">
                                     <div className="time-block">
                                         <span className="time-num">{timer.days}</span>
@@ -647,7 +640,7 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                             </button>
 
                             {bookedCoach ? (
-                                <section className="section-stack">
+                                <section className="section-stack booking-post-detail-coach">
                                     <div className="section-head">
                                         <h2 className="section-title-sm">{t("booking.post.privateCoach")}</h2>
                                         <span className="pill">{bookedCoach.badge}</span>
@@ -655,7 +648,7 @@ export default function BookingPage({ onOpenBookingModal, onOpenReviewInvite, on
                                     <CoachCard coach={bookedCoach} compact />
                                 </section>
                             ) : null}
-                        </>
+                        </div>
                     ) : null}
                 </>
             )}

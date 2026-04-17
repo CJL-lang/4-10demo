@@ -82,7 +82,7 @@ export default function MonthlySettlementModal({ onClose }) {
 
                     <div className="settlement-ribbon-container">
                         <div className="settlement-ribbon">
-                            <span className="settlement-rank-text">NO. 4</span>
+                            <span className="settlement-rank-text">{t("profile.rankingHero.value")}</span>
                         </div>
                         <div className="settlement-subtitle">ELITE 级学员</div>
                     </div>
