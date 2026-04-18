@@ -4,14 +4,13 @@ import BookingModal from "./components/BookingModal";
 import Toast from "./components/Toast";
 import { pickReviewBooking, useAppContext } from "./context/AppContext";
 import { getSessionDisplay, getSlotById, scheduleDates } from "./data/mockData";
-import BookingPage from "./pages/BookingPage";
 import ClubPage from "./pages/ClubPage";
 import GrowthPage from "./pages/GrowthPage";
 import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 import { useTranslation } from "react-i18next";
 
-const TAB_ORDER = ["club", "booking", "growth", "profile"];
+const TAB_ORDER = ["club", "messages", "growth", "profile"];
 
 export default function App() {
     const { i18n, t } = useTranslation();
@@ -22,7 +21,7 @@ export default function App() {
     const [slideDir, setSlideDir] = useState("");
     const scrollRef = useRef(null);
 
-    const viewKey = `${state.currentTab}-${state.currentTab === "booking" ? `${state.bookingStatus}-${state.detailBookingId ?? "list"}` : "stable"}`;
+    const viewKey = `${state.currentTab}-stable`;
     const selectedSchedule = useMemo(
         () => scheduleDates.find((item) => item.day === state.selectedDate) || scheduleDates[0],
         [state.selectedDate]
@@ -115,10 +114,25 @@ export default function App() {
                     onGoGrowth={() => {
                         actions.setTab("growth");
                     }}
+                    onOpenBookingModal={() => setBookingModalOpen(true)}
+                    onClubSubpageChange={setHideBottomNav}
                     onToast={(message) => {
                         setToastMessage(message);
                     }}
                 />
+            );
+        }
+        if (state.currentTab === "messages") {
+            return (
+                <section className="screen fade-enter messages-placeholder-page">
+                    <div className="section-stack section-bottom-gap" style={{ paddingTop: "24px" }}>
+                        <div className="panel panel-elevated" style={{ padding: "24px" }}>
+                            <p className="muted-text" style={{ margin: 0, textAlign: "center" }}>
+                                {t("messages.placeholder")}
+                            </p>
+                        </div>
+                    </div>
+                </section>
             );
         }
         if (state.currentTab === "growth") {
@@ -138,13 +152,8 @@ export default function App() {
         if (state.currentTab === "profile") {
             return <ProfilePage onToast={(message) => setToastMessage(message)} />;
         }
-        return (
-            <BookingPage
-                onOpenBookingModal={() => setBookingModalOpen(true)}
-                onToast={(message) => setToastMessage(message)}
-            />
-        );
-    }, [actions, reviewSessionInfo, state.bookingStatus, state.currentTab, state.detailBookingId, t]);
+        return null;
+    }, [actions, reviewSessionInfo, state.currentTab, t]);
 
     if (!state.auth.isLoggedIn) {
         return (

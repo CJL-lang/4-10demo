@@ -52,7 +52,7 @@ function formatBookingCardDate(iso, locale) {
     }).format(date);
 }
 
-export default function BookingPage({ onOpenBookingModal, onToast }) {
+export default function BookingPage({ onOpenBookingModal, onToast, embedded = false, onEmbeddedBack }) {
     const { t, i18n } = useTranslation();
     const { state, actions } = useAppContext();
     const detailBooking = useMemo(
@@ -194,7 +194,18 @@ export default function BookingPage({ onOpenBookingModal, onToast }) {
                 ) : null}
                 {!showPostDetail ? (
                     <div className="user-chip">
-                        <GolfVenueAvatar />
+                        {embedded ? (
+                            <button
+                                type="button"
+                                className="icon-btn"
+                                aria-label={t("club.backHomeAria")}
+                                onClick={onEmbeddedBack}
+                            >
+                                ←
+                            </button>
+                        ) : (
+                            <GolfVenueAvatar />
+                        )}
                         <div>
                             <p className="small-label">{t("common.venueName")}</p>
                             <h1 className="headline">{t("booking.title")}</h1>
@@ -212,9 +223,6 @@ export default function BookingPage({ onOpenBookingModal, onToast }) {
                         title={isPre ? t("booking.switchToPost") : t("booking.switchToPre")}
                     >
                         ⇄
-                    </button>
-                    <button type="button" className="icon-btn" aria-label={t("booking.notificationAria")}>
-                        ○
                     </button>
                 </div>
             </header>

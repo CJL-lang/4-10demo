@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import RecordCard from "../components/RecordCard";
-import RecordReportView from "../components/RecordReportView";
 import StarRating from "../components/StarRating";
+import RecordReportMediaPlaceholder from "../components/RecordReportMediaPlaceholder";
 import { growthViewItems, practiceTasks, ratingLabels, records } from "../data/mockData";
 import { useAppContext } from "../context/AppContext";
 
@@ -18,57 +17,105 @@ function RatingGroup({ name, value, onChange, label }) {
     );
 }
 
-function collectProjectItems(t, taskId) {
-    const items = [];
-    for (let i = 0; i < 12; i += 1) {
-        const line = t(`tasks.${taskId}.projectItems.${i}`, { defaultValue: "" });
-        if (!line) break;
-        items.push(line);
+function LiveFeedTypeIcon({ type }) {
+    if (type === "image") {
+        return (
+            <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
+                <path
+                    d="M4 4.25A1.75 1.75 0 0 1 5.75 2.5h8.5A1.75 1.75 0 0 1 16 4.25v11.5a1.75 1.75 0 0 1-1.75 1.75h-8.5A1.75 1.75 0 0 1 4 15.75V4.25Zm1.5 0v8.46l2.56-2.55a.75.75 0 0 1 1.06 0l1.38 1.38 2.44-2.44a.75.75 0 0 1 1.06 0l.5.5V4.25a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm0 10.89v.61c0 .14.11.25.25.25h8.5a.25.25 0 0 0 .25-.25v-4.03l-1.28-1.28-2.44 2.44a.75.75 0 0 1-1.06 0l-1.38-1.38-3.09 3.04ZM8 7a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z"
+                    fill="currentColor"
+                />
+            </svg>
+        );
     }
-    return items;
+
+    if (type === "video") {
+        return (
+            <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
+                <path
+                    d="M4.75 3.5A1.75 1.75 0 0 0 3 5.25v9.5c0 .97.78 1.75 1.75 1.75h7.5A1.75 1.75 0 0 0 14 14.75v-2.02l2.1 1.4a.75.75 0 0 0 1.16-.62V6.49a.75.75 0 0 0-1.16-.62L14 7.27V5.25a1.75 1.75 0 0 0-1.75-1.75h-7.5Zm3.87 3.66a.75.75 0 0 1 1.13-.64l2.78 1.7a.75.75 0 0 1 0 1.28l-2.78 1.7a.75.75 0 0 1-1.13-.64V7.16Z"
+                    fill="currentColor"
+                />
+            </svg>
+        );
+    }
+
+    return (
+        <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
+            <path
+                d="M5 3.25A2.25 2.25 0 0 0 2.75 5.5v6A2.25 2.25 0 0 0 5 13.75h1.86l2.54 2.12a.75.75 0 0 0 1.23-.58v-1.54H15a2.25 2.25 0 0 0 2.25-2.25v-6A2.25 2.25 0 0 0 15 3.25H5Z"
+                fill="currentColor"
+            />
+        </svg>
+    );
+}
+
+function taskCardCopy(task, langIsEn) {
+    return {
+        date: langIsEn && task.sessionDateEn ? task.sessionDateEn : task.sessionDate,
+        title: langIsEn && task.titleEn ? task.titleEn : task.title,
+        drill: langIsEn && task.drillTopicEn ? task.drillTopicEn : task.drillTopic,
+        note: langIsEn && task.coachNoteEn ? task.coachNoteEn : task.coachNote,
+    };
+}
+
+function GrowthSessionCard({ task, variant, onOpen }) {
+    const { t, i18n } = useTranslation();
+    const langIsEn = Boolean(i18n.language?.toLowerCase().startsWith("en"));
+    const copy = taskCardCopy(task, langIsEn);
+    const skillLabel = task.difficulty || t("growth.skillPill");
+    const coachRole = t("growth.coachRoleLead");
+
+    return (
+        <article className={`panel panel-low growth-session-card ${task.done ? "growth-session-card--done" : ""}`}>
+            <div className="growth-session-card__meta">
+                <span className="growth-session-card__date">{copy.date}</span>
+                <span className="growth-session-card__time">{task.sessionTime}</span>
+            </div>
+            <div className="growth-session-card__head">
+                <h3 className="growth-session-card__title">{copy.title}</h3>
+                <span className="growth-session-card__pill">{skillLabel}</span>
+            </div>
+            <p className="growth-session-card__drill">{copy.drill}</p>
+            <div className="growth-session-card__coach">
+                <img className="growth-session-card__avatar" src={task.avatarUrl} alt="" />
+                <div className="growth-session-card__coach-text">
+                    <span className="growth-session-card__coach-role">{coachRole}</span>
+                    <span className="growth-session-card__coach-name">{task.coach}</span>
+                </div>
+            </div>
+            <p className="growth-session-card__note">{copy.note}</p>
+            <button type="button" className="growth-session-card__cta" onClick={() => onOpen(task.id)}>
+                {variant === "homework" ? t("growth.viewHomework") : t("growth.viewReport")}
+            </button>
+        </article>
+    );
 }
 
 export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, reviewSessionInfo }) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { state, actions } = useAppContext();
     const videoInputRef = useRef(null);
     const audioInputRef = useRef(null);
     const [activeTaskId, setActiveTaskId] = useState(null);
+    const [activeReportTaskId, setActiveReportTaskId] = useState(null);
     const [homeworkDraft, setHomeworkDraft] = useState({
         videoFileName: "",
         textNote: "",
         voiceFileName: "",
     });
-    const [reportRecord, setReportRecord] = useState(null);
-
-    const filteredRecords = useMemo(
-        () => records.filter((item) => item.type === state.recordFilter),
-        [state.recordFilter]
-    );
-
-    const visibleRecords = useMemo(
-        () => filteredRecords.slice(0, state.recordVisibleCount),
-        [filteredRecords, state.recordVisibleCount]
-    );
-
-    const hasMoreRecords = visibleRecords.length < filteredRecords.length;
 
     const tasks = useMemo(
         () =>
             practiceTasks.map((task) => {
                 const done = Boolean(state.taskDoneMap[task.id]);
-                const record = records.find((r) => r.id === task.recordId) || null;
                 return {
                     ...task,
-                    record,
-                    title: t(`tasks.${task.id}.title`),
-                    projectRequirements: t(`tasks.${task.id}.projectRequirements`),
-                    projectItems: collectProjectItems(t, task.id),
                     done,
                     progress: done ? 100 : task.progress,
                 };
             }),
-        [state.taskDoneMap, t]
+        [state.taskDoneMap]
     );
 
     const activeTask = useMemo(
@@ -76,48 +123,57 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
         [tasks, activeTaskId]
     );
 
+    const activeReportTask = useMemo(
+        () => tasks.find((task) => task.id === activeReportTaskId) || null,
+        [tasks, activeReportTaskId]
+    );
+
+    const recordForReport = useMemo(() => {
+        if (!activeReportTask?.recordId) {
+            return null;
+        }
+        return records.find((r) => r.id === activeReportTask.recordId) || null;
+    }, [activeReportTask]);
+
     const canSubmitHomework =
         Boolean(homeworkDraft.videoFileName) &&
         (homeworkDraft.textNote.trim().length > 0 || Boolean(homeworkDraft.voiceFileName));
 
-    const detailMode = state.growthView === "tasks" && Boolean(activeTask);
+    const homeworkDetailMode = state.growthView === "tasks" && Boolean(activeTask);
+    const reportDetailMode = state.growthView === "report" && Boolean(activeReportTask);
+    const hideSubnavChrome = homeworkDetailMode || reportDetailMode;
 
     const taskGroups = useMemo(
         () => ({
-            pending: tasks.filter((task) => !task.done && task.record),
-            completed: tasks.filter((task) => task.done && task.record),
+            pending: tasks.filter((task) => !task.done),
+            completed: tasks.filter((task) => task.done),
         }),
         [tasks]
     );
 
     useEffect(() => {
-        const hideNav = detailMode || Boolean(reportRecord);
-        onDetailPageChange?.(hideNav);
+        onDetailPageChange?.(hideSubnavChrome);
         return () => {
             onDetailPageChange?.(false);
         };
-    }, [detailMode, reportRecord, onDetailPageChange]);
-
-    useEffect(() => {
-        if (!state.pendingHomeworkTaskId) {
-            return;
-        }
-        const id = state.pendingHomeworkTaskId;
-        actions.setPendingHomeworkTask(null);
-        setActiveTaskId(id);
-        setHomeworkDraft({
-            videoFileName: "",
-            textNote: "",
-            voiceFileName: "",
-        });
-    }, [state.pendingHomeworkTaskId, actions]);
+    }, [hideSubnavChrome, onDetailPageChange]);
 
     useEffect(() => {
         const scrollMain = document.querySelector(".scroll-main");
         if (scrollMain) {
             scrollMain.scrollTo({ top: 0, behavior: "auto" });
         }
-    }, [detailMode, state.growthView, reportRecord]);
+    }, [hideSubnavChrome, state.growthView]);
+
+    useEffect(() => {
+        const tid = state.pendingHomeworkTaskId;
+        if (!tid) {
+            return;
+        }
+        actions.setGrowthView("tasks");
+        setActiveTaskId(tid);
+        actions.setPendingHomeworkTask(null);
+    }, [state.pendingHomeworkTaskId, actions]);
 
     const openTaskDetail = (taskId) => {
         setActiveTaskId(taskId);
@@ -152,36 +208,34 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
         onToast?.(t("growth.submitToast"));
     };
 
-    const renderTaskGroup = (groupKey, title, list, emptyText, withBottomGap) => (
-        <section className={`section-stack club-record-page ${withBottomGap ? "section-bottom-gap" : ""}`} key={groupKey}>
+    const renderGrowthSessionList = (list, variant) => (
+        <div className="growth-session-list">
+            {list.map((task) => (
+                <GrowthSessionCard key={task.id} task={task} variant={variant} onOpen={variant === "homework" ? openTaskDetail : setActiveReportTaskId} />
+            ))}
+        </div>
+    );
+
+    const renderHomeworkSection = (titleKey, list, emptyKey) => (
+        <section className="section-stack" key={titleKey}>
             <div className="section-head">
-                <h2 className="section-title-sm">{title}</h2>
+                <h2 className="section-title-sm">{t(titleKey)}</h2>
                 <span className="tiny-text">{t("growth.countItems", { count: list.length })}</span>
             </div>
             {list.length === 0 ? (
                 <article className="panel panel-low task-empty-card">
-                    <p className="muted-text">{emptyText}</p>
+                    <p className="muted-text">{t(emptyKey)}</p>
                 </article>
             ) : (
-                <div className="stack-list">
-                    {list.map((task, index) => (
-                        <div
-                            key={task.id}
-                            className="record-card-enter-wrap"
-                            style={{ animationDelay: `${index * 420}ms` }}
-                        >
-                            <RecordCard record={task.record} onHomework={() => openTaskDetail(task.id)} />
-                        </div>
-                    ))}
-                </div>
+                renderGrowthSessionList(list, "homework")
             )}
         </section>
     );
 
     const renderTaskView = () => (
         <>
-            {renderTaskGroup("pending", t("growth.pendingHomework"), taskGroups.pending, t("growth.emptyPendingHomework"), true)}
-            {renderTaskGroup("completed", t("growth.completedHomework"), taskGroups.completed, t("growth.emptyCompletedHomework"), false)}
+            {renderHomeworkSection("growth.pendingHomework", taskGroups.pending, "growth.emptyPendingHomework")}
+            {renderHomeworkSection("growth.completedHomework", taskGroups.completed, "growth.emptyCompletedHomework")}
             <div className="section-bottom-gap" />
         </>
     );
@@ -191,28 +245,25 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
             <section className="section-stack section-bottom-gap homework-detail-wrap swing-3d-enter">
                 <article className="panel panel-elevated homework-brief-card">
                     <div className="homework-detail-topbar">
-                        <button type="button" className="icon-btn homework-back-btn" aria-label={t("growth.taskBackAria")} onClick={closeTaskDetail}>
+                        <button type="button" className="icon-btn homework-back-btn" aria-label={t("growth.backToHomeworkList")} onClick={closeTaskDetail}>
                             ←
                         </button>
+                        <span className="pill homework-category-pill">{task.category}</span>
                     </div>
                     <div className="homework-hero">
-                        <h3 className="homework-task-title">
-                            {task.record
-                                ? t(`records.${task.record.id}.title`, { defaultValue: task.record.title })
-                                : task.title}
-                        </h3>
+                        <div className="section-head homework-section-head">
+                            <h2 className="section-title-sm">{t("growth.tasks")}</h2>
+                            <span className="tag">ASSIGNMENT</span>
+                        </div>
+                        <h3 className="homework-task-title">{task.title}</h3>
                     </div>
                     <div className="homework-meta-grid">
                         <div className="homework-meta-card homework-meta-card--publish">
-                            <span className="homework-meta-label">{t("growth.courseSession")}</span>
-                            <strong>
-                                {task.record
-                                    ? `${task.record.date}${task.record.time ? ` ${task.record.time}` : ""}`
-                                    : task.publishTime}
-                            </strong>
+                            <span className="homework-meta-label">{t("growth.publishTime")}</span>
+                            <strong>{task.publishTime}</strong>
                         </div>
                         <div className="homework-meta-card homework-meta-card--deadline">
-                            <span className="homework-meta-label">{t("growth.homeworkDeadline")}</span>
+                            <span className="homework-meta-label">{t("growth.deadline")}</span>
                             <strong>{task.deadline}</strong>
                         </div>
                     </div>
@@ -308,12 +359,7 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
 
                     <div className="submit-footer">
                         <p className="submit-req-hint">{t("growth.submitHint")}</p>
-                        <button
-                            type="button"
-                            className="btn-submit-action"
-                            disabled={!canSubmitHomework}
-                            onClick={handleSubmitHomework}
-                        >
+                        <button type="button" className="btn-submit-action" disabled={!canSubmitHomework} onClick={handleSubmitHomework}>
                             {canSubmitHomework ? t("growth.submitReady") : t("growth.submitDisabled")}
                         </button>
                     </div>
@@ -322,139 +368,206 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
         );
     };
 
-    const coachStarLabel =
-        state.ratings.coach > 0 ? t(`growth.coachRatingLabels.${state.ratings.coach}`) : "—";
+    const renderReportDetailView = (task) => {
+        const langIsEn = Boolean(i18n.language?.toLowerCase().startsWith("en"));
+        const copy = taskCardCopy(task, langIsEn);
+        const body = recordForReport?.coachReview || copy.note;
+        const feedItems = recordForReport?.liveFeedEntries || [];
+        const getLiveFeedTypeLabel = (type) => {
+            if (type === "image") {
+                return t("club.liveFeed.typeImage");
+            }
+            if (type === "video") {
+                return t("club.liveFeed.typeVideo");
+            }
+            return t("club.liveFeed.typeText");
+        };
 
-    const renderReviewView = () => (
-        <article className="panel feedback-panel panel-elevated section-bottom-gap">
-            <header className="feedback-head">
-                <h2 className="headline">{t("growth.reviewHeadline")}</h2>
-                <span className="tag">{t("growth.reviewTag")}</span>
-            </header>
-
-            <article className="panel panel-low review-session-card">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
-                    <div style={{ minWidth: 0 }}>
-                        <p className="small-label" style={{ marginBottom: "4px" }}>
-                            {t("growth.sessionInfo")}
-                        </p>
-                        <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "bold", color: "var(--on-surface)", wordBreak: "break-word" }}>
-                            {reviewSessionInfo?.courseName || t("growth.sessionSyncing")}
-                        </h3>
-                    </div>
-                    {reviewSessionInfo?.dateLabel && (
-                        <div className="review-session-meta" style={{ margin: 0, flexShrink: 0 }}>
-                            <span>{reviewSessionInfo.dateLabel}</span>
-                        </div>
-                    )}
-                </div>
-
-                {reviewSessionInfo?.coachName && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "16px", paddingTop: "12px", borderTop: "1px dashed rgba(255, 255, 255, 0.1)" }}>
-                        <img
-                            src={reviewSessionInfo.avatarUrl}
-                            alt=""
-                            style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }}
-                        />
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                            <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--on-surface)" }}>
-                                {reviewSessionInfo.coachName}
-                            </span>
-                            <span style={{ fontSize: "12px", color: "var(--on-surface-variant)" }}>
-                                {t("coachCard.coach")}
-                            </span>
-                        </div>
-                    </div>
-                )}
-            </article>
-
-            <RatingGroup
-                name={t("growth.physical")}
-                value={state.ratings.physical}
-                onChange={(value) => actions.setRating("physical", value)}
-                label={ratingLabels.physical[state.ratings.physical - 1] || "—"}
-            />
-            <RatingGroup
-                name={t("growth.mental")}
-                value={state.ratings.mental}
-                onChange={(value) => actions.setRating("mental", value)}
-                label={ratingLabels.mental[state.ratings.mental - 1] || "—"}
-            />
-            <RatingGroup
-                name={t("growth.skill")}
-                value={state.ratings.skill}
-                onChange={(value) => actions.setRating("skill", value)}
-                label={ratingLabels.skill[state.ratings.skill - 1] || "—"}
-            />
-
-            <div className="rating-group">
-                <div className="rating-head">
-                    <h3>{t("growth.coachRating")}</h3>
-                    <span>{coachStarLabel}</span>
-                </div>
-                <StarRating value={state.ratings.coach} onChange={(value) => actions.setRating("coach", value)} />
-            </div>
-
-            <textarea
-                className="feedback-textarea"
-                placeholder={t("growth.feedbackPlaceholder")}
-                value={state.reviewText}
-                onChange={(event) => actions.setReviewText(event.target.value)}
-            />
-
-            <button type="button" className="btn-primary wide" onClick={onSubmit}>
-                {t("growth.submitReview")}
-            </button>
-        </article>
-    );
-
-    const renderReportView = () => (
-        <section className="section-stack section-bottom-gap club-record-page">
-            <div className="stack-list">
-                {visibleRecords.map((record, index) => (
-                    <div
-                        key={record.id}
-                        className="record-card-enter-wrap"
-                        style={{ animationDelay: `${index * 420}ms` }}
-                    >
-                        <RecordCard
-                            record={record}
-                            onReport={(r) => {
-                                setReportRecord(r);
-                                onToast?.(t("club.toasts.openedReport"));
-                            }}
-                        />
-                    </div>
-                ))}
-            </div>
-
-            {hasMoreRecords ? (
-                <button
-                    type="button"
-                    className="btn-ghost small record-more-btn"
-                    onClick={() => {
-                        actions.loadMoreRecords();
-                        onToast?.(t("club.toasts.loadedMore"));
-                    }}
-                >
-                    {t("club.loadMore")}
-                </button>
-            ) : null}
-        </section>
-    );
-
-    if (reportRecord) {
         return (
-            <RecordReportView
-                record={reportRecord}
-                onBack={() => setReportRecord(null)}
-            />
+            <section className="section-stack section-bottom-gap homework-detail-wrap swing-3d-enter">
+                <article className="panel panel-elevated homework-brief-card growth-report-detail-card">
+                    <div className="homework-detail-topbar">
+                        <button type="button" className="icon-btn homework-back-btn" aria-label={t("growth.backToReportList")} onClick={() => setActiveReportTaskId(null)}>
+                            ←
+                        </button>
+                        <span className="pill homework-category-pill">{t("growth.report")}</span>
+                    </div>
+                    <div className="homework-hero">
+                        <div className="section-head homework-section-head">
+                            <h2 className="section-title-sm">{t("growth.report")}</h2>
+                            <span className="tag">{t("growth.reportDetailTag")}</span>
+                        </div>
+                        <h3 className="homework-task-title">{copy.title}</h3>
+                    </div>
+                    <div className="growth-report-detail-meta">
+                        <span>{copy.date}</span>
+                        <span className="growth-report-detail-meta__time">{task.sessionTime}</span>
+                    </div>
+                    <p className="growth-report-detail-drill">{copy.drill}</p>
+                    <div className="growth-session-card__coach growth-report-detail-coach">
+                        <img className="growth-session-card__avatar" src={task.avatarUrl} alt="" />
+                        <div className="growth-session-card__coach-text">
+                            <span className="growth-session-card__coach-role">{t("growth.coachRoleLead")}</span>
+                            <span className="growth-session-card__coach-name">{task.coach}</span>
+                        </div>
+                    </div>
+                    <h4 className="growth-report-detail-subhead">{t("growth.reportCoachReview")}</h4>
+                    <p className="growth-report-detail-body">{body}</p>
+
+                    <div className="growth-report-live-wrap">
+                        <div className="live-feed-stream-head growth-report-live-head">
+                            <p className="live-feed-stream-label">{t("growth.reportRealtimeTitle")}</p>
+                            <span className="live-feed-stream-count">{feedItems.length}</span>
+                        </div>
+                        {feedItems.length > 0 ? (
+                            <div className="live-feed-history-card growth-report-live-card">
+                                <div className="live-feed-history-body">
+                                    <div className="live-feed-timeline">
+                                        {feedItems.map((item, index) => (
+                                            <div
+                                                key={item.id}
+                                                className="live-feed-item growth-report-live-item"
+                                                style={{ animationDelay: `${index * 120}ms` }}
+                                            >
+                                                <div className="live-feed-dot" aria-hidden="true" />
+                                                <div className="live-feed-content">
+                                                    <div className="live-feed-meta">
+                                                        <div className="live-feed-meta-main">
+                                                            <span className="live-feed-time">{item.timestamp}</span>
+                                                            <span className={`live-feed-type-pill live-feed-type-pill--${item.type}`}>
+                                                                <span className="live-feed-type-pill-icon" aria-hidden="true">
+                                                                    <LiveFeedTypeIcon type={item.type} />
+                                                                </span>
+                                                                {getLiveFeedTypeLabel(item.type)}
+                                                            </span>
+                                                        </div>
+                                                        <span className="live-feed-coach">{item.coachName}</span>
+                                                    </div>
+                                                    {(item.type === "image" || item.type === "video") && (
+                                                        <div className="live-feed-media">
+                                                            <RecordReportMediaPlaceholder kind={item.type === "video" ? "video" : "image"} />
+                                                        </div>
+                                                    )}
+                                                    <p className="live-feed-text">{item.content}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="panel panel-low live-feed-empty">
+                                <p className="muted-text">{t("club.liveFeed.empty")}</p>
+                            </div>
+                        )}
+                    </div>
+                </article>
+            </section>
         );
-    }
+    };
+
+    const renderReportListView = () => {
+        const ordered = [...tasks].sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
+        return (
+            <>
+                <section className="section-stack">
+                    <div className="section-head">
+                        <h2 className="section-title-sm">{t("growth.report")}</h2>
+                        <span className="tiny-text">{t("growth.countItems", { count: ordered.length })}</span>
+                    </div>
+                    {ordered.length === 0 ? (
+                        <article className="panel panel-low task-empty-card">
+                            <p className="muted-text">{t("growth.emptyReport")}</p>
+                        </article>
+                    ) : (
+                        renderGrowthSessionList(ordered, "report")
+                    )}
+                </section>
+                <div className="section-bottom-gap" />
+            </>
+        );
+    };
+
+    const renderReviewView = () => {
+        const coachLabel =
+            state.ratings.coach > 0 ? t(`growth.coachRatingLabels.${state.ratings.coach}`) : "—";
+
+        return (
+            <article className="panel feedback-panel panel-elevated section-bottom-gap growth-review-panel">
+                <header className="feedback-head">
+                    <h2 className="headline">{t("growth.reviewHeadline")}</h2>
+                    <span className="tag">{t("growth.reviewTag")}</span>
+                </header>
+
+                <article className="panel panel-low review-session-card">
+                    <div className="review-session-card-top">
+                        <div>
+                            <p className="small-label">{t("growth.sessionInfo")}</p>
+                            <h3>{reviewSessionInfo?.courseName ?? t("growth.sessionSyncing")}</h3>
+                        </div>
+                        {reviewSessionInfo?.dateLabel ? <span className="pill review-session-time-pill">{reviewSessionInfo.dateLabel}</span> : null}
+                    </div>
+                    <p className="muted-text">{t("growth.courseTopic", { value: reviewSessionInfo?.drill ?? t("growth.pendingCourseTopic") })}</p>
+                    <div className="review-session-divider" aria-hidden="true" />
+                    <div className="review-session-coach-row">
+                        {reviewSessionInfo?.avatarUrl ? (
+                            <img className="review-session-avatar" src={reviewSessionInfo.avatarUrl} alt="" />
+                        ) : (
+                            <div className="review-session-avatar review-session-avatar--placeholder" aria-hidden="true" />
+                        )}
+                        <div className="review-session-coach-meta">
+                            <span className="review-session-coach-name">{reviewSessionInfo?.coachName || "—"}</span>
+                            <span className="muted-text review-session-coach-title">
+                                {reviewSessionInfo?.coachTitle || t("growth.unassignedCoach")}
+                            </span>
+                        </div>
+                    </div>
+                </article>
+
+                <RatingGroup
+                    name={t("growth.physical")}
+                    value={state.ratings.physical}
+                    onChange={(value) => actions.setRating("physical", value)}
+                    label={ratingLabels.physical[state.ratings.physical - 1] || "—"}
+                />
+                <RatingGroup
+                    name={t("growth.mental")}
+                    value={state.ratings.mental}
+                    onChange={(value) => actions.setRating("mental", value)}
+                    label={ratingLabels.mental[state.ratings.mental - 1] || "—"}
+                />
+                <RatingGroup
+                    name={t("growth.skill")}
+                    value={state.ratings.skill}
+                    onChange={(value) => actions.setRating("skill", value)}
+                    label={ratingLabels.skill[state.ratings.skill - 1] || "—"}
+                />
+
+                <div className="rating-group">
+                    <div className="rating-head">
+                        <h3>{t("growth.coachRating")}</h3>
+                        <span>{coachLabel}</span>
+                    </div>
+                    <StarRating value={state.ratings.coach} onChange={(value) => actions.setRating("coach", value)} />
+                </div>
+
+                <textarea
+                    className="feedback-textarea"
+                    placeholder={t("growth.feedbackPlaceholder")}
+                    value={state.reviewText}
+                    onChange={(event) => actions.setReviewText(event.target.value)}
+                />
+
+                <button type="button" className="btn-primary wide" onClick={onSubmit}>
+                    {t("growth.submitReview")}
+                </button>
+            </article>
+        );
+    };
 
     return (
-        <section className={`screen fade-enter ${detailMode ? "homework-focus-screen" : ""}`}>
-            {!detailMode ? (
+        <section className={`screen fade-enter ${hideSubnavChrome ? "homework-focus-screen" : ""}`}>
+            {!hideSubnavChrome ? (
                 <section className="section-stack growth-subnav-wrap">
                     <div className="growth-subnav">
                         {growthViewItems.map((item) => (
@@ -466,6 +579,9 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                                     actions.setGrowthView(item.key);
                                     if (item.key !== "tasks") {
                                         closeTaskDetail();
+                                    }
+                                    if (item.key !== "report") {
+                                        setActiveReportTaskId(null);
                                     }
                                 }}
                             >
@@ -479,7 +595,8 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
             {state.growthView === "tasks" && activeTask ? renderTaskDetailView(activeTask) : null}
             {state.growthView === "tasks" && !activeTask ? renderTaskView() : null}
             {state.growthView === "review" ? renderReviewView() : null}
-            {state.growthView === "report" ? renderReportView() : null}
+            {state.growthView === "report" && activeReportTask ? renderReportDetailView(activeReportTask) : null}
+            {state.growthView === "report" && !activeReportTask ? renderReportListView() : null}
         </section>
     );
 }

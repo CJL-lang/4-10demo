@@ -1,11 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import GolfVenueAvatar from "../components/GolfVenueAvatar";
 import ProgressOverviewSection from "../components/ProgressOverviewSection";
 import RecordReportMediaPlaceholder from "../components/RecordReportMediaPlaceholder";
-import { useAppContext } from "../context/AppContext";
+import BookingPage from "./BookingPage";
+import { sortBookingsByTime, useAppContext } from "../context/AppContext";
 import SessionCourseDetailCard from "../components/SessionCourseDetailCard";
-import { liveFeedData, liveFeedCourseSession } from "../data/mockData";
+import {
+    assessmentHistoryRecords,
+    getAssessmentRecordById,
+    getSessionDisplay,
+    getSlotById,
+    liveFeedData,
+    liveFeedCourseSession,
+} from "../data/mockData";
+
+/** 与 app.css 中 `.club-record-page .stack-list > .record-card-enter-wrap` 的 rankRowReveal 节奏一致 */
+const ASSESSMENT_CARD_STAGGER_MS = 420;
+const ASSESSMENT_RANK_REVEAL_MS = 360;
+/** 维度卡片入场约过半后，子项开始错层入场 */
+const ASSESSMENT_ITEM_AFTER_REVEAL_MS = Math.round(ASSESSMENT_RANK_REVEAL_MS * 0.48);
+const ASSESSMENT_ITEM_STAGGER_MS = 56;
 
 function LiveFeedTypeIcon({ type }) {
     if (type === "image") {
@@ -40,10 +55,57 @@ function LiveFeedTypeIcon({ type }) {
     );
 }
 
-export default function ClubPage({ onGoGrowth, onToast }) {
-    const { t } = useTranslation();
-    const { state } = useAppContext();
+function formatDigestSession(iso, locale) {
+    if (!iso) {
+        return "";
+    }
+    const date = new Date(iso);
+    return new Intl.DateTimeFormat(locale === "en" ? "en-US" : "zh-CN", {
+        month: "short",
+        day: "numeric",
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+    }).format(date);
+}
+
+function formatAssessmentRecordDate(iso, locale) {
+    if (!iso) {
+        return "";
+    }
+    const date = new Date(iso);
+    return new Intl.DateTimeFormat(locale === "en" ? "en-US" : "zh-CN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    }).format(date);
+}
+
+export default function ClubPage({ onGoGrowth, onToast, onOpenBookingModal, onClubSubpageChange }) {
+    const { t, i18n } = useTranslation();
+    const { state, actions } = useAppContext();
     const [clubView, setClubView] = useState("home");
+    const [selectedAssessmentRecordId, setSelectedAssessmentRecordId] = useState(null);
+
+    useEffect(() => {
+        if (state.clubOpenBooking) {
+            setClubView("booking");
+            actions.clearClubOpenBooking();
+        }
+    }, [state.clubOpenBooking, actions]);
+
+    useEffect(() => {
+        const hideBottom =
+            clubView === "assessmentRecords" || clubView === "assessmentRecordDetail";
+        onClubSubpageChange?.(hideBottom);
+    }, [clubView, onClubSubpageChange]);
+
+    useEffect(
+        () => () => {
+            onClubSubpageChange?.(false);
+        },
+        [onClubSubpageChange]
+    );
 
     useEffect(() => {
         const scrollMain = document.querySelector(".scroll-main");
@@ -51,6 +113,95 @@ export default function ClubPage({ onGoGrowth, onToast }) {
             scrollMain.scrollTo({ top: 0, behavior: "auto" });
         }
     }, [clubView]);
+
+    const sortedBookings = useMemo(() => sortBookingsByTime(state.bookings), [state.bookings]);
+    const nextBooking = sortedBookings[0] ?? null;
+    const nextSlot = useMemo(() => (nextBooking ? getSlotById(nextBooking.courseAssetId) : null), [nextBooking]);
+    const nextSessionDisplay = useMemo(() => {
+        if (!nextBooking) {
+            return null;
+        }
+        return getSessionDisplay(nextBooking.day, nextBooking.courseAssetId);
+    }, [nextBooking]);
+
+    const digestSwipeRef = useRef(null);
+    const digestPointerRef = useRef({ active: false, pointerId: null, startX: 0, startScroll: 0 });
+
+    const snapDigestToNearest = () => {
+        const el = digestSwipeRef.current;
+        if (!el) {
+            return;
+        }
+        const w = el.clientWidth;
+        if (w <= 0) {
+            return;
+        }
+        const idx = Math.max(0, Math.min(1, Math.round(el.scrollLeft / w)));
+        el.scrollTo({ left: idx * w, behavior: "smooth" });
+    };
+
+    useLayoutEffect(() => {
+        const el = digestSwipeRef.current;
+        if (!el) {
+            return;
+        }
+        let cancelled = false;
+        const apply = () => {
+            if (cancelled || !digestSwipeRef.current) {
+                return;
+            }
+            const w = digestSwipeRef.current.clientWidth;
+            if (w <= 0) {
+                requestAnimationFrame(apply);
+                return;
+            }
+            const idx = nextBooking ? 1 : 0;
+            digestSwipeRef.current.scrollLeft = idx * w;
+        };
+        apply();
+        return () => {
+            cancelled = true;
+        };
+    }, [nextBooking]);
+
+    const digestPointerDown = (e) => {
+        if (e.target.closest("button, a")) {
+            return;
+        }
+        const el = digestSwipeRef.current;
+        if (!el) {
+            return;
+        }
+        digestPointerRef.current = {
+            active: true,
+            pointerId: e.pointerId,
+            startX: e.clientX,
+            startScroll: el.scrollLeft,
+        };
+        el.setPointerCapture(e.pointerId);
+    };
+
+    const digestPointerMove = (e) => {
+        const p = digestPointerRef.current;
+        if (!p.active || p.pointerId !== e.pointerId) {
+            return;
+        }
+        const el = digestSwipeRef.current;
+        if (!el) {
+            return;
+        }
+        el.scrollLeft = p.startScroll - (e.clientX - p.startX);
+    };
+
+    const digestPointerUp = (e) => {
+        const p = digestPointerRef.current;
+        if (!p.active || p.pointerId !== e.pointerId) {
+            return;
+        }
+        p.active = false;
+        digestSwipeRef.current?.releasePointerCapture(e.pointerId);
+        snapDigestToNearest();
+    };
 
     const liveFeedItems = liveFeedData || [];
     const latestLiveFeedItem = liveFeedItems[0] || null;
@@ -66,6 +217,185 @@ export default function ClubPage({ onGoGrowth, onToast }) {
         }
         return t("club.liveFeed.typeText");
     };
+
+    if (clubView === "assessmentRecordDetail") {
+        const record = selectedAssessmentRecordId ? getAssessmentRecordById(selectedAssessmentRecordId) : null;
+
+        if (!record) {
+            return (
+                <section className="screen swing-3d-enter club-assessment-records-page">
+                    <header className="top-header club-subpage-header">
+                        <div className="user-chip">
+                            <button
+                                type="button"
+                                className="icon-btn"
+                                aria-label={t("club.assessmentRecords.backListAria")}
+                                onClick={() => setClubView("assessmentRecords")}
+                            >
+                                ←
+                            </button>
+                            <div>
+                                <p className="small-label">{t("club.assessmentRecords.detailTitle")}</p>
+                                <h1 className="headline">{t("club.assessmentRecords.listTitle")}</h1>
+                            </div>
+                        </div>
+                    </header>
+                    <section className="section-stack section-bottom-gap">
+                        <p className="muted-text">{t("club.assessmentRecords.listTitle")}</p>
+                        <button type="button" className="panel panel-low" onClick={() => setClubView("assessmentRecords")}>
+                            {t("club.assessmentRecords.backListAria")}
+                        </button>
+                    </section>
+                </section>
+            );
+        }
+
+        const recordTitle = t(`club.assessmentRecords.records.${record.i18nSlug}.title`);
+
+        return (
+            <section className="screen swing-3d-enter club-assessment-detail-page">
+                <header className="top-header club-subpage-header">
+                    <div className="user-chip">
+                        <button
+                            type="button"
+                            className="icon-btn"
+                            aria-label={t("club.assessmentRecords.backListAria")}
+                            onClick={() => setClubView("assessmentRecords")}
+                        >
+                            ←
+                        </button>
+                        <div>
+                            <p className="small-label">{t("club.assessmentRecords.detailTitle")}</p>
+                            <h1 className="headline club-assessment-detail-headline">{recordTitle}</h1>
+                        </div>
+                    </div>
+                </header>
+
+                <section className="section-stack section-bottom-gap club-record-page club-assessment-detail-body">
+                    <div className="stack-list">
+                        <div className="record-card-enter-wrap" style={{ animationDelay: "0ms" }}>
+                            <div className="panel panel-elevated club-assessment-detail-hero">
+                                <p className="small-label club-assessment-detail-hero-label">{t("club.assessmentRecords.dateLabel")}</p>
+                                <p className="club-assessment-detail-hero-date">{formatAssessmentRecordDate(record.dateIso, i18n.resolvedLanguage)}</p>
+                                <div className="club-assessment-detail-hero-coach">
+                                    <img src={record.coach.avatarUrl} alt="" className="club-assessment-coach-avatar" width={48} height={48} />
+                                    <div>
+                                        <p className="club-assessment-detail-hero-coach-label">{t("club.assessmentRecords.coachSection")}</p>
+                                        <p className="club-assessment-coach-name">{record.coach.name}</p>
+                                        <p className="muted-text club-assessment-coach-title">{record.coach.title}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {record.dimensions.map((dim, di) => (
+                            <div
+                                key={dim.id}
+                                className="record-card-enter-wrap"
+                                style={{ animationDelay: `${(di + 1) * ASSESSMENT_CARD_STAGGER_MS}ms` }}
+                            >
+                                <article className="panel panel-elevated club-assessment-dimension-block">
+                                    <div className="club-assessment-dimension-head">
+                                        <span className="club-assessment-dimension-accent" aria-hidden="true" />
+                                        <h2 className="section-title-sm club-assessment-dimension-title">
+                                            {t(`progressAssessment.${dim.id}.title`)}
+                                        </h2>
+                                    </div>
+                                    <p className="small-label club-assessment-dimension-summary-label">{t("club.assessmentRecords.dimensionSummary")}</p>
+                                    <p className="club-assessment-dimension-summary">
+                                        {t(`club.assessmentRecords.records.${record.i18nSlug}.dimensions.${dim.id}`)}
+                                    </p>
+                                    <p className="small-label club-assessment-item-eval-label">{t("club.assessmentRecords.itemEval")}</p>
+                                    <ul className="club-assessment-item-list">
+                                        {dim.items.map((item, ii) => {
+                                            const blockDelay = (di + 1) * ASSESSMENT_CARD_STAGGER_MS;
+                                            const itemAnimDelay =
+                                                blockDelay + ASSESSMENT_ITEM_AFTER_REVEAL_MS + ii * ASSESSMENT_ITEM_STAGGER_MS;
+                                            return (
+                                                <li
+                                                    key={item.key}
+                                                    className="club-assessment-item-row"
+                                                    style={{ animationDelay: `${itemAnimDelay}ms` }}
+                                                >
+                                                    <div className="club-assessment-item-head">
+                                                        <span className="club-assessment-item-name">{t(`progressAssessment.${dim.id}.items.${item.key}`)}</span>
+                                                        <span className="club-assessment-item-score-pill">
+                                                            {t("club.assessmentRecords.scoreShort", { score: item.score })}
+                                                        </span>
+                                                    </div>
+                                                    <p className="club-assessment-item-comment">
+                                                        {t(`club.assessmentRecords.records.${record.i18nSlug}.items.${dim.id}.${item.key}`)}
+                                                    </p>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </article>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            </section>
+        );
+    }
+
+    if (clubView === "assessmentRecords") {
+        return (
+            <section className="screen swing-3d-enter club-assessment-records-page">
+                <header className="top-header club-subpage-header">
+                    <div className="user-chip">
+                        <button
+                            type="button"
+                            className="icon-btn"
+                            aria-label={t("club.assessmentRecords.backHomeAria")}
+                            onClick={() => setClubView("home")}
+                        >
+                            ←
+                        </button>
+                        <div>
+                            <p className="small-label">{t("progressOverview.title")}</p>
+                            <h1 className="headline">{t("club.assessmentRecords.listTitle")}</h1>
+                        </div>
+                    </div>
+                    <span className="pill">{t("club.recordCount", { count: assessmentHistoryRecords.length })}</span>
+                </header>
+
+                <section className="section-stack section-bottom-gap club-record-page club-assessment-records-list">
+                    <div className="stack-list">
+                        {assessmentHistoryRecords.map((rec, i) => {
+                            const cardTitle = t(`club.assessmentRecords.records.${rec.i18nSlug}.title`);
+                            return (
+                                <div key={rec.id} className="record-card-enter-wrap" style={{ animationDelay: `${i * 420}ms` }}>
+                                    <button
+                                        type="button"
+                                        className="panel panel-elevated club-assessment-record-card"
+                                        aria-label={t("club.assessmentRecords.openRecordAria", { title: cardTitle })}
+                                        onClick={() => {
+                                            setSelectedAssessmentRecordId(rec.id);
+                                            setClubView("assessmentRecordDetail");
+                                        }}
+                                    >
+                                        <p className="small-label">{t("club.assessmentRecords.dateLabel")}</p>
+                                        <p className="club-assessment-record-date">{formatAssessmentRecordDate(rec.dateIso, i18n.resolvedLanguage)}</p>
+                                        <p className="small-label club-assessment-record-name-label">{t("club.assessmentRecords.nameLabel")}</p>
+                                        <h3 className="club-assessment-record-title">{cardTitle}</h3>
+                                        <p className="small-label club-assessment-record-coach-label">{t("club.assessmentRecords.coachSection")}</p>
+                                        <div className="club-assessment-record-coach">
+                                            <img src={rec.coach.avatarUrl} alt="" className="club-assessment-coach-avatar" width={44} height={44} />
+                                            <div>
+                                                <p className="club-assessment-coach-name">{rec.coach.name}</p>
+                                                <p className="muted-text club-assessment-coach-title">{rec.coach.title}</p>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </section>
+            </section>
+        );
+    }
 
     if (clubView === "liveFeed") {
         const staggerMs = 420;
@@ -298,6 +628,17 @@ export default function ClubPage({ onGoGrowth, onToast }) {
         );
     }
 
+    if (clubView === "booking") {
+        return (
+            <BookingPage
+                embedded
+                onEmbeddedBack={() => setClubView("home")}
+                onOpenBookingModal={onOpenBookingModal}
+                onToast={onToast}
+            />
+        );
+    }
+
     return (
         <section className="screen fade-enter club-home">
             <header className="top-header club-header">
@@ -371,7 +712,100 @@ export default function ClubPage({ onGoGrowth, onToast }) {
                 </section>
             )}
 
-            <ProgressOverviewSection withBottomGap={false} />
+            <section className="club-booking-digest section-stack section-bottom-gap" aria-label={t("club.bookingDigest.sectionTitle")}>
+                <div className="section-head">
+                    <h2 className="section-title-sm">{t("club.bookingDigest.sectionTitle")}</h2>
+                </div>
+                <div className="club-booking-digest-card">
+                    <div
+                        ref={digestSwipeRef}
+                        className="club-booking-digest-swipe"
+                        onPointerDown={digestPointerDown}
+                        onPointerMove={digestPointerMove}
+                        onPointerUp={digestPointerUp}
+                        onPointerCancel={digestPointerUp}
+                    >
+                        <div className="club-booking-digest-slide">
+                            <div className="club-booking-digest-slide-inner club-booking-digest-slide-inner--pre">
+                                <div className="club-booking-digest-slide-head">
+                                    <span className="club-booking-digest-pulse-dot" aria-hidden="true" />
+                                    <p className="club-booking-digest-eyebrow">{t("club.bookingDigest.preEyebrow")}</p>
+                                </div>
+                                <h3 className="club-booking-digest-title">{t("club.bookingDigest.preTitle")}</h3>
+                                <p className="club-booking-digest-summary">{t("club.bookingDigest.preSummary")}</p>
+                                <button
+                                    type="button"
+                                    className="club-booking-digest-action-btn"
+                                    onClick={() => setClubView("booking")}
+                                >
+                                    <span>{t("club.bookingDigest.viewDetails")}</span>
+                                    <span className="club-booking-digest-action-icon" aria-hidden="true">
+                                        →
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        <div className="club-booking-digest-slide">
+                            <div className="club-booking-digest-slide-inner club-booking-digest-slide-inner--post">
+                                {nextBooking ? (
+                                    <>
+                                        <div className="club-booking-digest-slide-head">
+                                            <span className="club-booking-digest-status-dot" aria-hidden="true" />
+                                            <p className="club-booking-digest-eyebrow">{t("club.bookingDigest.postEyebrow")}</p>
+                                        </div>
+                                        <p className="club-booking-digest-next-time">
+                                            {t("club.bookingDigest.nextTime", {
+                                                date: formatDigestSession(nextBooking.nextSessionISO, i18n.resolvedLanguage),
+                                                range: nextSlot?.range ?? "—",
+                                            })}
+                                        </p>
+                                        {nextSessionDisplay ? (
+                                            <p className="club-booking-digest-course">{nextSessionDisplay.courseName}</p>
+                                        ) : null}
+                                        <button
+                                            type="button"
+                                            className="club-booking-digest-action-btn club-booking-digest-action-btn--ghost"
+                                            onClick={() => setClubView("booking")}
+                                        >
+                                            <span>{t("club.bookingDigest.viewDetails")}</span>
+                                            <span className="club-booking-digest-action-icon" aria-hidden="true">
+                                                →
+                                            </span>
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="club-booking-digest-slide-head">
+                                            <span className="club-booking-digest-status-dot club-booking-digest-status-dot--muted" aria-hidden="true" />
+                                            <p className="club-booking-digest-eyebrow">{t("club.bookingDigest.postEyebrow")}</p>
+                                        </div>
+                                        <p className="club-booking-digest-summary club-booking-digest-summary--compact">
+                                            {t("club.bookingDigest.postEmptyHint")}
+                                        </p>
+                                        <button
+                                            type="button"
+                                            className="club-booking-digest-action-btn club-booking-digest-action-btn--primary"
+                                            onClick={() => setClubView("booking")}
+                                        >
+                                            <span>{t("club.bookingDigest.goBook")}</span>
+                                            <span className="club-booking-digest-action-icon" aria-hidden="true">
+                                                →
+                                            </span>
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <ProgressOverviewSection
+                withBottomGap={false}
+                onOpenAssessmentRecords={() => {
+                    setClubView("assessmentRecords");
+                }}
+            />
 
             <div className="club-entries-stack section-stack section-bottom-gap">
                 <button

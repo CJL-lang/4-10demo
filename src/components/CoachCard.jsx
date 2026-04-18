@@ -1,7 +1,4 @@
-import { useTranslation } from "react-i18next";
-
 export default function CoachCard({ coach, compact = false, selectable = false, selected = false, onClick }) {
-    const { t } = useTranslation();
     const interactiveProps = selectable
         ? {
               role: "button",
@@ -30,19 +27,8 @@ export default function CoachCard({ coach, compact = false, selectable = false, 
                     {coach.score ? <span className="coach-score">★ {coach.score}</span> : null}
                     {coach.time ? <span className="coach-badge" style={{ backgroundColor: 'rgba(255, 202, 104, 0.1)', color: 'var(--primary)', padding: '2px 8px', borderRadius: '12px', fontSize: '12px', whiteSpace: 'nowrap' }}>{coach.time}</span> : (coach.badge ? <span className="coach-badge">{coach.badge}</span> : null)}
                 </div>
-                {coach.courseName ? (
-                    <p className="coach-subtitle" style={{ color: 'var(--on-surface-variant)', fontSize: '13px', margin: '4px 0' }}>
-                        {t("coachCard.coach")} {coach.name} <span style={{ opacity: 0.6 }}>| {coach.title}</span>
-                    </p>
-                ) : (
-                    <p className="coach-subtitle">{coach.title}</p>
-                )}
-                {coach.drill ? <p className="coach-desc" style={{ marginTop: '8px', color: 'var(--tertiary)' }}>{t("coachCard.specialTraining")}{coach.drill}</p> : null}
-                {coach.desc ? (
-                    <p className="coach-desc" style={{ marginTop: coach.drill ? "4px" : "8px" }}>
-                        {coach.desc}
-                    </p>
-                ) : null}
+                {coach.courseName ? <p className="coach-subtitle" style={{ color: 'var(--on-surface-variant)', fontSize: '13px', margin: '4px 0' }}>教练：{coach.name} <span style={{ opacity: 0.6 }}>| {coach.title}</span></p> : <p className="coach-subtitle">{coach.title}</p>}
+                {coach.drill ? <p className="coach-desc" style={{ marginTop: '8px', color: 'var(--tertiary)' }}>专项训练：{coach.drill}</p> : (coach.desc ? <p className="coach-desc">{coach.desc}</p> : null)}
             </div>
         </article>
     );

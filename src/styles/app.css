@@ -530,7 +530,7 @@
     line-height: 1.6;
 }
 
-/* 预约通知 / 课后互评 共用课程信息卡 */
+/* 预约通知 / 课后评价 共用课程信息卡 */
 .session-course-detail-card {
     margin-bottom: 20px;
     background: var(--surface-container-high);
@@ -1753,6 +1753,261 @@
     background: linear-gradient(135deg, var(--primary), var(--primary-container));
 }
 
+.growth-session-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.growth-session-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 16px 14px;
+    border-radius: 20px;
+}
+
+.growth-session-card--done {
+    opacity: 0.92;
+}
+
+.growth-session-card__meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+    color: rgba(245, 236, 216, 0.62);
+}
+
+.growth-session-card__time {
+    color: rgba(120, 200, 255, 0.9);
+    font-variant-numeric: tabular-nums;
+}
+
+.growth-session-card__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.growth-session-card__title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.25;
+    color: rgba(255, 252, 245, 0.96);
+}
+
+.growth-session-card__pill {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(245, 236, 216, 0.82);
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.growth-session-card__drill {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: rgba(245, 236, 216, 0.78);
+}
+
+.growth-session-card__coach {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.growth-session-card__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 202, 104, 0.35);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.growth-session-card__coach-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.growth-session-card__coach-role {
+    font-size: 11px;
+    color: rgba(245, 236, 216, 0.55);
+}
+
+.growth-session-card__coach-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255, 252, 245, 0.94);
+}
+
+.growth-session-card__note {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(245, 236, 216, 0.72);
+}
+
+.growth-session-card__cta {
+    margin-top: 4px;
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    color: var(--primary);
+    background: transparent;
+    border: 1.5px solid rgba(255, 202, 104, 0.55);
+    transition:
+        background var(--transition-fast),
+        color var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+.growth-session-card__cta:hover {
+    background: rgba(255, 202, 104, 0.1);
+    border-color: rgba(255, 202, 104, 0.85);
+}
+
+.growth-report-detail-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: rgba(245, 236, 216, 0.72);
+}
+
+.growth-report-detail-meta__time {
+    color: rgba(120, 200, 255, 0.88);
+    font-variant-numeric: tabular-nums;
+}
+
+.growth-report-detail-drill {
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: rgba(245, 236, 216, 0.82);
+}
+
+.growth-report-detail-coach {
+    margin-top: 12px;
+}
+
+.growth-report-detail-subhead {
+    margin: 18px 0 0;
+    font-size: 13px;
+    font-weight: 800;
+    color: rgba(255, 252, 245, 0.88);
+}
+
+.growth-report-detail-body {
+    margin: 8px 0 0;
+    font-size: 14px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    color: rgba(245, 236, 216, 0.78);
+}
+
+.growth-report-live-wrap {
+    margin-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 14px;
+}
+
+.growth-report-live-head {
+    margin-bottom: 8px;
+}
+
+.growth-report-live-card {
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 10px;
+}
+
+.growth-report-live-item {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: growthLiveItemIn 420ms cubic-bezier(0.22, 0.88, 0.32, 1) both;
+}
+
+@keyframes growthLiveItemIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.review-session-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.review-session-time-pill {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.review-session-divider {
+    margin: 14px 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.review-session-coach-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.review-session-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 202, 104, 0.4);
+}
+
+.review-session-avatar--placeholder {
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.review-session-coach-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.review-session-coach-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: rgba(255, 252, 245, 0.95);
+}
+
+.review-session-coach-title {
+    font-size: 12px;
+}
+
 .progress-overview-card {
     margin-top: 6px;
 }
@@ -1791,6 +2046,37 @@
     min-height: 210px;
 }
 
+.progress-chart-box {
+    border-radius: 22px;
+    padding: 16px 14px 14px;
+    border: 1px solid rgba(255, 202, 104, 0.14);
+    background:
+        radial-gradient(120% 85% at 50% 0%, rgba(255, 202, 104, 0.09), transparent 55%),
+        linear-gradient(165deg, rgba(30, 26, 17, 0.88) 0%, rgba(14, 12, 8, 0.74) 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 12px 28px rgba(0, 0, 0, 0.24);
+    transition:
+        border-color 280ms ease,
+        box-shadow 280ms ease;
+}
+
+.progress-chart-box:hover {
+    border-color: rgba(255, 202, 104, 0.2);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        0 14px 34px rgba(0, 0, 0, 0.28);
+}
+
+.progress-chart-box:focus-within {
+    border-color: rgba(255, 202, 104, 0.22);
+}
+
+.trend-panel .progress-chart-box .chart-progress-head {
+    margin-bottom: 12px;
+    margin-top: 0;
+}
+
 .chart-progress-head {
     flex-direction: column;
     align-items: stretch;
@@ -1800,43 +2086,452 @@
 
 .chart-progress-head-top {
     display: flex;
-    align-items: baseline;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
     width: 100%;
 }
 
-.chart-carousel-hint {
-    margin: 0;
-    font-size: 12px;
-    line-height: 1.45;
-    color: var(--outline);
-    letter-spacing: 0.02em;
-}
-
-.trend-legend {
-    margin-top: 8px;
+.chart-progress-head-lead {
     display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+    min-width: 0;
 }
 
-.trend-legend-item {
+.progress-view-toggle {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    padding: 3px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    gap: 2px;
+}
+
+.progress-view-toggle button {
+    margin: 0;
+    border: none;
+    background: transparent;
+    color: var(--outline);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 6px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    line-height: 1.2;
+    white-space: nowrap;
+    transition:
+        background-color 200ms ease,
+        color 200ms ease;
+}
+
+.progress-view-toggle button:hover:not(.is-active) {
+    color: var(--on-surface-variant);
+}
+
+.progress-view-toggle button.is-active {
+    background: rgba(255, 202, 104, 0.2);
+    color: var(--primary-fixed);
+}
+
+.progress-view-toggle button:focus-visible {
+    outline: 2px solid rgba(255, 202, 104, 0.55);
+    outline-offset: 2px;
+}
+
+.chart-progress-head-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.progress-view-records-btn {
+    margin: 0;
+    border: none;
+    background: transparent;
+    padding: 2px 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: rgba(255, 202, 104, 0.92);
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    white-space: nowrap;
+}
+
+.progress-view-records-btn:hover {
+    color: var(--primary-fixed);
+}
+
+.progress-view-records-btn:focus-visible {
+    outline: 2px solid rgba(255, 202, 104, 0.55);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Club — assessment records list & detail（对齐课程档案 skills：玻璃层次 + rankRowReveal） */
+.club-assessment-records-page .club-subpage-header,
+.club-assessment-detail-page .club-subpage-header {
+    align-items: flex-start;
+}
+
+.club-assessment-records-page .club-subpage-header .headline {
+    font-size: 22px;
+    line-height: 1.25;
+}
+
+.club-assessment-detail-page {
+    margin-top: 2px;
+}
+
+.club-assessment-detail-body .stack-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.club-assessment-detail-hero {
+    padding: 18px 16px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 202, 104, 0.16);
+    background:
+        radial-gradient(120% 90% at 50% 0%, rgba(255, 202, 104, 0.1), transparent 55%),
+        linear-gradient(165deg, rgba(28, 24, 16, 0.92) 0%, rgba(14, 12, 8, 0.78) 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 14px 36px rgba(0, 0, 0, 0.22);
+}
+
+.club-assessment-detail-hero-label {
+    margin: 0;
+    opacity: 0.88;
+}
+
+.club-assessment-detail-hero-date {
+    margin: 6px 0 0;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--primary-fixed);
+    line-height: 1.25;
+}
+
+.club-assessment-detail-hero-coach {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 14px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.club-assessment-detail-hero-coach-label {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--outline);
+}
+
+.club-assessment-dimension-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0 0 2px;
+}
+
+.club-assessment-dimension-accent {
+    width: 4px;
+    min-height: 1.1em;
+    margin-top: 0.4em;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 202, 104, 0.95), rgba(255, 202, 104, 0.2));
+    flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(255, 202, 104, 0.22);
+}
+
+.club-assessment-dimension-title {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.club-assessment-dimension-block {
+    padding: 18px 16px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(160deg, rgba(26, 22, 14, 0.9) 0%, rgba(12, 10, 6, 0.74) 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.club-assessment-dimension-summary-label {
+    margin: 14px 0 8px;
+}
+
+.club-assessment-item-eval-label {
+    margin: 18px 0 10px;
+}
+
+.club-assessment-dimension-summary {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
     color: var(--on-surface-variant);
-    font-size: 12px;
+}
+
+.club-assessment-item-list {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+@keyframes assessmentItemRowIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+        filter: blur(4px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+.club-assessment-item-row {
+    padding: 12px 12px 12px 14px;
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    /* animation-delay 由 ClubPage 按「父卡 stagger + rankRowReveal 过半 + 子项错层」内联传入 */
+    animation: assessmentItemRowIn 480ms cubic-bezier(0.22, 0.88, 0.32, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .club-assessment-item-row {
+        animation: none !important;
+        animation-delay: 0ms !important;
+        opacity: 1;
+        transform: none;
+        filter: none;
+    }
+}
+
+.club-assessment-item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
     font-weight: 700;
 }
 
-.trend-legend-item i {
-    display: inline-block;
-    width: 14px;
-    height: 3px;
-    border-radius: 99px;
+.club-assessment-item-name {
+    min-width: 0;
+    line-height: 1.35;
 }
 
+.club-assessment-item-score-pill {
+    flex-shrink: 0;
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    color: var(--primary-fixed);
+    background: rgba(255, 202, 104, 0.14);
+    border: 1px solid rgba(255, 202, 104, 0.28);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+.club-assessment-item-comment {
+    margin: 10px 0 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--on-surface-variant);
+}
+
+.club-assessment-record-card {
+    display: block;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    margin: 0;
+    padding: 18px 16px;
+    box-sizing: border-box;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: linear-gradient(160deg, rgba(26, 22, 14, 0.85) 0%, rgba(14, 12, 8, 0.7) 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 10px 28px rgba(0, 0, 0, 0.2);
+    transition:
+        border-color 220ms ease,
+        box-shadow 220ms ease,
+        transform 220ms ease;
+}
+
+.club-assessment-record-card:hover {
+    border-color: rgba(255, 202, 104, 0.22);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 14px 36px rgba(0, 0, 0, 0.26);
+    transform: translateY(-1px);
+}
+
+.club-assessment-record-card:active {
+    transform: translateY(0);
+}
+
+.club-assessment-record-date {
+    margin: 4px 0 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--primary-fixed);
+    letter-spacing: -0.02em;
+}
+
+.club-assessment-record-title {
+    margin: 6px 0 0;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--on-surface);
+}
+
+.club-assessment-record-name-label,
+.club-assessment-record-coach-label {
+    margin-top: 14px;
+}
+
+.club-assessment-record-coach {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.club-assessment-coach-avatar {
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid rgba(255, 202, 104, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.club-assessment-coach-name {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.club-assessment-coach-title {
+    margin: 2px 0 0;
+    font-size: 12px;
+}
+
+.club-assessment-detail-page .club-subpage-header .club-assessment-detail-headline {
+    font-size: 18px;
+    line-height: 1.3;
+    max-width: 100%;
+    letter-spacing: -0.02em;
+}
+
+/* ── Progress assessment: horizontal swipe + radar（与 chart同款的左右箭头） */
+.progress-assessment-outer {
+    position: relative;
+    margin-top: 2px;
+}
+
+.progress-assessment-outer .chart-carousel-nav {
+    z-index: 13;
+}
+
+.progress-assessment-swipe {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    cursor: grab;
+    /* 与 chart-carousel-outer 一致：竖向交给外层，横向由 Pointer 实时驱动 */
+    touch-action: pan-y;
+    user-select: none;
+    outline: none;
+    padding: 2px 0 6px;
+    min-height: 300px;
+}
+
+.progress-assessment-swipe.is-dragging {
+    scroll-snap-type: none;
+    cursor: grabbing;
+}
+
+.progress-assessment-swipe:focus-visible {
+    outline: 2px solid rgba(255, 202, 104, 0.45);
+    outline-offset: 3px;
+    border-radius: 18px;
+}
+
+.progress-assessment-swipe:active {
+    cursor: grabbing;
+}
+
+.progress-assessment-swipe::-webkit-scrollbar {
+    display: none;
+}
+
+.progress-assessment-slide {
+    flex: 0 0 100%;
+    min-width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    padding: 4px 8px 8px;
+}
+
+.progress-assessment-slide-inner {
+    border-radius: 18px;
+    padding: 14px 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(165deg, rgba(22, 18, 12, 0.65) 0%, rgba(10, 8, 5, 0.45) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    min-height: 280px;
+    box-sizing: border-box;
+}
+
+.progress-assessment-slide-title {
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.25;
+    color: var(--primary-fixed);
+    letter-spacing: -0.01em;
+}
+
+/* ── Legacy skill trend: 3D chart carousel (weekly D1–D7) ─────────────── */
 /* ── Shared SVG primitives (reused in carousel cards) ──────────────────── */
 .trend-grid-line {
     stroke: rgba(157, 143, 121, 0.18);
@@ -1888,7 +2583,7 @@
 /* ── Chart Carousel ────────────────────────────────────────────────────── */
 .chart-carousel-outer {
     position: relative;
-    height: 210px;
+    height: 232px;
     margin-top: 4px;
     overflow: hidden;
     border-radius: 20px;
@@ -2167,10 +2862,10 @@
     background: linear-gradient(to left, rgba(14, 11, 7, 0.96) 0%, rgba(14, 11, 7, 0.4) 45%, transparent 100%);
 }
 
-/* Dot indicators */
+/* Dot indicators — sit low so D1–D7 row on the active card stays readable */
 .chart-dots {
     position: absolute;
-    bottom: 10px;
+    bottom: 3px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -2264,6 +2959,298 @@
     text-align: center;
     font-size: 10px;
     color: var(--outline);
+}
+
+.app-stage.locale-en .chart-card-label {
+    font-size: 12px;
+    letter-spacing: -0.01em;
+}
+
+@keyframes radarFrameIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.94);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes radarBgDiscIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes radarGridFadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes radarAxisFadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes radarAreaReveal {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes radarStrokeDraw {
+    0% {
+        stroke-dashoffset: 1;
+    }
+
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes radarPointPop {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes radarLegendRowIn {
+    0% {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.assessment-radar-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+    color: var(--assessment-accent);
+}
+
+.assessment-radar-wrap--animated .assessment-radar-svg-frame {
+    animation: radarFrameIn 560ms cubic-bezier(0.22, 0.88, 0.32, 1) both;
+}
+
+.assessment-radar-svg-frame {
+    margin: 0 auto;
+    max-width: 236px;
+    padding: 12px;
+    border-radius: 22px;
+    background: linear-gradient(165deg, rgba(22, 18, 12, 0.5) 0%, rgba(8, 6, 4, 0.28) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 10px 28px rgba(0, 0, 0, 0.2);
+}
+
+.assessment-radar-svg {
+    width: 100%;
+    max-width: 220px;
+    margin: 0 auto;
+    display: block;
+    overflow: visible;
+}
+
+.assessment-radar-bg-disc {
+    opacity: 0;
+    animation: radarBgDiscIn 480ms ease 40ms forwards;
+}
+
+.assessment-radar-grid {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.11);
+    stroke-width: 1;
+    opacity: 0;
+    animation: radarGridFadeIn 420ms cubic-bezier(0.22, 0.88, 0.32, 1) forwards;
+}
+
+.assessment-radar-grid--outer {
+    stroke: rgba(255, 202, 104, 0.22);
+    stroke-width: 1.35;
+}
+
+.assessment-radar-axis {
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 1;
+    opacity: 0;
+    animation: radarAxisFadeIn 400ms cubic-bezier(0.22, 0.88, 0.32, 1) forwards;
+}
+
+.assessment-radar-area {
+    opacity: 0;
+    animation: radarAreaReveal 720ms cubic-bezier(0.22, 0.88, 0.32, 1) 200ms forwards;
+}
+
+.assessment-radar-stroke {
+    stroke-width: 2.45;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    filter: drop-shadow(0 0 5px rgba(255, 202, 104, 0.22));
+    animation: radarStrokeDraw 1000ms cubic-bezier(0.4, 0, 0.2, 1) 280ms forwards;
+}
+
+.assessment-radar-point {
+    stroke: rgba(255, 252, 245, 0.88);
+    stroke-width: 1.35;
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: radarPointPop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.assessment-radar-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px 10px;
+    grid-template-columns: 1fr 1fr;
+    font-size: 12px;
+    color: rgba(245, 236, 216, 0.85);
+}
+
+.assessment-radar-legend li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    opacity: 0;
+    animation: radarLegendRowIn 440ms cubic-bezier(0.22, 0.88, 0.32, 1) both;
+}
+
+@supports (color: color-mix(in srgb, white, black)) {
+    .assessment-radar-legend li {
+        border-color: color-mix(in srgb, var(--assessment-accent) 22%, rgba(255, 255, 255, 0.08));
+    }
+}
+
+.assessment-radar-legend strong {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--assessment-accent);
+}
+
+.assessment-radar-legend strong small {
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 2px;
+    opacity: 0.85;
+}
+
+.assessment-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.assessment-bar-row {
+    display: grid;
+    grid-template-columns: 1fr minmax(72px, 1.1fr) auto;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.assessment-bar-label {
+    color: rgba(245, 236, 216, 0.88);
+    line-height: 1.3;
+}
+
+.assessment-bar-track {
+    height: 8px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.assessment-bar-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--assessment-accent), rgba(255, 255, 255, 0.35));
+    min-width: 4%;
+    transition: width 400ms cubic-bezier(0.22, 0.95, 0.28, 1);
+}
+
+.assessment-bar-score {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--assessment-accent);
+    min-width: 2.5rem;
+    text-align: right;
+}
+
+.assessment-bar-unit {
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 2px;
+    opacity: 0.8;
+}
+
+@media (max-width: 400px) {
+    .assessment-radar-legend {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .assessment-bar-fill {
+        transition: none;
+    }
+
+    .assessment-radar-wrap--animated .assessment-radar-svg-frame,
+    .assessment-radar-bg-disc,
+    .assessment-radar-grid,
+    .assessment-radar-axis,
+    .assessment-radar-area,
+    .assessment-radar-stroke,
+    .assessment-radar-point,
+    .assessment-radar-legend li,
+    .growth-report-live-item {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+        stroke-dashoffset: 0 !important;
+    }
 }
 
 .task-summary-card {
@@ -3087,15 +4074,13 @@
     pointer-events: none;
     z-index: 4;
     opacity: 0;
-    background: linear-gradient(
-        118deg,
-        transparent 0%,
-        transparent 36%,
-        rgba(255, 252, 235, 0.98) 49.5%,
-        rgba(255, 236, 160, 0.75) 51%,
-        transparent 64%,
-        transparent 100%
-    );
+    background: linear-gradient(118deg,
+            transparent 0%,
+            transparent 36%,
+            rgba(255, 252, 235, 0.98) 49.5%,
+            rgba(255, 236, 160, 0.75) 51%,
+            transparent 64%,
+            transparent 100%);
     background-size: 240% 100%;
     background-position: 130% 50%;
     mix-blend-mode: screen;
@@ -4585,6 +5570,243 @@
 
 .club-home .top-header {
     margin-bottom: 18px;
+}
+
+.club-booking-digest-card {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 26px;
+    border: 1px solid rgba(255, 202, 104, 0.12);
+    background: linear-gradient(165deg, rgba(28, 22, 12, 0.55), rgba(14, 10, 5, 0.72));
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.2),
+        0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.club-booking-digest-swipe {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    cursor: grab;
+    touch-action: pan-x;
+    user-select: none;
+    padding: 4px 0 6px;
+}
+
+.club-booking-digest-swipe:active {
+    cursor: grabbing;
+}
+
+.club-booking-digest-swipe::-webkit-scrollbar {
+    display: none;
+}
+
+.club-booking-digest-slide {
+    flex: 0 0 100%;
+    min-width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    padding: 8px 12px 10px;
+}
+
+.club-booking-digest-slide-inner {
+    position: relative;
+    overflow: hidden;
+    padding: 20px 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+    min-height: 148px;
+    box-sizing: border-box;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 202, 104, 0.16);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+.club-booking-digest-slide-inner::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 4px 0 0 4px;
+    pointer-events: none;
+}
+
+.club-booking-digest-slide-inner--pre {
+    background:
+        radial-gradient(140px 100px at 100% 0%, rgba(255, 202, 104, 0.2), transparent 72%),
+        linear-gradient(155deg, rgba(72, 58, 36, 0.5) 0%, rgba(24, 19, 10, 0.96) 100%);
+}
+
+.club-booking-digest-slide-inner--pre::before {
+    background: linear-gradient(180deg, #ffca68, rgba(236, 171, 19, 0.65));
+    box-shadow: 0 0 16px rgba(255, 202, 104, 0.45);
+}
+
+.club-booking-digest-slide-inner--post {
+    background:
+        radial-gradient(120px 90px at 0% 0%, rgba(124, 184, 138, 0.12), transparent 70%),
+        radial-gradient(160px 100px at 100% 100%, rgba(255, 202, 104, 0.1), transparent 65%),
+        linear-gradient(165deg, rgba(34, 40, 32, 0.45) 0%, rgba(16, 14, 10, 0.96) 100%);
+}
+
+.club-booking-digest-slide-inner--post::before {
+    background: linear-gradient(180deg, rgba(124, 184, 138, 0.95), rgba(90, 140, 102, 0.55));
+    box-shadow: 0 0 14px rgba(124, 184, 138, 0.35);
+}
+
+.club-booking-digest-slide-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.club-booking-digest-pulse-dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 10px rgba(255, 202, 104, 0.85);
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.club-booking-digest-status-dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(124, 184, 138, 0.95);
+    box-shadow: 0 0 10px rgba(124, 184, 138, 0.55);
+}
+
+.club-booking-digest-status-dot--muted {
+    background: rgba(255, 255, 255, 0.22);
+    box-shadow: none;
+}
+
+.club-booking-digest-eyebrow {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 224, 176, 0.82);
+}
+
+.club-booking-digest-title {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--primary-fixed);
+    line-height: 1.2;
+}
+
+.club-booking-digest-summary {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: rgba(245, 236, 216, 0.78);
+    max-width: 100%;
+}
+
+.club-booking-digest-summary--compact {
+    line-height: 1.5;
+}
+
+.club-booking-digest-next-time {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #fff5e0;
+    line-height: 1.35;
+}
+
+.club-booking-digest-course {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 214, 160, 0.88);
+    line-height: 1.4;
+}
+
+.club-booking-digest-action-btn {
+    margin-top: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px 10px 18px;
+    border: 1px solid rgba(255, 202, 104, 0.35);
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(255, 202, 104, 0.22), rgba(59, 52, 38, 0.35));
+    color: var(--primary-fixed);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition:
+        transform var(--transition-fast),
+        border-color var(--transition-fast),
+        background var(--transition-main),
+        box-shadow var(--transition-fast);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+}
+
+.club-booking-digest-action-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 202, 104, 0.55);
+    background: linear-gradient(135deg, rgba(255, 202, 104, 0.32), rgba(59, 52, 38, 0.45));
+}
+
+.club-booking-digest-action-btn:focus-visible {
+    outline: 2px solid rgba(255, 202, 104, 0.65);
+    outline-offset: 2px;
+}
+
+.club-booking-digest-action-btn--ghost {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: none;
+}
+
+.club-booking-digest-action-btn--ghost:hover {
+    background: rgba(255, 202, 104, 0.1);
+    border-color: rgba(255, 202, 104, 0.28);
+}
+
+.club-booking-digest-action-btn--primary {
+    border-color: rgba(255, 202, 104, 0.45);
+    background: linear-gradient(135deg, rgba(236, 171, 19, 0.55), rgba(180, 120, 20, 0.35));
+    color: #1a1206;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.club-booking-digest-action-btn--primary:hover {
+    background: linear-gradient(135deg, rgba(255, 202, 104, 0.75), rgba(200, 140, 30, 0.45));
+    color: #120c02;
+}
+
+.club-booking-digest-action-icon {
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1;
+    opacity: 0.9;
 }
 
 .club-entries-stack {
@@ -6137,24 +7359,24 @@
     gap: 22px;
 }
 
-.booking-detail-stack > .booking-detail-hero,
-.booking-detail-stack > .booking-detail-section {
+.booking-detail-stack>.booking-detail-hero,
+.booking-detail-stack>.booking-detail-section {
     animation: bookingDetailReveal 560ms cubic-bezier(0.22, 0.88, 0.32, 1) both;
 }
 
-.booking-detail-stack > *:nth-child(1) {
+.booking-detail-stack>*:nth-child(1) {
     animation-delay: 0ms;
 }
 
-.booking-detail-stack > *:nth-child(2) {
+.booking-detail-stack>*:nth-child(2) {
     animation-delay: 70ms;
 }
 
-.booking-detail-stack > *:nth-child(3) {
+.booking-detail-stack>*:nth-child(3) {
     animation-delay: 140ms;
 }
 
-.booking-detail-stack > *:nth-child(4) {
+.booking-detail-stack>*:nth-child(4) {
     animation-delay: 210ms;
 }
 
@@ -6438,8 +7660,8 @@
 
 @media (prefers-reduced-motion: reduce) {
 
-    .booking-detail-stack > .booking-detail-hero,
-    .booking-detail-stack > .booking-detail-section {
+    .booking-detail-stack>.booking-detail-hero,
+    .booking-detail-stack>.booking-detail-section {
         animation: none;
         opacity: 1;
         transform: none;
@@ -7324,11 +8546,6 @@
 .app-stage.locale-en .coach-desc,
 .app-stage.locale-en .session-course-detail-sub {
     line-height: 1.45;
-}
-
-.app-stage.locale-en .chart-card-label {
-    font-size: 12px;
-    letter-spacing: -0.01em;
 }
 
 /* ==========================================================================

@@ -1,23 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 function computeCountdown(targetISO) {
-    if (!targetISO) {
-        return {
-            days: "00",
-            hours: "00",
-            minutes: "00",
-            seconds: "00",
-        };
-    }
     const target = new Date(targetISO).getTime();
-    if (Number.isNaN(target)) {
-        return {
-            days: "00",
-            hours: "00",
-            minutes: "00",
-            seconds: "00",
-        };
-    }
     const diff = Math.max(0, target - Date.now());
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);

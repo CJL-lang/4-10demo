@@ -1,6 +1,6 @@
 export const navItems = [
     { key: "club", label: "进度", icon: "◫" },
-    { key: "booking", label: "预约", icon: "◷" },
+    { key: "messages", label: "消息", icon: "✉" },
     { key: "growth", label: "课后", icon: "⌁" },
     { key: "profile", label: "我的", icon: "◉" },
 ];
@@ -352,6 +352,16 @@ export const recordFilterItems = [{ key: "skills" }];
 
 export const growthViewItems = [{ key: "tasks" }, { key: "report" }, { key: "review" }];
 
+/** 进度页六项测评：雷达/图例强调色（统一金色系，与主题 primary 同族） */
+export const assessmentSlideColors = {
+    swingMechanics: "var(--primary)",
+    shortGame: "#f5c84a",
+    putting: "#ffd78a",
+    physical: "#e8b032",
+    mental: "#ffc668",
+    courseManagement: "#f4d58d",
+};
+
 export const growthOverview = {
     phaseLabel: "提升期 Week 5 / 8",
     phaseProgress: 62,
@@ -362,6 +372,60 @@ export const growthOverview = {
         { key: "心理", score: 91, displayValue: "91", trend: "+2" },
         { key: "技能", score: 78, displayValue: "L8", trend: "+1级" },
     ],
+    assessmentSlides: [
+        {
+            id: "swingMechanics",
+            items: [
+                { key: "grip", score: 8 },
+                { key: "stance", score: 7 },
+                { key: "backswing", score: 7 },
+                { key: "downswing", score: 6 },
+                { key: "impact", score: 8 },
+                { key: "followThrough", score: 7 },
+            ],
+        },
+        {
+            id: "shortGame",
+            items: [
+                { key: "chip", score: 7 },
+                { key: "pitch", score: 6 },
+                { key: "bunker", score: 5 },
+            ],
+        },
+        {
+            id: "putting",
+            items: [
+                { key: "distanceControl", score: 8 },
+                { key: "directionControl", score: 7 },
+                { key: "greenReading", score: 6 },
+            ],
+        },
+        {
+            id: "physical",
+            items: [
+                { key: "flexibility", score: 7 },
+                { key: "coreStrength", score: 6 },
+                { key: "balance", score: 8 },
+                { key: "power", score: 5 },
+            ],
+        },
+        {
+            id: "mental",
+            items: [
+                { key: "focus", score: 8 },
+                { key: "pressure", score: 6 },
+                { key: "competitionMindset", score: 7 },
+            ],
+        },
+        {
+            id: "courseManagement",
+            items: [
+                { key: "strategy", score: 7 },
+                { key: "riskAssessment", score: 6 },
+            ],
+        },
+    ],
+    /** 旧版「技能趋势」轮播：五项技能 × D1–D7 等级曲线（演示数据） */
     weeklyTrendSeries: {
         irons: [5, 6, 6, 7, 7, 7, 7],
         woods: [4, 5, 5, 5, 6, 6, 6],
@@ -371,53 +435,204 @@ export const growthOverview = {
     },
 };
 
+/** Club 测评记录列表/详情演示数据（维度 id、子项 key 与 progressAssessment 对齐） */
+export const assessmentHistoryRecords = [
+    {
+        id: "ar-rec-1",
+        i18nSlug: "r1",
+        dateIso: "2024-03-28T14:30:00",
+        coach: { ...MAIN_COACH },
+        dimensions: [
+            {
+                id: "swingMechanics",
+                items: [
+                    { key: "grip", score: 8 },
+                    { key: "stance", score: 7 },
+                    { key: "backswing", score: 7 },
+                    { key: "downswing", score: 6 },
+                    { key: "impact", score: 8 },
+                    { key: "followThrough", score: 7 },
+                ],
+            },
+            {
+                id: "shortGame",
+                items: [
+                    { key: "chip", score: 7 },
+                    { key: "pitch", score: 6 },
+                    { key: "bunker", score: 5 },
+                ],
+            },
+            {
+                id: "putting",
+                items: [
+                    { key: "distanceControl", score: 8 },
+                    { key: "directionControl", score: 7 },
+                    { key: "greenReading", score: 6 },
+                ],
+            },
+            {
+                id: "physical",
+                items: [
+                    { key: "flexibility", score: 7 },
+                    { key: "coreStrength", score: 6 },
+                    { key: "balance", score: 8 },
+                    { key: "power", score: 5 },
+                ],
+            },
+        ],
+    },
+    {
+        id: "ar-rec-2",
+        i18nSlug: "r2",
+        dateIso: "2024-03-15T10:00:00",
+        coach: {
+            name: "Alex Rivera",
+            initials: "AR",
+            title: "短杆专项教练",
+            avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+        },
+        dimensions: [
+            {
+                id: "swingMechanics",
+                items: [
+                    { key: "grip", score: 7 },
+                    { key: "stance", score: 8 },
+                    { key: "impact", score: 7 },
+                ],
+            },
+            {
+                id: "mental",
+                items: [
+                    { key: "focus", score: 8 },
+                    { key: "pressure", score: 6 },
+                    { key: "competitionMindset", score: 7 },
+                ],
+            },
+            {
+                id: "courseManagement",
+                items: [
+                    { key: "strategy", score: 7 },
+                    { key: "riskAssessment", score: 6 },
+                ],
+            },
+        ],
+    },
+    {
+        id: "ar-rec-3",
+        i18nSlug: "r3",
+        dateIso: "2024-02-28T16:00:00",
+        coach: { ...MAIN_COACH },
+        dimensions: [
+            {
+                id: "putting",
+                items: [
+                    { key: "distanceControl", score: 7 },
+                    { key: "directionControl", score: 8 },
+                    { key: "greenReading", score: 7 },
+                ],
+            },
+            {
+                id: "shortGame",
+                items: [
+                    { key: "chip", score: 8 },
+                    { key: "pitch", score: 7 },
+                    { key: "bunker", score: 6 },
+                ],
+            },
+        ],
+    },
+];
+
+export function getAssessmentRecordById(recordId) {
+    return assessmentHistoryRecords.find((r) => r.id === recordId) ?? null;
+}
+
+/** 课后作业 / 课后报告列表与详情共用；与 records[].id 通过 recordId 对齐（课程记录「打开作业」） */
 export const practiceTasks = [
     {
-        id: "w-2024-week16",
+        id: "w-iron-a-240328",
         recordId: "r-240328",
-        title: "第 16 周：果岭周边短杆控制",
-        publishTime: "2024-04-15 09:00",
-        deadline: "2024-04-21 23:59",
+        title: "铁杆·A组",
+        titleEn: "Irons · Group A",
+        publishTime: "2024-03-28 12:00",
+        deadline: "2024-04-05 23:59",
+        sessionDate: "2024年3月28日",
+        sessionDateEn: "Mar 28, 2024",
+        sessionTime: "10:00–11:30",
+        drillTopic: "专项: 7号铁击球面控制与起草",
+        drillTopicEn: "Focus: 7-iron face control and turf interaction",
+        coachTitle: "主教练",
+        coach: MAIN_COACH.name,
+        avatarUrl: MAIN_COACH.avatarUrl,
+        coachNote: "命中率达到 8/10，击球重心更稳定。",
+        coachNoteEn: "Hit rate 8/10; strike-centeredness is steadier.",
+        category: "课后作业",
+        difficulty: "技能",
         projectItems: [
-            "15码内高抛球落点控制 (10次)",
-            "沙坑救球出沙率测试 (10次)",
-            "核心收紧静力支撑保持"
+            "7号铁击球面角度自检（连续 10 球）",
+            "草痕方向与深浅记录（视频+标注）",
+            "击球重心偏移复盘（文字或语音）",
         ],
-        projectRequirements: "本周重点突破果岭边的复杂球位。录制沙坑救球视频时，需清晰展示双脚站位和球杆面的打开程度。文字复盘要求说明沙坑起爆点的击球感受。",
-        reward: "短杆控制 +5",
+        projectRequirements:
+            "视频需包含杆面朝向与草痕特写；复盘需说明至少两次节奏失衡的原因与调整。",
+        reward: "",
         progress: 0,
-        coach: "教练 Alex Rivera",
     },
     {
-        id: "w-2024-week15",
+        id: "w-short-adv-240307",
         recordId: "r-240307",
-        title: "第 15 周：中长铁与下盘稳定",
-        publishTime: "2024-04-08 09:00",
-        deadline: "2024-04-14 23:59",
+        title: "短杆·进阶班",
+        titleEn: "Short game · Advanced",
+        publishTime: "2024-03-07 16:00",
+        deadline: "2024-03-20 23:59",
+        sessionDate: "2024年3月7日",
+        sessionDateEn: "Mar 7, 2024",
+        sessionTime: "14:30–16:00",
+        drillTopic: "专项: 30码内切杆节奏训练",
+        drillTopicEn: "Focus: chipping rhythm inside 30 yards",
+        coachTitle: "主教练",
+        coach: MAIN_COACH.name,
+        avatarUrl: MAIN_COACH.avatarUrl,
+        coachNote: "第一落点控制更集中，落点离散度降低。",
+        coachNoteEn: "First bounce tighter; landing dispersion improved.",
+        category: "课后作业",
+        difficulty: "技能",
         projectItems: [
-            "5号铁飞行弹道控制",
-            "7号铁上果岭命中率测试",
-            "弹力带髋部驱动发力练习"
+            "30码内切杆节奏 10 球落区统计",
+            "厚草与薄草位各 5 球触地反馈记录",
+            "节奏口令与呼吸配合复盘",
         ],
-        projectRequirements: "需拍摄正面与侧面的铁杆挥杆视频，重点观察上杆顶点时的下盘稳定性，以及击球瞬间的拍面角度。需附上击球距离数据。",
-        reward: "技能熟练 +4",
+        projectRequirements: "请上传侧面与正面的切杆视频；文字复盘需写出两次节奏断点的自我感受。",
+        reward: "",
         progress: 100,
-        coach: "教练 David Chen",
     },
     {
-        id: "w-2024-week14",
+        id: "w-iron-b-240215",
         recordId: "r-240215",
-        title: "第 14 周：赛前心态与推杆节奏",
-        publishTime: "2024-04-01 09:00",
-        deadline: "2024-04-07 23:59",
+        title: "铁杆·B组",
+        titleEn: "Irons · Group B",
+        publishTime: "2024-02-15 16:00",
+        deadline: "2024-02-28 23:59",
+        sessionDate: "2024年2月15日",
+        sessionDateEn: "Feb 15, 2024",
+        sessionTime: "14:30–16:00",
+        drillTopic: "专项: 铁杆重心转移与压缩",
+        drillTopicEn: "Focus: iron weight shift and compression",
+        coachTitle: "主教练",
+        coach: MAIN_COACH.name,
+        avatarUrl: MAIN_COACH.avatarUrl,
+        coachNote: "专注于击球瞬间保持球杆前倾。击球效果和起草提升明显。",
+        coachNoteEn: "Focused on shaft lean at impact; ball striking and turf interaction improved.",
+        category: "课后作业",
+        difficulty: "技能",
         projectItems: [
-            "3 英尺推杆连续命中演练",
-            "赛前10分钟视觉化心理流程"
+            "慢挥杆确认杆身前倾与重心转移",
+            "10 球纯击球与起草质量自检",
+            "TRACKMAN 或落点数据截图（可选）",
         ],
-        projectRequirements: "主要记录推杆的收杆稳定性。文字复盘请描述在做视觉化流程时的心率感受，并提出需要改善的心理暗示词。",
-        reward: "心态专注 +3",
+        projectRequirements: "视频需能看到击球后草痕；复盘说明重心转移时常见的卡顿点。",
+        reward: "",
         progress: 100,
-        coach: "心理教练 Hannah Cole",
     },
 ];
 
@@ -523,7 +738,9 @@ const defaultTaskDoneMap = practiceTasks.reduce((acc, item) => {
 }, {});
 
 export const defaultState = {
-    currentTab: "booking",
+    currentTab: "club",
+    /** 预约成功后一次性打开 Club 内约课二级；不入库、刷新后清除 */
+    clubOpenBooking: false,
     bookingStatus: "pre",
     selectedDate: 15,
     selectedCourseAssetId: null,

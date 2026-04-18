@@ -23,7 +23,7 @@ function TrophyIcon() {
 }
 
 /**
- * 与预约通知内课程卡片同一结构，供「预约后教练区」「课后互评」复用。
+ * 与预约通知内课程卡片同一结构，供「预约后教练区」「课后评价」复用。
  * @param {boolean} [coachHasEditedCourse=true] 为 false 时课程名为「未知」，副标题与预约前「待教练确认」一致。
  */
 export default function SessionCourseDetailCard({

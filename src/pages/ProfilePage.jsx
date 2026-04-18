@@ -428,18 +428,6 @@ export default function ProfilePage({ onToast }) {
                               </h3>
                               <p>{t(`achievements.${activeAchievement.id}.detail`, { defaultValue: activeAchievement.detail })}</p>
                               <p>{t(`achievements.${activeAchievement.id}.rule`, { defaultValue: activeAchievement.rule })}</p>
-                              <p>
-                                  {t("common.level")}：{activeAchievement.rank} / {activeAchievement.levelScale}
-                              </p>
-                              <p>
-                                  {t("common.status")}：
-                                  {activeAchievement.status === "unlocked"
-                                      ? t("profile.achievementStatus.unlocked")
-                                      : activeAchievement.status === "progress"
-                                        ? t("profile.achievementStatus.progress")
-                                        : t("profile.achievementStatus.locked")}
-                              </p>
-                              <p>{t(`achievements.${activeAchievement.id}.milestone`, { defaultValue: activeAchievement.milestone })}</p>
                               <div className="modal-actions achievement-detail-modal__actions">
                                   {activeAchievement.status !== "locked" && state.wornAchievementId === activeAchievement.id ? (
                                       <button
@@ -469,9 +457,6 @@ export default function ProfilePage({ onToast }) {
                                   ) : null}
                                   <button type="button" className="btn-ghost" onClick={actions.closeAchievement}>
                                       {t("common.close")}
-                                  </button>
-                                  <button type="button" className="btn-primary" onClick={actions.closeAchievement}>
-                                      {t("common.gotIt")}
                                   </button>
                               </div>
                           </section>

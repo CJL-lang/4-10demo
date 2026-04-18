@@ -38,6 +38,9 @@ function hydrateAuth() {
 }
 
 function validTab(tab) {
+    if (tab === "booking") {
+        return "club";
+    }
     return navItems.some((item) => item.key === tab) ? tab : defaultState.currentTab;
 }
 
@@ -194,6 +197,7 @@ function hydrateState() {
                 : null;
         return {
             currentTab: validTab(parsed.currentTab),
+            clubOpenBooking: false,
             bookingStatus: parsed.bookingStatus === "booked" ? "booked" : "pre",
             selectedDate: validScheduleDay(parsed.selectedDate, defaultState.selectedDate),
             selectedCourseAssetId: (() => {
@@ -341,8 +345,10 @@ function appReducer(state, action) {
         }
         case "BOOK_NOW": {
             const next = pushBooking(state, state.selectedDate, state.selectedCourseAssetId);
-            return { ...next, currentTab: "booking" };
+            return { ...next, currentTab: "club", clubOpenBooking: true };
         }
+        case "CLEAR_CLUB_OPEN_BOOKING":
+            return { ...state, clubOpenBooking: false };
         case "SET_BOOKING_COURSE_CONFIRMED": {
             const id = action.payload?.id;
             if (!id) {
@@ -425,6 +431,7 @@ export function AppProvider({ children }) {
             setWornAchievement: (id) => dispatch({ type: "SET_WORN_ACHIEVEMENT", payload: id }),
             clearWornAchievement: () => dispatch({ type: "SET_WORN_ACHIEVEMENT", payload: null }),
             bookNow: () => dispatch({ type: "BOOK_NOW" }),
+            clearClubOpenBooking: () => dispatch({ type: "CLEAR_CLUB_OPEN_BOOKING" }),
             setBookingCourseConfirmed: (id, confirmed) =>
                 dispatch({ type: "SET_BOOKING_COURSE_CONFIRMED", payload: { id, confirmed } }),
             login: (role) => dispatch({ type: "LOGIN", payload: { role } }),
