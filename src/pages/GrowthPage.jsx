@@ -28,7 +28,6 @@ function LiveFeedTypeIcon({ type }) {
             </svg>
         );
     }
-
     if (type === "video") {
         return (
             <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
@@ -39,7 +38,6 @@ function LiveFeedTypeIcon({ type }) {
             </svg>
         );
     }
-
     return (
         <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
             <path
@@ -172,8 +170,20 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
         }
         actions.setGrowthView("tasks");
         setActiveTaskId(tid);
+        setActiveReportTaskId(null);
         actions.setPendingHomeworkTask(null);
     }, [state.pendingHomeworkTaskId, actions]);
+
+    useEffect(() => {
+        const tid = state.pendingReportTaskId;
+        if (!tid) {
+            return;
+        }
+        actions.setGrowthView("report");
+        setActiveTaskId(null);
+        setActiveReportTaskId(tid);
+        actions.setPendingReportTask(null);
+    }, [state.pendingReportTaskId, actions]);
 
     const openTaskDetail = (taskId) => {
         setActiveTaskId(taskId);
@@ -186,6 +196,21 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
 
     const closeTaskDetail = () => {
         setActiveTaskId(null);
+    };
+
+    const backToRecordsIfNeeded = () => {
+        if (state.resumeProfileSubView === "records") {
+            actions.setTab("profile");
+            return true;
+        }
+        return false;
+    };
+
+    const closeReportDetail = () => {
+        if (backToRecordsIfNeeded()) {
+            return;
+        }
+        setActiveReportTaskId(null);
     };
 
     const handleSubmitHomework = () => {
@@ -248,13 +273,9 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                         <button type="button" className="icon-btn homework-back-btn" aria-label={t("growth.backToHomeworkList")} onClick={closeTaskDetail}>
                             ←
                         </button>
-                        <span className="pill homework-category-pill">{task.category}</span>
+                        <h2 className="section-title-sm homework-detail-topbar-heading">{t("growth.tasks")}</h2>
                     </div>
                     <div className="homework-hero">
-                        <div className="section-head homework-section-head">
-                            <h2 className="section-title-sm">{t("growth.tasks")}</h2>
-                            <span className="tag">ASSIGNMENT</span>
-                        </div>
                         <h3 className="homework-task-title">{task.title}</h3>
                     </div>
                     <div className="homework-meta-grid">
@@ -387,80 +408,78 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
             <section className="section-stack section-bottom-gap homework-detail-wrap swing-3d-enter">
                 <article className="panel panel-elevated homework-brief-card growth-report-detail-card">
                     <div className="homework-detail-topbar">
-                        <button type="button" className="icon-btn homework-back-btn" aria-label={t("growth.backToReportList")} onClick={() => setActiveReportTaskId(null)}>
+                        <button type="button" className="icon-btn homework-back-btn" aria-label={t("growth.backToReportList")} onClick={closeReportDetail}>
                             ←
                         </button>
-                        <span className="pill homework-category-pill">{t("growth.report")}</span>
+                        <h2 className="section-title-sm homework-detail-topbar-heading">{t("growth.report")}</h2>
                     </div>
-                    <div className="homework-hero">
-                        <div className="section-head homework-section-head">
-                            <h2 className="section-title-sm">{t("growth.report")}</h2>
-                            <span className="tag">{t("growth.reportDetailTag")}</span>
-                        </div>
+                    <header className="growth-report-detail-hero">
                         <h3 className="homework-task-title">{copy.title}</h3>
+                    </header>
+                    <div className="growth-report-detail-summary">
+                        <div className="growth-report-detail-meta">
+                            <span>{copy.date}</span>
+                            <span className="growth-report-detail-meta__time">{task.sessionTime}</span>
+                        </div>
+                        <p className="growth-report-detail-drill">{copy.drill}</p>
                     </div>
-                    <div className="growth-report-detail-meta">
-                        <span>{copy.date}</span>
-                        <span className="growth-report-detail-meta__time">{task.sessionTime}</span>
-                    </div>
-                    <p className="growth-report-detail-drill">{copy.drill}</p>
-                    <div className="growth-session-card__coach growth-report-detail-coach">
-                        <img className="growth-session-card__avatar" src={task.avatarUrl} alt="" />
-                        <div className="growth-session-card__coach-text">
-                            <span className="growth-session-card__coach-role">{t("growth.coachRoleLead")}</span>
-                            <span className="growth-session-card__coach-name">{task.coach}</span>
+                    <div className="growth-report-detail-coach-wrap">
+                        <div className="growth-session-card__coach growth-report-detail-coach">
+                            <img className="growth-session-card__avatar" src={task.avatarUrl} alt="" />
+                            <div className="growth-session-card__coach-text">
+                                <span className="growth-session-card__coach-role">{t("growth.coachRoleLead")}</span>
+                                <span className="growth-session-card__coach-name">{task.coach}</span>
+                            </div>
                         </div>
                     </div>
-                    <h4 className="growth-report-detail-subhead">{t("growth.reportCoachReview")}</h4>
-                    <p className="growth-report-detail-body">{body}</p>
+                    <section className="growth-report-detail-review">
+                        <h4 className="growth-report-detail-subhead">{t("growth.reportCoachReview")}</h4>
+                        <p className="growth-report-detail-body">{body}</p>
+                    </section>
 
-                    <div className="growth-report-live-wrap">
-                        <div className="live-feed-stream-head growth-report-live-head">
-                            <p className="live-feed-stream-label">{t("growth.reportRealtimeTitle")}</p>
-                            <span className="live-feed-stream-count">{feedItems.length}</span>
+                    <section className="growth-report-detail-live" aria-labelledby="growth-report-live-heading">
+                        <div className="growth-report-detail-live__head">
+                            <h4 id="growth-report-live-heading" className="growth-report-detail-live__title">
+                                {t("growth.sessionLiveRecordTitle")}
+                            </h4>
+                            <span className="growth-report-detail-live__count">{feedItems.length}</span>
                         </div>
                         {feedItems.length > 0 ? (
-                            <div className="live-feed-history-card growth-report-live-card">
-                                <div className="live-feed-history-body">
-                                    <div className="live-feed-timeline">
-                                        {feedItems.map((item, index) => (
-                                            <div
-                                                key={item.id}
-                                                className="live-feed-item growth-report-live-item"
-                                                style={{ animationDelay: `${index * 120}ms` }}
-                                            >
-                                                <div className="live-feed-dot" aria-hidden="true" />
-                                                <div className="live-feed-content">
-                                                    <div className="live-feed-meta">
-                                                        <div className="live-feed-meta-main">
-                                                            <span className="live-feed-time">{item.timestamp}</span>
-                                                            <span className={`live-feed-type-pill live-feed-type-pill--${item.type}`}>
-                                                                <span className="live-feed-type-pill-icon" aria-hidden="true">
-                                                                    <LiveFeedTypeIcon type={item.type} />
-                                                                </span>
-                                                                {getLiveFeedTypeLabel(item.type)}
-                                                            </span>
-                                                        </div>
-                                                        <span className="live-feed-coach">{item.coachName}</span>
-                                                    </div>
-                                                    {(item.type === "image" || item.type === "video") && (
-                                                        <div className="live-feed-media">
-                                                            <RecordReportMediaPlaceholder kind={item.type === "video" ? "video" : "image"} />
-                                                        </div>
-                                                    )}
-                                                    <p className="live-feed-text">{item.content}</p>
-                                                </div>
+                            <ul className="growth-report-detail-live__list">
+                                {feedItems.map((item, index) => (
+                                    <li
+                                        key={item.id}
+                                        className="growth-report-detail-live__item growth-report-detail-live__item--motion"
+                                        style={{
+                                            animationDelay: `${780 + index * 110}ms`,
+                                        }}
+                                    >
+                                        <span className="growth-report-detail-live__rail" aria-hidden="true" />
+                                        <div className="growth-report-detail-live__body">
+                                            <div className="growth-report-detail-live__meta">
+                                                <span className="growth-report-detail-live__time">{item.timestamp}</span>
+                                                <span className={`growth-report-detail-live__type growth-report-detail-live__type--${item.type}`}>
+                                                    <span className="growth-report-detail-live__type-icon" aria-hidden="true">
+                                                        <LiveFeedTypeIcon type={item.type} />
+                                                    </span>
+                                                    {getLiveFeedTypeLabel(item.type)}
+                                                </span>
+                                                <span className="growth-report-detail-live__coach">{item.coachName}</span>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
+                                            {(item.type === "image" || item.type === "video") && (
+                                                <div className="growth-report-detail-live__media">
+                                                    <RecordReportMediaPlaceholder kind={item.type === "video" ? "video" : "image"} />
+                                                </div>
+                                            )}
+                                            <p className="growth-report-detail-live__text">{item.content}</p>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
                         ) : (
-                            <div className="panel panel-low live-feed-empty">
-                                <p className="muted-text">{t("club.liveFeed.empty")}</p>
-                            </div>
+                            <p className="growth-report-detail-live__empty">{t("club.liveFeed.empty")}</p>
                         )}
-                    </div>
+                    </section>
                 </article>
             </section>
         );

@@ -485,12 +485,7 @@ export const assessmentHistoryRecords = [
         id: "ar-rec-2",
         i18nSlug: "r2",
         dateIso: "2024-03-15T10:00:00",
-        coach: {
-            name: "Alex Rivera",
-            initials: "AR",
-            title: "短杆专项教练",
-            avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-        },
+        coach: { ...MAIN_COACH },
         dimensions: [
             {
                 id: "swingMechanics",
@@ -697,6 +692,233 @@ export const badges = achievementItems.slice(0, 3).map((item) => ({
     label: item.label,
 }));
 
+/** 「我的套餐」学生端详情演示数据：保留核心字段，并为重排补充概览/入口信息。 */
+export const studentPackages = [
+    {
+        id: "pkg-foundation-enlightenment",
+        name: "基础高尔夫启蒙套餐",
+        period: {
+            start: "2025.09.01",
+            end: "2026.02.28",
+        },
+        status: {
+            label: "已结业",
+            tone: "success",
+        },
+        overview: {
+            completedLessons: 12,
+            totalLessons: 12,
+            partnerCount: 2,
+            attendanceLabel: "90%",
+            attendanceDetail: "10/12节",
+        },
+        planSummary: {
+            title: "核心提升计划",
+            description: "共包含 12 节系统性课程，当前进度 12/12。",
+        },
+        courseOutline: [
+            {
+                id: "foundation-lesson-1",
+                title: "第1节：高尔夫礼仪与基础握杆",
+                description: "学习基础姿势与正确的握杆方式。",
+                statusLabel: "已销课",
+                statusTone: "success",
+            },
+            {
+                id: "foundation-lesson-2",
+                title: "第2节：推杆基础",
+                description: "果岭上的基础推杆练习。",
+                statusLabel: "已销课",
+                statusTone: "success",
+            },
+            {
+                id: "foundation-lesson-3",
+                title: "第3节：短杆启蒙",
+                description: "理解短杆挥动节奏与触球后的送杆路径。",
+                statusLabel: "已完成",
+                statusTone: "muted",
+            },
+        ],
+        partnerProfiles: [
+            {
+                name: "小明",
+                rank: "L3",
+                avatarUrl:
+                    "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=128&h=128&q=80",
+            },
+            {
+                name: "小红",
+                rank: "L5",
+                avatarUrl:
+                    "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=128&h=128&q=80",
+            },
+        ],
+        sharedProgress: ["礼仪规范达标", "握杆姿势固定"],
+        moments: [
+            {
+                id: "foundation-moment-1",
+                date: "2025年9月15日",
+                title: "首次推杆入洞",
+                description: "在果岭上完成了人生第一次推杆入洞。",
+            },
+        ],
+        courseRecordEntry: {
+            recordId: "r-240328",
+            title: "高尔夫礼仪与基础握杆",
+            meta: "2025-09-05 14:00 | 教练：王教练",
+            statusLabel: "表现优秀",
+        },
+        assessmentRecordEntry: {
+            recordId: "ar-rec-1",
+            title: "结业测评",
+            meta: "2026-02-25",
+            statusLabel: "85分（良好）",
+        },
+    },
+    {
+        id: "pkg-shortgame-advanced",
+        name: "短杆进阶专项套餐",
+        period: {
+            start: "2026.03.03",
+            end: "2026.05.30",
+        },
+        status: {
+            label: "进行中",
+            tone: "active",
+        },
+        overview: {
+            completedLessons: 6,
+            totalLessons: 10,
+            partnerCount: 1,
+            attendanceLabel: "80%",
+            attendanceDetail: "4/5节",
+        },
+        planSummary: {
+            title: "比赛场景短杆提升",
+            description: "围绕切杆、劈起杆与果岭边救球建立稳定成功率，目前已完成 6/10 节。",
+        },
+        courseOutline: [
+            {
+                id: "shortgame-lesson-1",
+                title: "第1节：30码内落点控制",
+                description: "建立第一落点意识与不同落区的杆面选择。",
+                statusLabel: "已销课",
+                statusTone: "success",
+            },
+            {
+                id: "shortgame-lesson-2",
+                title: "第2节：薄草位切杆",
+                description: "处理不同草况下的杆头入射角和节奏。",
+                statusLabel: "已销课",
+                statusTone: "success",
+            },
+            {
+                id: "shortgame-lesson-3",
+                title: "第3节：沙坑脱困",
+                description: "提升起爆点稳定性和出沙厚度控制。",
+                statusLabel: "待上课",
+                statusTone: "muted",
+            },
+        ],
+        partnerProfiles: [
+            {
+                name: "小雨",
+                rank: "L4",
+                avatarUrl:
+                    "https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=128&h=128&q=80",
+            },
+        ],
+        sharedProgress: ["切杆触地更稳定", "沙坑出球高度更统一"],
+        moments: [
+            {
+                id: "shortgame-moment-1",
+                date: "2026年3月22日",
+                title: "首次连续三球进内圈",
+                description: "30码内切杆训练中，连续三球都落在目标内圈。",
+            },
+            {
+                id: "shortgame-moment-2",
+                date: "2026年4月2日",
+                title: "完成第一节沙坑脱困练习",
+                description: "可以稳定把球送上果岭，落点更靠近旗位方向。",
+            },
+        ],
+        courseRecordEntry: {
+            recordId: "r-240307",
+            title: "短杆·进阶班",
+            meta: "2026-04-02 15:00 | 教练：David Chen",
+            statusLabel: "继续巩固",
+        },
+        assessmentRecordEntry: {
+            recordId: "ar-rec-3",
+            title: "阶段测评",
+            meta: "2026-04-18",
+            statusLabel: "78分（稳步提升）",
+        },
+    },
+    {
+        id: "pkg-newcomer-gift",
+        name: "新客体验赠课",
+        period: {
+            start: "2025.08.18",
+            end: "2025.08.31",
+        },
+        status: {
+            label: "已体验",
+            tone: "muted",
+        },
+        overview: {
+            completedLessons: 2,
+            totalLessons: 2,
+            partnerCount: 0,
+            attendanceLabel: "100%",
+            attendanceDetail: "2/2节",
+        },
+        planSummary: {
+            title: "入门体验模块",
+            description: "通过两节体验课了解基础站姿、挥杆节奏与学院教学方式。",
+        },
+        courseOutline: [
+            {
+                id: "gift-lesson-1",
+                title: "第1节：挥杆启蒙体验",
+                description: "完成基础握杆、站姿与短距离挥杆体验。",
+                statusLabel: "已销课",
+                statusTone: "success",
+            },
+            {
+                id: "gift-lesson-2",
+                title: "第2节：果岭互动体验",
+                description: "在果岭区认识推杆节奏与距离感。",
+                statusLabel: "已销课",
+                statusTone: "success",
+            },
+        ],
+        partnerProfiles: [],
+        sharedProgress: ["完成第一次正式挥杆", "建立基础礼仪认知"],
+        moments: [
+            {
+                id: "gift-moment-1",
+                date: "2025年8月24日",
+                title: "第一次完成标准收杆",
+                description: "从僵硬用力转为能顺畅完成收杆动作。",
+            },
+        ],
+        courseRecordEntry: {
+            recordId: "r-240215",
+            title: "体验课总结",
+            meta: "2025-08-28 10:00 | 教练：David Chen",
+            statusLabel: "体验完成",
+        },
+        assessmentRecordEntry: {
+            recordId: "ar-rec-2",
+            title: "体验评估",
+            meta: "2025-08-30",
+            statusLabel: "建议进入基础班",
+        },
+    },
+];
+
 export const rankingGroups = [
     {
         title: "技能综合排名",
@@ -765,4 +987,14 @@ export const defaultState = {
     wornAchievementId: null,
     /** 从其它页跳转时打开对应课后作业（如课程记录） */
     pendingHomeworkTaskId: null,
+    /** 从其它页跳转时打开对应课后报告详情（与 pendingHomeworkTaskId 同源任务 id） */
+    pendingReportTaskId: null,
+    /** 下次进入「我的」时恢复子页：如从课程记录跳转课后后再返回 */
+    resumeProfileSubView: null,
+    /** 从套餐详情跳转其它页后返回时恢复的套餐 id（不入本地持久化） */
+    resumeProfilePackageId: null,
+    /** 下次进入 Club 时恢复二级页：如从套餐详情跳转测评记录 */
+    resumeClubSubView: null,
+    /** Club 二级详情需要恢复的测评记录 id */
+    resumeAssessmentRecordId: null,
 };

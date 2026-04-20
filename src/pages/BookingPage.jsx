@@ -4,6 +4,7 @@ import { sortBookingsByTime, useAppContext } from "../context/AppContext";
 import { ALL_SLOTS, coachInfoCard, courseAssetsByDate, getSessionDisplay, getSlotById, openSlotsByDate, scheduleDates } from "../data/mockData";
 import { useCountdown } from "../hooks/useCountdown";
 import SessionCourseDetailCard from "../components/SessionCourseDetailCard";
+import LeaveRequestModal from "../components/LeaveRequestModal";
 import DateChip from "../components/DateChip";
 import GolfVenueAvatar from "../components/GolfVenueAvatar";
 
@@ -63,6 +64,8 @@ export default function BookingPage({ onOpenBookingModal, onToast, embedded = fa
     const [isNotificationExpanded, setIsNotificationExpanded] = useState(false);
     const slotStripRef = useRef(null);
     const [stripFog, setStripFog] = useState({ left: false, right: false });
+    const [leaveModalOpen, setLeaveModalOpen] = useState(false);
+    const [leaveModalBooking, setLeaveModalBooking] = useState(null);
 
     const selectedSchedule = useMemo(
         () => scheduleDates.find((item) => item.day === state.selectedDate) || scheduleDates[0],
@@ -164,6 +167,14 @@ export default function BookingPage({ onOpenBookingModal, onToast, embedded = fa
             })
         );
     };
+
+    const leaveModalSummary = useMemo(() => {
+        if (!leaveModalBooking) return null;
+        return {
+            dateLine: formatBookingCardDate(leaveModalBooking.nextSessionISO, i18n.resolvedLanguage || "zh"),
+            slotRange: getSlotById(leaveModalBooking.courseAssetId)?.range ?? "—",
+        };
+    }, [leaveModalBooking, i18n.resolvedLanguage]);
 
     const showPostList = !isPre && !detailBooking && state.bookings.length > 0;
     const showPostEmpty = !isPre && !detailBooking && state.bookings.length === 0;
@@ -456,7 +467,7 @@ export default function BookingPage({ onOpenBookingModal, onToast, embedded = fa
                                             : ""
                                         : t("growth.pendingCourseTopic", { defaultValue: cardSession?.drill ?? "" });
                                     return (
-                                        <li key={b.id} role="listitem">
+                                        <li key={b.id} role="listitem" className="booking-post-card-item">
                                             <button
                                                 type="button"
                                                 className={`booking-post-card ${coachEdited ? "booking-post-card--confirmed" : "booking-post-card--pending-coach"
@@ -484,6 +495,20 @@ export default function BookingPage({ onOpenBookingModal, onToast, embedded = fa
                                                     <p className="muted-text booking-post-card-drill">{drillLabel}</p>
                                                 ) : null}
                                             </button>
+                                            <div className="booking-post-card-footer">
+                                                <button
+                                                    type="button"
+                                                    className="booking-post-leave-btn"
+                                                    aria-label={t("booking.post.requestLeaveAria")}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setLeaveModalBooking(b);
+                                                        setLeaveModalOpen(true);
+                                                    }}
+                                                >
+                                                    {t("booking.post.requestLeave")}
+                                                </button>
+                                            </div>
                                         </li>
                                     );
                                 })}
@@ -616,6 +641,21 @@ export default function BookingPage({ onOpenBookingModal, onToast, embedded = fa
                     ) : null}
                 </>
             )}
+
+            <LeaveRequestModal
+                open={leaveModalOpen}
+                sessionSummary={leaveModalSummary}
+                onCancel={() => setLeaveModalOpen(false)}
+                onClosed={() => setLeaveModalBooking(null)}
+                onConfirm={(reason) => {
+                    onToast(
+                        t("booking.post.leaveModalSentToast", {
+                            reason: reason.length > 48 ? `${reason.slice(0, 48)}…` : reason,
+                        })
+                    );
+                    setLeaveModalOpen(false);
+                }}
+            />
         </section>
     );
 }

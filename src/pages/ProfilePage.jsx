@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import CourseRecordsScreen from "../components/CourseRecordsScreen";
 import MyCoachScreen from "../components/MyCoachScreen";
+import MyPackagesScreen from "../components/MyPackagesScreen";
 import GolfVenueAvatar from "../components/GolfVenueAvatar";
 import LanguageToggle from "../components/LanguageToggle";
 import MonthlySettlementModal from "../components/MonthlySettlementModal";
@@ -23,7 +24,15 @@ function readStoredProfileLayout() {
 export default function ProfilePage({ onToast }) {
     const { t } = useTranslation();
     const { state, actions } = useAppContext();
-    const [profileView, setProfileView] = useState("home");
+    const [profileView, setProfileView] = useState(() => {
+        if (state.resumeProfileSubView === "records") {
+            return "records";
+        }
+        if (state.resumeProfileSubView === "packagesDetail") {
+            return "packages";
+        }
+        return "home";
+    });
     const [showSettlementModal, setShowSettlementModal] = useState(false);
     const [profileLayout, setProfileLayout] = useState(readStoredProfileLayout);
     const [achievementModalRoot, setAchievementModalRoot] = useState(null);
@@ -86,13 +95,17 @@ export default function ProfilePage({ onToast }) {
                 id: "package",
                 icon: "🎫",
                 label: t("profile.entries.package.title"),
-                onClick: () => toast(t("profile.comingSoon")),
+                onClick: () => {
+                    setProfileView("packages");
+                    toast(t("profile.enteredMyPackages"));
+                },
             },
             {
                 id: "courseRecords",
                 icon: "📋",
                 label: t("profile.entries.courseRecords.title"),
                 onClick: () => {
+                    actions.setResumeProfileSubView(null);
                     setProfileView("records");
                     toast(t("profile.enteredCourseRecords"));
                 },
@@ -107,17 +120,61 @@ export default function ProfilePage({ onToast }) {
                 },
             },
         ],
-        [t, toast, setProfileView]
+        [t, toast, actions, setProfileView]
     );
 
     if (profileView === "coach") {
         return <MyCoachScreen onBack={() => setProfileView("home")} />;
     }
 
+    if (profileView === "packages") {
+        return (
+            <MyPackagesScreen
+                onBack={() => {
+                    actions.setResumeProfilePackageId(null);
+                    setProfileView("home");
+                }}
+                onOpenCourseRecords={(pkg) => {
+                    if (pkg?.id) {
+                        actions.setResumeProfilePackageId(pkg.id);
+                    }
+                    actions.setResumeProfileSubView(null);
+                    setProfileView("records");
+                    toast(t("profile.enteredCourseRecords"));
+                }}
+                onOpenAssessmentRecords={(pkg) => {
+                    const recordId = pkg?.assessmentRecordEntry?.recordId;
+                    if (pkg?.id) {
+                        actions.setResumeProfilePackageId(pkg.id);
+                    }
+                    actions.setResumeClubSubView(recordId ? "assessmentRecordDetail" : "assessmentRecords");
+                    actions.setResumeAssessmentRecord(recordId ?? null);
+                    actions.setTab("club");
+                    toast(t("profile.enteredAssessmentRecords"));
+                }}
+                onOpenTrainingPlan={(pkg) => {
+                    if (pkg?.id) {
+                        actions.setResumeProfilePackageId(pkg.id);
+                    }
+                    actions.setResumeClubSubView("plan");
+                    actions.setTab("club");
+                    toast(t("profile.enteredTrainingPlan"));
+                }}
+            />
+        );
+    }
+
     if (profileView === "records") {
         return (
             <CourseRecordsScreen
-                onBack={() => setProfileView("home")}
+                onBack={() => {
+                    actions.setResumeProfileSubView(null);
+                    if (state.resumeProfilePackageId) {
+                        setProfileView("packages");
+                    } else {
+                        setProfileView("home");
+                    }
+                }}
                 onToast={toast}
             />
         );

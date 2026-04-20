@@ -224,6 +224,11 @@ function hydrateState() {
             activeAchievementId: typeof parsed.activeAchievementId === "string" ? parsed.activeAchievementId : null,
             wornAchievementId: validWornAchievementId(parsed.wornAchievementId),
             pendingHomeworkTaskId: null,
+            pendingReportTaskId: null,
+            resumeProfileSubView: null,
+            resumeProfilePackageId: null,
+            resumeClubSubView: null,
+            resumeAssessmentRecordId: null,
         };
     } catch {
         return defaultState;
@@ -292,6 +297,41 @@ function appReducer(state, action) {
             }
             const tid = validHomeworkTaskId(action.payload);
             return { ...state, pendingHomeworkTaskId: tid };
+        }
+        case "SET_PENDING_REPORT_TASK": {
+            if (action.payload === null || action.payload === undefined || action.payload === "") {
+                return { ...state, pendingReportTaskId: null };
+            }
+            const rid = validHomeworkTaskId(action.payload);
+            return { ...state, pendingReportTaskId: rid };
+        }
+        case "SET_RESUME_PROFILE_SUB_VIEW": {
+            const v = action.payload;
+            if (v === "records" || v === "packagesDetail") {
+                return { ...state, resumeProfileSubView: v };
+            }
+            return { ...state, resumeProfileSubView: null };
+        }
+        case "SET_RESUME_PROFILE_PACKAGE_ID": {
+            const id = action.payload;
+            if (id === null || id === undefined || id === "") {
+                return { ...state, resumeProfilePackageId: null };
+            }
+            return { ...state, resumeProfilePackageId: String(id) };
+        }
+        case "SET_RESUME_CLUB_SUB_VIEW": {
+            const v = action.payload;
+            if (v === "assessmentRecords" || v === "assessmentRecordDetail" || v === "plan") {
+                return { ...state, resumeClubSubView: v };
+            }
+            return { ...state, resumeClubSubView: null };
+        }
+        case "SET_RESUME_ASSESSMENT_RECORD": {
+            const rid = action.payload;
+            if (rid === null || rid === undefined || rid === "") {
+                return { ...state, resumeAssessmentRecordId: null };
+            }
+            return { ...state, resumeAssessmentRecordId: String(rid) };
         }
         case "SET_RECORD_FILTER":
             return {
@@ -396,7 +436,14 @@ export function AppProvider({ children }) {
     const [state, dispatch] = useReducer(appReducer, defaultState, hydrateFullState);
 
     useEffect(() => {
-        const { auth: _a, ...rest } = state;
+        const {
+            auth: _a,
+            resumeProfileSubView: _resume,
+            resumeProfilePackageId: _resumePkg,
+            resumeClubSubView: _resumeClub,
+            resumeAssessmentRecordId: _resumeAssessment,
+            ...rest
+        } = state;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(rest));
     }, [state]);
 
@@ -422,6 +469,12 @@ export function AppProvider({ children }) {
             setReviewText: (text) => dispatch({ type: "SET_REVIEW_TEXT", payload: text }),
             setGrowthView: (view) => dispatch({ type: "SET_GROWTH_VIEW", payload: view }),
             setPendingHomeworkTask: (taskId) => dispatch({ type: "SET_PENDING_HOMEWORK_TASK", payload: taskId }),
+            setPendingReportTask: (taskId) => dispatch({ type: "SET_PENDING_REPORT_TASK", payload: taskId }),
+            setResumeProfileSubView: (view) => dispatch({ type: "SET_RESUME_PROFILE_SUB_VIEW", payload: view }),
+            setResumeProfilePackageId: (id) => dispatch({ type: "SET_RESUME_PROFILE_PACKAGE_ID", payload: id }),
+            setResumeClubSubView: (view) => dispatch({ type: "SET_RESUME_CLUB_SUB_VIEW", payload: view }),
+            setResumeAssessmentRecord: (recordId) =>
+                dispatch({ type: "SET_RESUME_ASSESSMENT_RECORD", payload: recordId }),
             setRecordFilter: (filter) => dispatch({ type: "SET_RECORD_FILTER", payload: filter }),
             loadMoreRecords: () => dispatch({ type: "LOAD_MORE_RECORDS" }),
             toggleTaskDone: (taskId) => dispatch({ type: "TOGGLE_TASK_DONE", taskId }),

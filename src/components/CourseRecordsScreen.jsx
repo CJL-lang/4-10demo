@@ -1,21 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import RecordCard from "./RecordCard";
-import RecordReportView from "./RecordReportView";
 import { useAppContext } from "../context/AppContext";
 import { practiceTasks, records } from "../data/mockData";
 
 export default function CourseRecordsScreen({ onBack, onToast }) {
     const { t } = useTranslation();
     const { state, actions } = useAppContext();
-    const [reportRecord, setReportRecord] = useState(null);
 
     useEffect(() => {
         const scrollMain = document.querySelector(".scroll-main");
         if (scrollMain) {
             scrollMain.scrollTo({ top: 0, behavior: "auto" });
         }
-    }, [reportRecord]);
+    }, []);
 
     const filteredRecords = useMemo(
         () => records.filter((item) => item.type === state.recordFilter),
@@ -30,17 +28,6 @@ export default function CourseRecordsScreen({ onBack, onToast }) {
     const hasMoreRecords = visibleRecords.length < filteredRecords.length;
 
     const toast = typeof onToast === "function" ? onToast : () => {};
-
-    if (reportRecord) {
-        return (
-            <RecordReportView
-                record={reportRecord}
-                onBack={() => {
-                    setReportRecord(null);
-                }}
-            />
-        );
-    }
 
     return (
         <section className="screen swing-3d-enter">
@@ -73,12 +60,21 @@ export default function CourseRecordsScreen({ onBack, onToast }) {
                             <RecordCard
                                 record={record}
                                 onReport={(r) => {
-                                    setReportRecord(r);
-                                    toast(t("club.toasts.openedReport"));
+                                    const task = practiceTasks.find((tk) => tk.recordId === r.id);
+                                    if (task) {
+                                        actions.setResumeProfileSubView("records");
+                                        actions.setTab("growth");
+                                        actions.setGrowthView("report");
+                                        actions.setPendingReportTask(task.id);
+                                        toast(t("club.toasts.openedReport"));
+                                    } else {
+                                        toast(t("club.toasts.noReportForRecord"));
+                                    }
                                 }}
                                 onHomework={(r) => {
                                     const task = practiceTasks.find((tk) => tk.recordId === r.id);
                                     if (task) {
+                                        actions.setResumeProfileSubView("records");
                                         actions.setTab("growth");
                                         actions.setGrowthView("tasks");
                                         actions.setPendingHomeworkTask(task.id);

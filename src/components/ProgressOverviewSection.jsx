@@ -9,6 +9,9 @@ const PROGRESS_VIEW_STORAGE_KEY = "club-progress-overview-view";
 /** 与 TrendChartCarousel 一致的拖拽门槛与翻页手感 */
 const DRAG_LOCK_THRESHOLD = 10;
 const DRAG_SNAP_THRESHOLD = 36;
+/** 标题栏横向拖动超过此值则切换新版 / 旧版测评视图 */
+const HEAD_VIEW_SWITCH_THRESHOLD = 52;
+const HEAD_VIEW_NUDGE_MAX = 44;
 
 function applyScrollOverscrollResistance(el, nextLeft) {
     const maxScroll = Math.max(0, el.scrollWidth - el.clientWidth);
@@ -54,6 +57,108 @@ export default function ProgressOverviewSection({ withBottomGap = true, onOpenAs
         axis: null,
         lockIdx: null,
     });
+    const headPointerRef = useRef({
+        pointerId: null,
+        startX: 0,
+        startY: 0,
+        axis: null,
+    });
+    const [headSwipeShift, setHeadSwipeShift] = useState(0);
+
+    const resetHeadPointer = () => {
+        headPointerRef.current = {
+            pointerId: null,
+            startX: 0,
+            startY: 0,
+            axis: null,
+        };
+    };
+
+    const onHeadPointerDown = (e) => {
+        if (e.target.closest("button, a")) {
+            return;
+        }
+        headPointerRef.current = {
+            pointerId: e.pointerId,
+            startX: e.clientX,
+            startY: e.clientY,
+            axis: null,
+        };
+    };
+
+    const onHeadPointerMove = (e) => {
+        const p = headPointerRef.current;
+        if (p.pointerId !== e.pointerId) {
+            return;
+        }
+        const dx = e.clientX - p.startX;
+        const dy = e.clientY - p.startY;
+        if (!p.axis) {
+            if (Math.abs(dx) < DRAG_LOCK_THRESHOLD && Math.abs(dy) < DRAG_LOCK_THRESHOLD) {
+                return;
+            }
+            if (Math.abs(dx) >= Math.abs(dy) * 0.85) {
+                p.axis = "x";
+                e.currentTarget.setPointerCapture(e.pointerId);
+                e.currentTarget.classList.add("is-head-view-dragging");
+            } else {
+                p.axis = "y";
+                return;
+            }
+        }
+        if (p.axis !== "x") {
+            return;
+        }
+        e.preventDefault();
+        const damp = Math.max(-HEAD_VIEW_NUDGE_MAX, Math.min(HEAD_VIEW_NUDGE_MAX, dx * 0.28));
+        setHeadSwipeShift(damp);
+    };
+
+    const finishHeadPointer = (e) => {
+        const p = headPointerRef.current;
+        if (p.pointerId !== e.pointerId) {
+            return;
+        }
+        const el = e.currentTarget;
+        if (p.axis === "x") {
+            const dx = e.clientX - p.startX;
+            if (dx <= -HEAD_VIEW_SWITCH_THRESHOLD) {
+                setViewMode("trend");
+            } else if (dx >= HEAD_VIEW_SWITCH_THRESHOLD) {
+                setViewMode("dimensions");
+            }
+            if (el.hasPointerCapture?.(e.pointerId)) {
+                el.releasePointerCapture(e.pointerId);
+            }
+            el.classList.remove("is-head-view-dragging");
+        } else if (p.pointerId != null) {
+            if (el.hasPointerCapture?.(e.pointerId)) {
+                el.releasePointerCapture(e.pointerId);
+            }
+            el.classList.remove("is-head-view-dragging");
+        }
+        setHeadSwipeShift(0);
+        resetHeadPointer();
+    };
+
+    const onHeadPointerUp = (e) => {
+        finishHeadPointer(e);
+    };
+
+    const onHeadPointerCancel = (e) => {
+        finishHeadPointer(e);
+    };
+
+    const onHeadKeyDown = (e) => {
+        if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            setViewMode("trend");
+        }
+        if (e.key === "ArrowRight") {
+            e.preventDefault();
+            setViewMode("dimensions");
+        }
+    };
 
     const snapAfterDrag = (clientDx) => {
         const el = swipeRef.current;
@@ -242,42 +347,31 @@ export default function ProgressOverviewSection({ withBottomGap = true, onOpenAs
     };
 
     return (
-        <article className={`panel panel-elevated trend-panel section-stack ${withBottomGap ? "section-bottom-gap" : ""}`}>
-            <div className="split-grid card-gap club-course-stats" role="region" aria-label={t("club.courseStatsAria")}>
-                <article className="panel stat-panel">
-                    <p className="section-title-sm">{t("booking.pre.totalCourses")}</p>
-                    <p className="metric-large">{t("booking.pre.totalCoursesValue")}</p>
-                    <p className="muted-text">{t("booking.pre.totalCoursesExpiry")}</p>
-                </article>
-                <article className="panel stat-panel panel-low">
-                    <p className="section-title-sm">{t("booking.pre.usedCourses")}</p>
-                    <p className="metric-large pale">{t("booking.pre.usedCoursesValue")}</p>
-                    <p className="accent-cold">{t("booking.pre.usedCoursesHint")}</p>
-                </article>
-            </div>
-
+        <section className={`trend-panel section-stack ${withBottomGap ? "section-bottom-gap" : ""}`}>
             <div className="progress-chart-box">
                 <div className="section-head chart-progress-head">
-                    <div className="chart-progress-head-top">
-                        <div className="chart-progress-head-lead">
-                            <h2 className="section-title-sm">{t("progressOverview.title")}</h2>
-                            <span className="muted-text">
+                    <div
+                        className="chart-progress-head-top chart-progress-head-top--view-swipe"
+                        style={headSwipeShift ? { transform: `translateX(${headSwipeShift}px)` } : undefined}
+                        onPointerDown={onHeadPointerDown}
+                        onPointerMove={onHeadPointerMove}
+                        onPointerUp={onHeadPointerUp}
+                        onPointerCancel={onHeadPointerCancel}
+                    >
+                        <div
+                            className="chart-progress-head-lead"
+                            tabIndex={0}
+                            aria-label={t("progressOverview.viewModeAria")}
+                            onKeyDown={onHeadKeyDown}
+                        >
+                            <h2 className="section-title-sm" id="progress-overview-title">
+                                {t("progressOverview.title")}
+                            </h2>
+                            <span className="muted-text" id="progress-overview-subtitle">
                                 {viewMode === "dimensions" ? t("progressOverview.subtitle") : t("progressOverview.subtitleTrend")}
                             </span>
                         </div>
                         <div className="chart-progress-head-actions">
-                            <div className="progress-view-toggle" role="group" aria-label={t("progressOverview.viewModeAria")}>
-                                <button
-                                    type="button"
-                                    className={viewMode === "dimensions" ? "is-active" : ""}
-                                    onClick={() => setViewMode("dimensions")}
-                                >
-                                    {t("progressOverview.viewDimensions")}
-                                </button>
-                                <button type="button" className={viewMode === "trend" ? "is-active" : ""} onClick={() => setViewMode("trend")}>
-                                    {t("progressOverview.viewTrend")}
-                                </button>
-                            </div>
                             {typeof onOpenAssessmentRecords === "function" ? (
                                 <button
                                     type="button"
@@ -349,14 +443,17 @@ export default function ProgressOverviewSection({ withBottomGap = true, onOpenAs
                             onPointerUp={onPointerUp}
                             onPointerCancel={onPointerCancel}
                         >
-                            {slides.map((slide) => (
+                            {slides.map((slide, slideIndex) => (
                                 <div key={slide.id} className="progress-assessment-slide">
-                                    <div className="progress-assessment-slide-inner">
+                                    <div
+                                        className={`progress-assessment-slide-inner${dimensionSlideIndex === slideIndex ? " is-active-slide" : ""}`}
+                                    >
                                         <h3 className="progress-assessment-slide-title">{t(`progressAssessment.${slide.id}.title`)}</h3>
                                         <AssessmentRadar
                                             slideId={slide.id}
                                             color={assessmentSlideColors[slide.id] || "var(--primary)"}
                                             items={slide.items}
+                                            isActive={dimensionSlideIndex === slideIndex}
                                         />
                                     </div>
                                 </div>
@@ -367,6 +464,6 @@ export default function ProgressOverviewSection({ withBottomGap = true, onOpenAs
                     <TrendChartCarousel />
                 )}
             </div>
-        </article>
+        </section>
     );
 }
