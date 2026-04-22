@@ -233,16 +233,18 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
         onToast?.(t("growth.submitToast"));
     };
 
-    const renderGrowthSessionList = (list, variant) => (
-        <div className="growth-session-list">
-            {list.map((task) => (
-                <GrowthSessionCard key={task.id} task={task} variant={variant} onOpen={variant === "homework" ? openTaskDetail : setActiveReportTaskId} />
+    const renderGrowthSessionList = (list, variant, staggerBase = 0) => (
+        <div className="growth-session-list stack-list">
+            {list.map((task, index) => (
+                <div key={task.id} className="record-card-enter-wrap" style={{ animationDelay: `${(staggerBase + index) * 420}ms` }}>
+                    <GrowthSessionCard task={task} variant={variant} onOpen={variant === "homework" ? openTaskDetail : setActiveReportTaskId} />
+                </div>
             ))}
         </div>
     );
 
-    const renderHomeworkSection = (titleKey, list, emptyKey) => (
-        <section className="section-stack" key={titleKey}>
+    const renderHomeworkSection = (titleKey, list, emptyKey, staggerBase = 0) => (
+        <section className="section-stack growth-session-stack" key={titleKey}>
             <div className="section-head">
                 <h2 className="section-title-sm">{t(titleKey)}</h2>
                 <span className="tiny-text">{t("growth.countItems", { count: list.length })}</span>
@@ -252,18 +254,22 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                     <p className="muted-text">{t(emptyKey)}</p>
                 </article>
             ) : (
-                renderGrowthSessionList(list, "homework")
+                renderGrowthSessionList(list, "homework", staggerBase)
             )}
         </section>
     );
 
-    const renderTaskView = () => (
-        <>
-            {renderHomeworkSection("growth.pendingHomework", taskGroups.pending, "growth.emptyPendingHomework")}
-            {renderHomeworkSection("growth.completedHomework", taskGroups.completed, "growth.emptyCompletedHomework")}
-            <div className="section-bottom-gap" />
-        </>
-    );
+    const renderTaskView = () => {
+        const pending = taskGroups.pending;
+        const completed = taskGroups.completed;
+        return (
+            <>
+                {renderHomeworkSection("growth.pendingHomework", pending, "growth.emptyPendingHomework", 0)}
+                {renderHomeworkSection("growth.completedHomework", completed, "growth.emptyCompletedHomework", pending.length)}
+                <div className="section-bottom-gap" />
+            </>
+        );
+    };
 
     const renderTaskDetailView = (task) => {
         return (
@@ -489,7 +495,7 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
         const ordered = [...tasks].sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
         return (
             <>
-                <section className="section-stack">
+                <section className="section-stack growth-session-stack">
                     <div className="section-head">
                         <h2 className="section-title-sm">{t("growth.report")}</h2>
                         <span className="tiny-text">{t("growth.countItems", { count: ordered.length })}</span>
@@ -585,7 +591,7 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
     };
 
     return (
-        <section className={`screen fade-enter ${hideSubnavChrome ? "homework-focus-screen" : ""}`}>
+        <section className={`screen ${hideSubnavChrome ? "fade-enter" : "swing-3d-enter"} ${hideSubnavChrome ? "homework-focus-screen" : ""}`.trim()}>
             {!hideSubnavChrome ? (
                 <section className="section-stack growth-subnav-wrap">
                     <div className="growth-subnav">

@@ -26,7 +26,119 @@ const resources = {
                 profile: "我的",
             },
             messages: {
-                placeholder: "消息中心即将上线，敬请期待。",
+                screenKicker: "消息中心",
+                screenTitle: "系统与聊天",
+                segmentSystem: "系统消息",
+                segmentChat: "聊天",
+                segmentsAria: "在系统消息与聊天之间切换",
+                systemListAria: "系统消息列表",
+                chatListAria: "聊天会话列表",
+                backAria: "返回上一页",
+                emptyChat: "暂无可显示的会话",
+                system: {
+                    items: {
+                        booking: {
+                            title: "上课提醒",
+                            preview: "明天 14:30 短杆进阶班，请提前 10 分钟签到。",
+                            time: "今天 10:30",
+                            body: "您好，系统已为您锁定明天 14:30 的「短杆进阶班」名额。请提前 10 分钟到达前台签到，如需改期请在开课前 6 小时联系教务。",
+                        },
+                        venue: {
+                            title: "场地维护通知",
+                            preview: "练习场 A 区周二上午例行维护，请改用 B 区。",
+                            time: "4 月 18 日",
+                            body: "因草坪养护，练习场 A 区 4 月 21 日 09:00–12:00 暂停开放。期间请改用 B 区打位，感谢您的理解与配合。",
+                        },
+                        assessment: {
+                            title: "测评报告已生成",
+                            preview: "您在本阶段的六项维度测评已完成归档，可前往测评记录查看雷达图与教练评语。",
+                            time: "今天 09:05",
+                            body: "系统已同步您最近一次阶段测评的雷达图、各维度得分与教练文字建议。若对某项评分有疑问，可在 7 日内在应用内发起复核申请，教务将协助对接教练说明。",
+                        },
+                        homework: {
+                            title: "课后任务待提交",
+                            preview: "「铁杆·B组」课后作业将于今晚 22:00 截止，请尽快上传视频或文字说明。",
+                            time: "今天 08:40",
+                            body: "您有一节课程的课后反馈尚未提交。完成后教练才能安排下一次课的重点；支持上传训练短视频、文字笔记或语音备忘。若遇特殊情况无法按时提交，请提前在聊天中告知教练或教务。",
+                        },
+                        packageBalance: {
+                            title: "课时余额提醒",
+                            preview: "当前套餐剩余 4 节课，建议在「我的套餐」中查看有效期与续费方案。",
+                            time: "昨天",
+                            body: "根据系统记录，您当前生效套餐的剩余课时已进入偏低区间。为避免影响排课优先级，可在「我的」-「我的套餐」查看有效期、赠课规则与续费活动；如需冻结课时请致电前台。",
+                        },
+                        holiday: {
+                            title: "节假日排课调整",
+                            preview: "劳动节假期 5 月 1–3 日学院前台服务时间调整，团体课顺延至节后第一周。",
+                            time: "4 月 17 日",
+                            body: "劳动节期间（5 月 1 日–3 日）前台接待时间缩短为 10:00–16:00，私教课请至少提前一天在系统内确认。原定该时段的团体课将统一顺延至 5 月 6 日起的同时间段，具体排期以教务短信为准。",
+                        },
+                        coachSubstitute: {
+                            title: "教练代课通知",
+                            preview: "本周四 10:00 课程由王教练代课，教案与训练目标已由主教交接。",
+                            time: "昨天 18:20",
+                            body: "因 David 教练临时参加 PGA 继续教育，您本周四 10:00 的铁杆课将由认证教练王教练代课。课前要点与视频资料已同步至您的课包，上课地点与打位号不变。若需改期，请不晚于周三 12:00 联系教务。",
+                        },
+                        policy: {
+                            title: "入场与安全须知更新",
+                            preview: "练习场禁止自行跨越围绳进入养护区；未成年人需家长或监护人陪同签到。",
+                            time: "4 月 12 日",
+                            body: "学院更新了练习场安全管理细则：未成年人须由家长或监护人完成签到后方可下场；雷雨天气预警时室外打位将暂时关闭，请听从现场工作人员指挥。完整条款可在「我的」-「常用功能」底部链接中查阅。",
+                        },
+                        eventOpen: {
+                            title: "暑期下场营报名开放",
+                            preview: "早鸟价即日起至 5 月 10 日，名额有限，报满即止。",
+                            time: "4 月 10 日",
+                            body: "「暑期实战策略下场营」已在学院小程序开放报名，含 3 次下场与 1 次赛前心理课。早鸟价含装备检测与分组对抗赛；若您当前套餐含活动抵扣券，结算时将自动匹配可用权益。",
+                        },
+                        paymentSuccess: {
+                            title: "支付成功通知",
+                            preview: "您的一笔课时续费已入账，系统将在 5 分钟内更新可用课时。",
+                            time: "4 月 8 日",
+                            body: "我们已收到您通过微信支付完成的课时续费订单，金额与套餐名称可在「我的」-「月度结算」或支付渠道账单中核对。若 10 分钟后课时仍未刷新，请勿重复付款，并联系前台协助核对。",
+                        },
+                    },
+                },
+                chat: {
+                    send: "发送",
+                    inputPlaceholder: "输入消息…",
+                    inputAria: "输入聊天内容",
+                    threadAria: "聊天消息记录",
+                    openThreadAria: "打开与 {{name}} 的聊天",
+                    demoSendToast: "已发送（演示环境，不保存记录）",
+                    relation: {
+                        coach: "教练",
+                        partner: "学习伙伴",
+                        parent: "家长",
+                        child: "孩子",
+                    },
+                    peerNames: {
+                        coach: "{{name}}",
+                        partner: "{{name}}",
+                        parent: "李妈妈",
+                        child: "李小明",
+                    },
+                    lastPreview: {
+                        coachStudent: "好的，我带上训练笔记。",
+                        coachParent: "收到，我们会准时到。",
+                        partner0: "下节课一起练切杆吗？",
+                        partner1: "我把视频发你啦～",
+                        parent: "周末下场注意安全。",
+                        child: "妈妈，今天的推杆我拿了 A！",
+                    },
+                    lines: {
+                        coachS1: "明天课前我想加练 10 分钟推杆，可以吗？",
+                        coachS2: "可以的，提前到跟我说一声就好。",
+                        coachS3: "好的，我带上训练笔记。",
+                        p0a: "下节课一起练切杆吗？",
+                        p0b: "好呀，我周三下午有空。",
+                        p1a: "我把视频发你啦～",
+                        par1: "周末下场注意安全。",
+                        par2: "知道啦，我会听教练安排的。",
+                        ch1: "妈妈，今天的推杆我拿了 A！",
+                        ch2: "太棒了，回家慢慢说给我听。",
+                    },
+                },
             },
             progressOverview: {
                 title: "测评记录",
@@ -47,7 +159,7 @@ const resources = {
             progressAssessment: {
                 scoreUnit: "分",
                 swingMechanics: {
-                    title: "挥杆力学（Swing Mechanics）",
+                    title: "挥杆力学",
                     items: {
                         grip: "握杆",
                         stance: "站姿",
@@ -58,7 +170,7 @@ const resources = {
                     },
                 },
                 shortGame: {
-                    title: "短杆技术（Short Game）",
+                    title: "短杆技术",
                     items: {
                         chip: "切杆",
                         pitch: "劈杆",
@@ -66,7 +178,7 @@ const resources = {
                     },
                 },
                 putting: {
-                    title: "推杆技术（Putting）",
+                    title: "推杆技术",
                     items: {
                         distanceControl: "距离控制",
                         directionControl: "方向控制",
@@ -74,7 +186,7 @@ const resources = {
                     },
                 },
                 physical: {
-                    title: "体能基础（Physical）",
+                    title: "体能基础",
                     items: {
                         flexibility: "柔韧性",
                         coreStrength: "核心力量",
@@ -83,7 +195,7 @@ const resources = {
                     },
                 },
                 mental: {
-                    title: "心理素质（Mental）",
+                    title: "心理素质",
                     items: {
                         focus: "专注力",
                         pressure: "抗压能力",
@@ -91,7 +203,7 @@ const resources = {
                     },
                 },
                 courseManagement: {
-                    title: "球场管理（Course Management）",
+                    title: "球场管理",
                     items: {
                         strategy: "策略选择",
                         riskAssessment: "风险评估",
@@ -605,6 +717,11 @@ const resources = {
                 rankingKicker: "排行榜",
                 member: "精英会员",
                 badgeWall: "勋章墙",
+                badgeWallViewMore: "查看更多",
+                badgeWallViewLess: "收起",
+                dimensionMedalScale: "L1-L10",
+                dimensionMedalModalBody:
+                    "{{dimension}} 当前维度等级为 {{rank}}，刻度为 {{scale}}。更细的子项得分与雷达图请前往「进度」中的测评记录查看。",
                 badgeProgress: "已获得 {{unlocked}}/{{total}}",
                 rankingHero: {
                     label: "全院综合排名",
@@ -693,11 +810,6 @@ const resources = {
                 menuSectionAria: "常用入口",
                 menuHeading: "常用功能",
                 entries: {
-                    messages: {
-                        kicker: "消息",
-                        title: "我的消息",
-                        desc: "课程提醒与系统通知",
-                    },
                     package: {
                         kicker: "套餐",
                         title: "我的套餐",
@@ -912,7 +1024,119 @@ const resources = {
                 profile: "Profile",
             },
             messages: {
-                placeholder: "Messages are coming soon.",
+                screenKicker: "Inbox",
+                screenTitle: "System & chat",
+                segmentSystem: "System",
+                segmentChat: "Chat",
+                segmentsAria: "Switch between system messages and chat",
+                systemListAria: "System messages",
+                chatListAria: "Chat conversations",
+                backAria: "Go back",
+                emptyChat: "No conversations yet",
+                system: {
+                    items: {
+                        booking: {
+                            title: "Lesson reminder",
+                            preview: "Short game class tomorrow at 14:30 — please arrive 10 minutes early.",
+                            time: "Today 10:30",
+                            body: "Your seat for tomorrow’s Short Game Advanced session at 14:30 is confirmed. Please check in at reception 10 minutes early. To reschedule, contact the office at least 6 hours before start.",
+                        },
+                        venue: {
+                            title: "Range maintenance",
+                            preview: "Range bay A is closed Tuesday morning — please use bay B.",
+                            time: "Apr 18",
+                            body: "Turf care will close Range A on Apr 21, 09:00–12:00. Please use Range B during that window. Thanks for your patience.",
+                        },
+                        assessment: {
+                            title: "Assessment report ready",
+                            preview: "Your latest six-dimension assessment is archived — open records for the radar chart and coach notes.",
+                            time: "Today 09:05",
+                            body: "We’ve synced your recent stage assessment: radar chart, per-dimension scores, and written coach feedback. If something looks off, you can request a review in-app within 7 days and the office will help coordinate with your coach.",
+                        },
+                        homework: {
+                            title: "Post-class task pending",
+                            preview: "“Irons B” homework is due tonight at 22:00 — upload a short video or written notes.",
+                            time: "Today 08:40",
+                            body: "You still have a post-class submission open. Completing it helps your coach plan the next session. You can attach a short practice clip, text notes, or a voice memo. If you can’t make the deadline, message your coach or the office early.",
+                        },
+                        packageBalance: {
+                            title: "Lesson balance reminder",
+                            preview: "You have 4 lessons left on the active package — check expiry and renewal options under My packages.",
+                            time: "Yesterday",
+                            body: "Your remaining lessons are in the low range. Open Profile → My packages for validity, bonus rules, and renewal promos. Call reception if you need to pause credits.",
+                        },
+                        holiday: {
+                            title: "Holiday schedule change",
+                            preview: "Labor Day weekend (May 1–3): shorter front-desk hours; group classes shift to the week after.",
+                            time: "Apr 17",
+                            body: "Front desk hours on May 1–3 are 10:00–16:00. Please confirm private lessons at least one day ahead in the app. Group sessions originally in that window move to the same time slots starting May 6 — final roster follows the office SMS.",
+                        },
+                        coachSubstitute: {
+                            title: "Substitute coach notice",
+                            preview: "Thursday 10:00 session will be led by Coach Wang; goals and notes were handed over by your lead coach.",
+                            time: "Yesterday 18:20",
+                            body: "David is at a PGA continuing-education event, so Coach Wang (certified) will run your Thursday 10:00 irons session. Pre-class notes and video references are already in your lesson pack; bay assignment is unchanged. To reschedule, contact the office before Wednesday 12:00.",
+                        },
+                        policy: {
+                            title: "Updated range safety rules",
+                            preview: "Do not cross ropes into maintenance areas; minors must check in with a parent or guardian.",
+                            time: "Apr 12",
+                            body: "We refreshed safety rules: minors need a parent/guardian at check-in before heading to the range. During thunderstorm alerts, outdoor bays may close — follow staff instructions. Full policy text is linked at the bottom of Profile → Shortcuts.",
+                        },
+                        eventOpen: {
+                            title: "Summer on-course camp registration",
+                            preview: "Early-bird pricing until May 10 — limited seats.",
+                            time: "Apr 10",
+                            body: "“Summer strategy on-course camp” is open for signup in the academy mini-program, including 3 on-course sessions plus one pre-round mental skills class. Early-bird pricing includes a gear check and a scramble match; package vouchers auto-apply at checkout when eligible.",
+                        },
+                        paymentSuccess: {
+                            title: "Payment received",
+                            preview: "A lesson renewal payment posted — available credits should refresh within about 5 minutes.",
+                            time: "Apr 8",
+                            body: "We received your WeChat Pay renewal. Amount and package name appear under Profile → Monthly settlement or in your wallet history. If credits don’t refresh after 10 minutes, don’t pay twice — call reception for a quick check.",
+                        },
+                    },
+                },
+                chat: {
+                    send: "Send",
+                    inputPlaceholder: "Type a message…",
+                    inputAria: "Message input",
+                    threadAria: "Chat history",
+                    openThreadAria: "Open chat with {{name}}",
+                    demoSendToast: "Sent (demo only — not saved)",
+                    relation: {
+                        coach: "Coach",
+                        partner: "Study buddy",
+                        parent: "Parent",
+                        child: "Child",
+                    },
+                    peerNames: {
+                        coach: "{{name}}",
+                        partner: "{{name}}",
+                        parent: "Mrs. Li",
+                        child: "Alex Li",
+                    },
+                    lastPreview: {
+                        coachStudent: "Sounds good — I’ll bring my notes.",
+                        coachParent: "Got it, we’ll be on time.",
+                        partner0: "Want to practice wedges together next class?",
+                        partner1: "Just sent you the video ~",
+                        parent: "Stay safe on the course this weekend.",
+                        child: "Mom — I got an A on putting today!",
+                    },
+                    lines: {
+                        coachS1: "Could I add 10 minutes of putting before class tomorrow?",
+                        coachS2: "Yes — just let me know when you arrive.",
+                        coachS3: "Great, I’ll bring my training notes.",
+                        p0a: "Want to drill wedges together next session?",
+                        p0b: "Yes — I’m free Wednesday afternoon.",
+                        p1a: "I just sent you the clip ~",
+                        par1: "Stay safe on the course this weekend.",
+                        par2: "Got it — I’ll follow the coach’s plan.",
+                        ch1: "Mom — I got an A on putting today!",
+                        ch2: "Amazing — tell me all about it when you’re home.",
+                    },
+                },
             },
             progressOverview: {
                 title: "Assessment records",
@@ -1491,6 +1715,11 @@ const resources = {
                 rankingKicker: "Leaderboard",
                 member: "Elite Member",
                 badgeWall: "Badge Wall",
+                badgeWallViewMore: "View more",
+                badgeWallViewLess: "Show less",
+                dimensionMedalScale: "L1–L10",
+                dimensionMedalModalBody:
+                    "{{dimension}} is currently {{rank}} on the {{scale}} scale. Open Progress → Assessment records for sub-scores and the radar chart.",
                 badgeProgress: "Unlocked {{unlocked}} / {{total}}",
                 rankingHero: {
                     label: "Overall Academy Ranking",
@@ -1579,11 +1808,6 @@ const resources = {
                 menuSectionAria: "Shortcuts",
                 menuHeading: "Shortcuts",
                 entries: {
-                    messages: {
-                        kicker: "Messages",
-                        title: "My messages",
-                        desc: "Course reminders and system notices",
-                    },
                     package: {
                         kicker: "Package",
                         title: "My package",

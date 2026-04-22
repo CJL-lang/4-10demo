@@ -35,15 +35,6 @@ function attendanceProgressRatio(overview) {
     return 0;
 }
 
-/** 学习伙伴数量映射为环上进度：0 人 0%，满环表示 4 人及以上（演示尺度） */
-function partnerProgressRatio(count) {
-    const n = Number(count) || 0;
-    if (n <= 0) {
-        return 0;
-    }
-    return clamp01(n / 4);
-}
-
 function PackageHeroStatRing({ label, valueText, progress, ariaLabel }) {
     const [drawProgress, setDrawProgress] = useState(0);
     const p = clamp01(progress);
@@ -343,14 +334,6 @@ export default function MyPackagesScreen({ onBack, onOpenCourseRecords, onOpenAs
                                                     value: pkg.overview?.attendanceDetail,
                                                 })}
                                             />
-                                            <PackageHeroStatRing
-                                                label={t("profile.packageScreen.summaryPartnersLabel")}
-                                                valueText={String(pkg.overview?.partnerCount ?? 0)}
-                                                progress={partnerProgressRatio(pkg.overview?.partnerCount)}
-                                                ariaLabel={t("profile.packageScreen.heroStatPartnersAria", {
-                                                    count: pkg.overview?.partnerCount ?? 0,
-                                                })}
-                                            />
                                         </div>
                                     </div>
                                 </li>
@@ -396,14 +379,6 @@ export default function MyPackagesScreen({ onBack, onOpenCourseRecords, onOpenAs
                                     progress={attendanceProgressRatio(activePackage.overview)}
                                     ariaLabel={t("profile.packageScreen.heroStatAttendanceAria", {
                                         value: activePackage.overview?.attendanceDetail,
-                                    })}
-                                />
-                                <PackageHeroStatRing
-                                    label={t("profile.packageScreen.summaryPartnersLabel")}
-                                    valueText={String(activePackage.overview?.partnerCount ?? 0)}
-                                    progress={partnerProgressRatio(activePackage.overview?.partnerCount)}
-                                    ariaLabel={t("profile.packageScreen.heroStatPartnersAria", {
-                                        count: activePackage.overview?.partnerCount ?? 0,
                                     })}
                                 />
                             </div>

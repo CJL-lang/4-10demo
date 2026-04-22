@@ -8,7 +8,14 @@ import GolfVenueAvatar from "../components/GolfVenueAvatar";
 import LanguageToggle from "../components/LanguageToggle";
 import MonthlySettlementModal from "../components/MonthlySettlementModal";
 import ProfileHeroMedal from "../components/ProfileHeroMedal";
-import { achievementItems, MAIN_COACH, PROFILE_HERO_BADGE_LOGO_WEBP, PROFILE_PORTRAIT_URL, rankingGroups } from "../data/mockData";
+import {
+    achievementItems,
+    dimensionMedalItems,
+    MAIN_COACH,
+    PROFILE_HERO_BADGE_LOGO_WEBP,
+    PROFILE_PORTRAIT_URL,
+    rankingGroups,
+} from "../data/mockData";
 import { useAppContext } from "../context/AppContext";
 
 const PROFILE_LAYOUT_STORAGE_KEY = "academy-react-prototype-profile-layout";
@@ -38,6 +45,8 @@ export default function ProfilePage({ onToast }) {
     const [achievementModalRoot, setAchievementModalRoot] = useState(null);
     const [showMedalPicker, setShowMedalPicker] = useState(false);
     const [pickerDraftId, setPickerDraftId] = useState(null);
+    const [badgeWallExpanded, setBadgeWallExpanded] = useState(false);
+    const [activeDimensionKey, setActiveDimensionKey] = useState(null);
 
     useEffect(() => {
         try {
@@ -65,6 +74,25 @@ export default function ProfilePage({ onToast }) {
     }, [showMedalPicker]);
 
     useEffect(() => {
+        if (!activeDimensionKey) {
+            return undefined;
+        }
+        const onKey = (e) => {
+            if (e.key === "Escape") {
+                setActiveDimensionKey(null);
+            }
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [activeDimensionKey]);
+
+    useEffect(() => {
+        if (state.activeAchievementId) {
+            setActiveDimensionKey(null);
+        }
+    }, [state.activeAchievementId]);
+
+    useEffect(() => {
         const scrollMain = document.querySelector(".scroll-main");
         if (scrollMain) {
             scrollMain.scrollTo({ top: 0, behavior: "auto" });
@@ -77,6 +105,19 @@ export default function ProfilePage({ onToast }) {
         [state.wornAchievementId]
     );
 
+    const badgeWallItems = useMemo(
+        () => [
+            ...achievementItems.map((item) => ({ kind: "skill", ...item })),
+            ...dimensionMedalItems.map((item) => ({ kind: "dimension", ...item })),
+        ],
+        []
+    );
+    const visibleBadgeWallItems = badgeWallExpanded ? badgeWallItems : badgeWallItems.slice(0, 6);
+    const activeDimensionMedal = useMemo(
+        () => (activeDimensionKey ? dimensionMedalItems.find((d) => d.dimensionKey === activeDimensionKey) : null),
+        [activeDimensionKey]
+    );
+
     const portraitSources = useMemo(() => [PROFILE_PORTRAIT_URL, MAIN_COACH.avatarUrl], []);
     const [portraitSrcIndex, setPortraitSrcIndex] = useState(0);
     const showPortraitInitials = portraitSrcIndex >= portraitSources.length;
@@ -85,12 +126,6 @@ export default function ProfilePage({ onToast }) {
 
     const profileMenuItems = useMemo(
         () => [
-            {
-                id: "messages",
-                icon: "💬",
-                label: t("profile.entries.messages.title"),
-                onClick: () => toast(t("profile.comingSoon")),
-            },
             {
                 id: "package",
                 icon: "🎫",
@@ -391,26 +426,43 @@ export default function ProfilePage({ onToast }) {
                 </article>
 
                 <div className="badge-grid">
-                    {achievementItems.map((item) => {
-                        const levelNum = parseInt(item.rank.replace(/\D/g, ""), 10) || 1;
+                    {visibleBadgeWallItems.map((item, idx) => {
+                        const levelNum = parseInt(String(item.rank).replace(/\D/g, ""), 10) || 1;
                         const brightness = 0.5 + levelNum * 0.1;
+                        const isSkill = item.kind === "skill";
+                        const dimKey = item.dimensionKey;
+                        const titleText = isSkill
+                            ? t(`achievements.${item.id}.label`, { defaultValue: item.label })
+                            : t(`progressAssessment.${dimKey}.title`);
+                        const open = () => {
+                            if (isSkill) {
+                                setActiveDimensionKey(null);
+                                actions.openAchievement(item.id);
+                            } else {
+                                actions.closeAchievement();
+                                setActiveDimensionKey(dimKey);
+                            }
+                        };
 
                         return (
                             <article
-                                className={`panel badge-card${item.id === state.wornAchievementId ? " badge-card--worn" : ""}`}
+                                className={`panel badge-card${
+                                    isSkill && item.id === state.wornAchievementId ? " badge-card--worn" : ""
+                                }`}
                                 key={item.id}
                                 role="button"
                                 tabIndex={0}
-                                onClick={() => actions.openAchievement(item.id)}
+                                style={{ animationDelay: `${idx * 52}ms` }}
+                                onClick={open}
                                 onKeyDown={(event) => {
                                     if (event.key === "Enter" || event.key === " ") {
                                         event.preventDefault();
-                                        actions.openAchievement(item.id);
+                                        open();
                                     }
                                 }}
                             >
                                 <div className="badge-card__inner">
-                                    {item.id === state.wornAchievementId ? (
+                                    {isSkill && item.id === state.wornAchievementId ? (
                                         <span className="badge-card__worn-pill">{t("profile.medalEquipped")}</span>
                                     ) : null}
                                     <div className="badge-rank" style={{ filter: `brightness(${brightness})` }}>
@@ -418,15 +470,23 @@ export default function ProfilePage({ onToast }) {
                                         <small className="badge-rank__eyebrow">LEVEL</small>
                                         <strong className="badge-rank__level">{item.rank}</strong>
                                     </div>
-                                    <p className="badge-card__title">
-                                        {t(`achievements.${item.id}.label`, { defaultValue: item.label })}
-                                    </p>
+                                    <p className="badge-card__title">{titleText}</p>
                                     <span className="badge-state-text">{item.levelScale}</span>
                                 </div>
                             </article>
                         );
                     })}
                 </div>
+                {badgeWallItems.length > 6 ? (
+                    <button
+                        type="button"
+                        className="badge-wall-expand-btn"
+                        aria-expanded={badgeWallExpanded}
+                        onClick={() => setBadgeWallExpanded((v) => !v)}
+                    >
+                        {badgeWallExpanded ? t("profile.badgeWallViewLess") : t("profile.badgeWallViewMore")}
+                    </button>
+                ) : null}
             </section>
 
             <section className="section-stack profile-menu-section" aria-labelledby="profile-menu-heading">
@@ -466,6 +526,40 @@ export default function ProfilePage({ onToast }) {
                     {t("profile.logout")}
                 </button>
             </section>
+
+            {achievementModalRoot && activeDimensionKey && activeDimensionMedal && !activeAchievement
+                ? createPortal(
+                      <div
+                          className="modal-mask"
+                          role="dialog"
+                          aria-modal="true"
+                          aria-labelledby="dimension-detail-title"
+                          onClick={() => setActiveDimensionKey(null)}
+                      >
+                          <section
+                              className="modal-card achievement-detail-modal"
+                              onClick={(event) => event.stopPropagation()}
+                          >
+                              <h3 id="dimension-detail-title">
+                                  {t(`progressAssessment.${activeDimensionKey}.title`)}
+                              </h3>
+                              <p>
+                                  {t("profile.dimensionMedalModalBody", {
+                                      dimension: t(`progressAssessment.${activeDimensionKey}.title`),
+                                      rank: activeDimensionMedal.rank,
+                                      scale: t("profile.dimensionMedalScale"),
+                                  })}
+                              </p>
+                              <div className="modal-actions achievement-detail-modal__actions">
+                                  <button type="button" className="btn-ghost" onClick={() => setActiveDimensionKey(null)}>
+                                      {t("common.close")}
+                                  </button>
+                              </div>
+                          </section>
+                      </div>,
+                      achievementModalRoot
+                  )
+                : null}
 
             {activeAchievement && achievementModalRoot
                 ? createPortal(

@@ -7,6 +7,7 @@ import { getSessionDisplay, getSlotById, scheduleDates } from "./data/mockData";
 import ClubPage from "./pages/ClubPage";
 import GrowthPage from "./pages/GrowthPage";
 import LoginPage from "./pages/LoginPage";
+import MessagesPage from "./pages/MessagesPage";
 import ProfilePage from "./pages/ProfilePage";
 import { useTranslation } from "react-i18next";
 
@@ -124,15 +125,12 @@ export default function App() {
         }
         if (state.currentTab === "messages") {
             return (
-                <section className="screen fade-enter messages-placeholder-page">
-                    <div className="section-stack section-bottom-gap" style={{ paddingTop: "24px" }}>
-                        <div className="panel panel-elevated" style={{ padding: "24px" }}>
-                            <p className="muted-text" style={{ margin: 0, textAlign: "center" }}>
-                                {t("messages.placeholder")}
-                            </p>
-                        </div>
-                    </div>
-                </section>
+                <MessagesPage
+                    onToast={(message) => {
+                        setToastMessage(message);
+                    }}
+                    onSubViewChange={setHideBottomNav}
+                />
             );
         }
         if (state.currentTab === "growth") {

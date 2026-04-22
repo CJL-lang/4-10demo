@@ -684,6 +684,19 @@ export const achievementItems = [
     },
 ];
 
+/**
+ * 测评记录六项维度勋章（演示数据；不参与佩戴选择，刻度 L1-L10）
+ * dimensionKey 对齐 i18n `progressAssessment.*`
+ */
+export const dimensionMedalItems = [
+    { id: "dim-swingMechanics", dimensionKey: "swingMechanics", rank: "L6", levelScale: "L1-L10" },
+    { id: "dim-shortGame", dimensionKey: "shortGame", rank: "L7", levelScale: "L1-L10" },
+    { id: "dim-putting", dimensionKey: "putting", rank: "L8", levelScale: "L1-L10" },
+    { id: "dim-physical", dimensionKey: "physical", rank: "L5", levelScale: "L1-L10" },
+    { id: "dim-mental", dimensionKey: "mental", rank: "L7", levelScale: "L1-L10" },
+    { id: "dim-courseManagement", dimensionKey: "courseManagement", rank: "L6", levelScale: "L1-L10" },
+];
+
 /** Profile「佩戴勋章」等校验用 */
 export const achievementIds = achievementItems.map((item) => item.id);
 
