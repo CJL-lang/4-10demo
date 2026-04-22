@@ -676,7 +676,7 @@ export default function ClubPage({ onGoGrowth, onToast, onOpenBookingModal, onCl
                 <section className="section-stack section-bottom-gap">
                     <div className="plan-container">
                         <div className="plan-header-card">
-                            <h2 className="plan-title">{t("club.entries.plan.studentPlan", { name: "李小明" })}</h2>
+                            <h2 className="plan-title">{t("club.entries.plan.studentPlan", { name: t("profile.studentName") })}</h2>
                             <p className="plan-subtitle">{t("club.entries.plan.readonly")}</p>
                         </div>
 

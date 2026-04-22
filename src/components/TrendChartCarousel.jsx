@@ -90,6 +90,7 @@ function ChartCard({ chart, isActive, isDragging, offset, onClick, switchChartAr
                 </span>
                 {trend > 0 && <span className="chart-card-trend chart-card-trend--up">+{trend}</span>}
             </div>
+            <p className="chart-card-story">{chart.story}</p>
 
             <svg className="chart-card-svg" viewBox={`0 0 ${CHART_W} ${CHART_H}`} preserveAspectRatio="none" aria-hidden="true">
                 {[3, 5, 7, 9].map((lvl) => (
@@ -150,7 +151,7 @@ function ChartCard({ chart, isActive, isDragging, offset, onClick, switchChartAr
     );
 }
 
-export default function TrendChartCarousel() {
+export default function TrendChartCarousel({ onActiveChartChange }) {
     const { t } = useTranslation();
     const charts = useMemo(
         () =>
@@ -158,6 +159,7 @@ export default function TrendChartCarousel() {
                 key,
                 label: t(`progressCharts.${key}`),
                 color: CHART_COLORS[key],
+                story: t(`progressOverview.chartStories.${key}`),
             })),
         [t]
     );
@@ -301,6 +303,10 @@ export default function TrendChartCarousel() {
         el.addEventListener("keydown", onKey);
         return () => el.removeEventListener("keydown", onKey);
     }, [prev, next]);
+
+    useEffect(() => {
+        onActiveChartChange?.(charts[activeIndex] || null);
+    }, [activeIndex, charts, onActiveChartChange]);
 
     return (
         <div

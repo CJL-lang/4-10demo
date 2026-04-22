@@ -7,16 +7,81 @@ const TAP_FX_MS = 620;
 /**
  * 个人主页「佩戴」勋章：挂绳奖牌（颈部下垂）+ 空态入口。
  * 佩戴态：短按触发动效；长按打开选择器。
+ * ⚠️ 所有 Hooks 必须在提前 return 之前调用，以遵守 Rules of Hooks。
  */
 export default function ProfileHeroMedal({ item, onOpenPicker }) {
     const { t } = useTranslation();
     const longPressTimerRef = useRef(null);
     const longPressFiredRef = useRef(false);
+    const tapClearRef = useRef(null);
     const [pendulumTap, setPendulumTap] = useState(false);
     const riverGradId = `profileHeroMedalRiverGrad-${useId().replace(/:/g, "")}`;
     const levelNum = item ? parseInt(String(item.rank).replace(/\D/g, ""), 10) || 1 : 1;
     const brightness = 0.5 + levelNum * 0.1;
 
+    // 清除长按定时器
+    const clearLongPressTimer = useCallback(() => {
+        if (longPressTimerRef.current != null) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+    }, []);
+
+    // 触发短按动效
+    const playTapFx = useCallback(() => {
+        if (tapClearRef.current != null) {
+            clearTimeout(tapClearRef.current);
+        }
+        setPendulumTap(true);
+        tapClearRef.current = window.setTimeout(() => {
+            tapClearRef.current = null;
+            setPendulumTap(false);
+        }, TAP_FX_MS);
+    }, []);
+
+    // 长按：onPointerDown 启动计时器
+    const handleWornPointerDown = useCallback(() => {
+        longPressFiredRef.current = false;
+        clearLongPressTimer();
+        longPressTimerRef.current = window.setTimeout(() => {
+            longPressTimerRef.current = null;
+            longPressFiredRef.current = true;
+            onOpenPicker();
+        }, LONG_PRESS_MS);
+    }, [clearLongPressTimer, onOpenPicker]);
+
+    // 短按：onPointerUp 播放动效
+    const handleWornPointerEnd = useCallback(() => {
+        clearLongPressTimer();
+        if (!longPressFiredRef.current) {
+            playTapFx();
+        }
+    }, [clearLongPressTimer, playTapFx]);
+
+    // 键盘支持
+    const handleWornKeyDown = useCallback(
+        (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onOpenPicker();
+            }
+        },
+        [onOpenPicker],
+    );
+
+    // 组件卸载时清理所有定时器
+    useEffect(() => {
+        return () => {
+            if (tapClearRef.current != null) {
+                clearTimeout(tapClearRef.current);
+            }
+            if (longPressTimerRef.current != null) {
+                clearTimeout(longPressTimerRef.current);
+            }
+        };
+    }, []);
+
+    // 空态：未佩戴勋章时展示入口按钮
     if (!item) {
         return (
             <button
@@ -53,64 +118,6 @@ export default function ProfileHeroMedal({ item, onOpenPicker }) {
             </button>
         );
     }
-
-    const clearLongPressTimer = useCallback(() => {
-        if (longPressTimerRef.current != null) {
-            clearTimeout(longPressTimerRef.current);
-            longPressTimerRef.current = null;
-        }
-    }, []);
-
-    const tapClearRef = useRef(null);
-
-    useEffect(() => {
-        return () => {
-            if (tapClearRef.current != null) {
-                clearTimeout(tapClearRef.current);
-            }
-            if (longPressTimerRef.current != null) {
-                clearTimeout(longPressTimerRef.current);
-            }
-        };
-    }, []);
-
-    const playTapFx = useCallback(() => {
-        if (tapClearRef.current != null) {
-            clearTimeout(tapClearRef.current);
-        }
-        setPendulumTap(true);
-        tapClearRef.current = window.setTimeout(() => {
-            tapClearRef.current = null;
-            setPendulumTap(false);
-        }, TAP_FX_MS);
-    }, []);
-
-    const handleWornPointerDown = useCallback(() => {
-        longPressFiredRef.current = false;
-        clearLongPressTimer();
-        longPressTimerRef.current = window.setTimeout(() => {
-            longPressTimerRef.current = null;
-            longPressFiredRef.current = true;
-            onOpenPicker();
-        }, LONG_PRESS_MS);
-    }, [clearLongPressTimer, onOpenPicker]);
-
-    const handleWornPointerEnd = useCallback(() => {
-        clearLongPressTimer();
-        if (!longPressFiredRef.current) {
-            playTapFx();
-        }
-    }, [clearLongPressTimer, playTapFx]);
-
-    const handleWornKeyDown = useCallback(
-        (event) => {
-            if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                onOpenPicker();
-            }
-        },
-        [onOpenPicker],
-    );
 
     return (
         <button
@@ -158,7 +165,7 @@ export default function ProfileHeroMedal({ item, onOpenPicker }) {
                     <span className="profile-hero-medal__shine" aria-hidden="true" />
                     <span className="profile-hero-medal__gold-glint" aria-hidden="true" />
                     <span className="badge-rank__ring" aria-hidden="true" />
-                    <small className="badge-rank__eyebrow">LEVEL</small>
+                    <small className="badge-rank__eyebrow">{t("common.level")}</small>
                     <strong className="badge-rank__level">{item.rank}</strong>
                 </div>
                 <span className="profile-hero-medal__sparkles" aria-hidden="true">

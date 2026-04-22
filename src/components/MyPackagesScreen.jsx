@@ -78,6 +78,7 @@ function PackageHeroStatRing({ label, valueText, progress, ariaLabel }) {
 
 /** 与 Profile 佩戴勋章同构的缩小版：头像 + 颈部挂绳奖牌（只读展示） */
 function PartnerAvatarWithMedal({ name, rank, avatarUrl }) {
+    const { t } = useTranslation();
     const uid = useId().replace(/:/g, "");
     const levelNum = parseInt(String(rank).replace(/\D/g, ""), 10) || 1;
     const brightness = 0.5 + levelNum * 0.1;
@@ -120,7 +121,7 @@ function PartnerAvatarWithMedal({ name, rank, avatarUrl }) {
                         <div className="package-partner-mini__coin" style={{ filter: `brightness(${brightness})` }}>
                             <span className="package-partner-mini__shine" aria-hidden="true" />
                             <span className="badge-rank__ring" aria-hidden="true" />
-                            <small className="badge-rank__eyebrow">LEVEL</small>
+                            <small className="badge-rank__eyebrow">{t("common.level")}</small>
                             <strong className="badge-rank__level">{rank}</strong>
                         </div>
                     </div>

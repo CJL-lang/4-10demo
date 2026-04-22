@@ -467,7 +467,7 @@ export default function ProfilePage({ onToast }) {
                                     ) : null}
                                     <div className="badge-rank" style={{ filter: `brightness(${brightness})` }}>
                                         <span className="badge-rank__ring" aria-hidden="true" />
-                                        <small className="badge-rank__eyebrow">LEVEL</small>
+                                        <small className="badge-rank__eyebrow">{t("common.level")}</small>
                                         <strong className="badge-rank__level">{item.rank}</strong>
                                     </div>
                                     <p className="badge-card__title">{titleText}</p>
@@ -669,7 +669,7 @@ export default function ProfilePage({ onToast }) {
                                                   aria-hidden="true"
                                               >
                                                   <span className="badge-rank__ring" />
-                                                  <small className="badge-rank__eyebrow">LEVEL</small>
+                                                  <small className="badge-rank__eyebrow">{t("common.level")}</small>
                                                   <strong className="badge-rank__level">{item.rank}</strong>
                                               </div>
                                               <div className="profile-medal-picker__row-main">
