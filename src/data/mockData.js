@@ -717,6 +717,7 @@ export const studentPackages = [
         status: {
             label: "已结业",
             tone: "success",
+            statusKind: "graduated",
         },
         overview: {
             completedLessons: 12,
@@ -798,6 +799,7 @@ export const studentPackages = [
         status: {
             label: "进行中",
             tone: "active",
+            statusKind: "inProgress",
         },
         overview: {
             completedLessons: 6,
@@ -879,6 +881,7 @@ export const studentPackages = [
         status: {
             label: "已体验",
             tone: "muted",
+            statusKind: "trialDone",
         },
         overview: {
             completedLessons: 2,

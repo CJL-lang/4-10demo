@@ -17,6 +17,20 @@ import {
 
 /** 与 app.css 中 `.club-record-page .stack-list > .record-card-enter-wrap` 的 rankRowReveal 节奏一致 */
 const ASSESSMENT_CARD_STAGGER_MS = 420;
+
+function localizedDigestCourseName(t, sessionDisplay) {
+    if (!sessionDisplay) {
+        return null;
+    }
+    const { courseAssetId, scheduleDay, courseName } = sessionDisplay;
+    if (courseAssetId) {
+        return t(`courseAssets.${courseAssetId}.courseName`, { defaultValue: courseName });
+    }
+    if (scheduleDay != null) {
+        return t(`schedule.${scheduleDay}.courseTitle`, { defaultValue: courseName });
+    }
+    return courseName;
+}
 const ASSESSMENT_RANK_REVEAL_MS = 360;
 /** 维度卡片入场约过半后，子项开始错层入场 */
 const ASSESSMENT_ITEM_AFTER_REVEAL_MS = Math.round(ASSESSMENT_RANK_REVEAL_MS * 0.48);
@@ -843,7 +857,9 @@ export default function ClubPage({ onGoGrowth, onToast, onOpenBookingModal, onCl
                                             })}
                                         </p>
                                         {nextSessionDisplay ? (
-                                            <p className="club-booking-digest-course">{nextSessionDisplay.courseName}</p>
+                                            <p className="club-booking-digest-course">
+                                                {localizedDigestCourseName(t, nextSessionDisplay)}
+                                            </p>
                                         ) : null}
                                         <button
                                             type="button"

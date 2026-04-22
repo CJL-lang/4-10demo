@@ -54,7 +54,7 @@ export default function MyCoachScreen({ onBack }) {
                         <div className="my-coach-hero-ring" aria-hidden="true" />
                     </div>
                     <h2 className="my-coach-hero-name">{coach.name}</h2>
-                    <p className="my-coach-hero-title">{coach.title}</p>
+                    <p className="my-coach-hero-title">{t("booking.pre.coachTitle")}</p>
                     <p className="my-coach-hero-tagline">{t("profile.coachScreen.tagline")}</p>
                 </div>
 
@@ -62,7 +62,7 @@ export default function MyCoachScreen({ onBack }) {
                     <section className="my-coach-section my-coach-section--quick" aria-label={t("profile.coachScreen.quickSectionAria")}>
                         <div className="my-coach-row my-coach-row--status">
                             <span className="my-coach-row-label">{t("profile.coachScreen.statusLabel")}</span>
-                            <span className="my-coach-status-pill">{coach.status}</span>
+                            <span className="my-coach-status-pill">{t("profile.coachCard.status")}</span>
                         </div>
                         <div className="my-coach-row">
                             <span className="my-coach-row-label">{t("profile.coachScreen.phoneLabel")}</span>
@@ -74,7 +74,7 @@ export default function MyCoachScreen({ onBack }) {
                         </div>
                         <div className="my-coach-row my-coach-row--last">
                             <span className="my-coach-row-label">{t("profile.coachScreen.bestScoreLabel")}</span>
-                            <span className="my-coach-row-value my-coach-best">{coach.bestScore ?? coach.bestScoreShort}</span>
+                            <span className="my-coach-row-value my-coach-best">{t("profile.coachCard.bestScoreValue")}</span>
                         </div>
                     </section>
 

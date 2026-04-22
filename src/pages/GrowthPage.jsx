@@ -61,7 +61,7 @@ function GrowthSessionCard({ task, variant, onOpen }) {
     const { t, i18n } = useTranslation();
     const langIsEn = Boolean(i18n.language?.toLowerCase().startsWith("en"));
     const copy = taskCardCopy(task, langIsEn);
-    const skillLabel = task.difficulty || t("growth.skillPill");
+    const skillLabel = task.difficulty === "技能" ? t("growth.skillPill") : task.difficulty || t("growth.skillPill");
     const coachRole = t("growth.coachRoleLead");
 
     return (

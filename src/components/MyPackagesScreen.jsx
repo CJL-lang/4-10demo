@@ -193,6 +193,35 @@ function statusToneClass(tone) {
     return " package-status-pill--muted";
 }
 
+function packageStatusLabel(t, status) {
+    const kind = status?.statusKind;
+    if (kind) {
+        return t(`profile.packageScreen.status.${kind}`, { defaultValue: status.label });
+    }
+    return status?.label ?? "";
+}
+
+function packagePlanTitle(t, pkg) {
+    return t(`profile.packageScreen.planCopy.${pkg.id}.title`, { defaultValue: pkg.planSummary?.title ?? "" });
+}
+
+function packagePlanDescription(t, pkg) {
+    const o = pkg.overview;
+    return t(`profile.packageScreen.planCopy.${pkg.id}.description`, {
+        defaultValue: pkg.planSummary?.description ?? "",
+        completed: o?.completedLessons ?? 0,
+        total: o?.totalLessons ?? 0,
+    });
+}
+
+function packageSharedProgressLine(t, pkgId, index, fallback) {
+    return t(`profile.packageScreen.sharedProgressLines.${pkgId}.${index}`, { defaultValue: fallback });
+}
+
+function packageMomentLine(t, moment, field) {
+    return t(`profile.packageScreen.momentCopy.${moment.id}.${field}`, { defaultValue: moment[field] ?? "" });
+}
+
 function PackageEntryCard({ title, entry, ctaLabel, onClick, simple, ariaLabel }) {
     if (simple) {
         return (
@@ -303,13 +332,15 @@ export default function MyPackagesScreen({ onBack, onOpenCourseRecords, onOpenAs
                                         })}
                                     >
                                         <div className="package-overview-card__top">
-                                            <span className={`package-status-pill${statusToneClass(pkg.status?.tone)}`}>{pkg.status?.label}</span>
+                                            <span className={`package-status-pill${statusToneClass(pkg.status?.tone)}`}>
+                                                {packageStatusLabel(t, pkg.status)}
+                                            </span>
                                             <span className="package-overview-card__period">{formatPeriod(pkg.period)}</span>
                                         </div>
                                         <h2 className="package-card__name">
                                             {t(`profile.packageScreen.itemNames.${pkg.id}`, { defaultValue: pkg.name })}
                                         </h2>
-                                        <p className="package-overview-card__summary">{pkg.planSummary?.description}</p>
+                                        <p className="package-overview-card__summary">{packagePlanDescription(t, pkg)}</p>
                                         <div
                                             className="package-detail-hero__stats package-overview-card__stats"
                                             role="group"
@@ -354,12 +385,12 @@ export default function MyPackagesScreen({ onBack, onOpenCourseRecords, onOpenAs
                                     <strong>{formatPeriod(activePackage.period)}</strong>
                                 </p>
                                 <span className={`package-status-pill${statusToneClass(activePackage.status?.tone)}`}>
-                                    {activePackage.status?.label}
+                                    {packageStatusLabel(t, activePackage.status)}
                                 </span>
                             </div>
                             <div className="package-plan-summary package-detail-hero__plan-summary">
-                                <p className="package-plan-summary__title">{activePackage.planSummary?.title}</p>
-                                <p className="package-plan-summary__desc">{activePackage.planSummary?.description}</p>
+                                <p className="package-plan-summary__title">{packagePlanTitle(t, activePackage)}</p>
+                                <p className="package-plan-summary__desc">{packagePlanDescription(t, activePackage)}</p>
                             </div>
                             <div className="package-detail-hero__stats" role="group" aria-label={t("profile.packageScreen.heroStatsGroupAria")}>
                                 <PackageHeroStatRing
@@ -438,8 +469,8 @@ export default function MyPackagesScreen({ onBack, onOpenCourseRecords, onOpenAs
                                 <article className="package-insight-card package-insight-card--wide package-insight-card--sub">
                                     <p className="package-insight-card__label">{t("profile.packageScreen.sharedProgressLabel")}</p>
                                     <ul className="package-progress-list">
-                                        {activePackage.sharedProgress?.map((item) => (
-                                            <li key={item}>{item}</li>
+                                        {activePackage.sharedProgress?.map((item, idx) => (
+                                            <li key={`${activePackage.id}-${idx}`}>{packageSharedProgressLine(t, activePackage.id, idx, item)}</li>
                                         ))}
                                     </ul>
                                 </article>
@@ -454,9 +485,9 @@ export default function MyPackagesScreen({ onBack, onOpenCourseRecords, onOpenAs
                                             >
                                                 <span className="package-timeline-item__dot" aria-hidden="true" />
                                                 <div className="package-timeline-item__body">
-                                                    <p className="package-timeline-item__date">{moment.date}</p>
-                                                    <p className="package-timeline-item__title">{moment.title}</p>
-                                                    <p className="package-timeline-item__desc">{moment.description}</p>
+                                                    <p className="package-timeline-item__date">{packageMomentLine(t, moment, "date")}</p>
+                                                    <p className="package-timeline-item__title">{packageMomentLine(t, moment, "title")}</p>
+                                                    <p className="package-timeline-item__desc">{packageMomentLine(t, moment, "description")}</p>
                                                 </div>
                                             </article>
                                         ))}

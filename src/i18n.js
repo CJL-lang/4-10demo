@@ -167,6 +167,8 @@ const resources = {
                 trendDirectionDown: "回调",
                 phaseProgressLabel: "阶段进度",
                 weeklyGoalLabel: "本周目标",
+                demoPhaseLabel: "提升期 Week 5 / 8",
+                demoWeeklyGoalMetric: "本周目标完成 3 / 4",
                 focusDimensionLabel: "优先补强",
                 activeTrendLabel: "当前关注",
                 streakValue: "{{count}} 天连续训练",
@@ -849,6 +851,62 @@ const resources = {
                         "pkg-shortgame-advanced": "短杆进阶专项套餐",
                         "pkg-newcomer-gift": "新客体验赠课",
                     },
+                    status: {
+                        graduated: "已结业",
+                        inProgress: "进行中",
+                        trialDone: "已体验",
+                    },
+                    planCopy: {
+                        "pkg-foundation-enlightenment": {
+                            title: "核心提升计划",
+                            description: "共包含 {{total}} 节系统性课程，当前进度 {{completed}}/{{total}}。",
+                        },
+                        "pkg-shortgame-advanced": {
+                            title: "比赛场景短杆提升",
+                            description:
+                                "围绕切杆、劈起杆与果岭边救球建立稳定成功率，目前已完成 {{completed}}/{{total}} 节。",
+                        },
+                        "pkg-newcomer-gift": {
+                            title: "入门体验模块",
+                            description: "通过两节体验课了解基础站姿、挥杆节奏与学院教学方式。",
+                        },
+                    },
+                    sharedProgressLines: {
+                        "pkg-foundation-enlightenment": {
+                            0: "礼仪规范达标",
+                            1: "握杆姿势固定",
+                        },
+                        "pkg-shortgame-advanced": {
+                            0: "切杆触地更稳定",
+                            1: "沙坑出球高度更统一",
+                        },
+                        "pkg-newcomer-gift": {
+                            0: "完成第一次正式挥杆",
+                            1: "建立基础礼仪认知",
+                        },
+                    },
+                    momentCopy: {
+                        "foundation-moment-1": {
+                            date: "2025年9月15日",
+                            title: "首次推杆入洞",
+                            description: "在果岭上完成了人生第一次推杆入洞。",
+                        },
+                        "shortgame-moment-1": {
+                            date: "2026年3月22日",
+                            title: "首次连续三球进内圈",
+                            description: "30码内切杆训练中，连续三球都落在目标内圈。",
+                        },
+                        "shortgame-moment-2": {
+                            date: "2026年4月2日",
+                            title: "完成第一节沙坑脱困练习",
+                            description: "可以稳定把球送上果岭，落点更靠近旗位方向。",
+                        },
+                        "gift-moment-1": {
+                            date: "2025年8月24日",
+                            title: "第一次完成标准收杆",
+                            description: "从僵硬用力转为能顺畅完成收杆动作。",
+                        },
+                    },
                 },
                 menuSectionAria: "常用入口",
                 menuHeading: "常用功能",
@@ -1208,6 +1266,8 @@ const resources = {
                 trendDirectionDown: "down",
                 phaseProgressLabel: "Phase progress",
                 weeklyGoalLabel: "Weekly goal",
+                demoPhaseLabel: "Build phase · Week 5 / 8",
+                demoWeeklyGoalMetric: "3 / 4 weekly goals completed",
                 focusDimensionLabel: "Next focus",
                 activeTrendLabel: "Current lens",
                 streakValue: "{{count}} training days in a row",
@@ -1848,8 +1908,8 @@ const resources = {
                     talent: "Talent Medal",
                 },
                 settlementPill: {
-                    ranking: "✦ Last month's ranking is out →",
-                    talent: "✦ Last month's talent medal settlement is out →",
+                    ranking: "✦ Monthly rankings →",
+                    talent: "✦ Monthly talent medals →",
                 },
                 comingSoon: "Coming soon",
                 enteredCourseRecords: "Opened course records",
@@ -1889,6 +1949,62 @@ const resources = {
                         "pkg-foundation-enlightenment": "Golf fundamentals starter package",
                         "pkg-shortgame-advanced": "Advanced short-game package",
                         "pkg-newcomer-gift": "New student trial lessons",
+                    },
+                    status: {
+                        graduated: "Completed",
+                        inProgress: "In progress",
+                        trialDone: "Trial done",
+                    },
+                    planCopy: {
+                        "pkg-foundation-enlightenment": {
+                            title: "Core improvement plan",
+                            description: "{{total}} structured lessons; progress {{completed}}/{{total}}.",
+                        },
+                        "pkg-shortgame-advanced": {
+                            title: "Short game for scoring situations",
+                            description:
+                                "Chips, pitches, and greenside saves — {{completed}}/{{total}} lessons completed.",
+                        },
+                        "pkg-newcomer-gift": {
+                            title: "Intro experience",
+                            description: "Two trial sessions on setup, tempo, and how we coach.",
+                        },
+                    },
+                    sharedProgressLines: {
+                        "pkg-foundation-enlightenment": {
+                            0: "Etiquette benchmarks passed",
+                            1: "Grip routine locked in",
+                        },
+                        "pkg-shortgame-advanced": {
+                            0: "Cleaner wedge contact",
+                            1: "More consistent bunker height",
+                        },
+                        "pkg-newcomer-gift": {
+                            0: "First full swings completed",
+                            1: "Basic etiquette in place",
+                        },
+                    },
+                    momentCopy: {
+                        "foundation-moment-1": {
+                            date: "Sep 15, 2025",
+                            title: "First putt holed",
+                            description: "Holed your first-ever putt on the practice green.",
+                        },
+                        "shortgame-moment-1": {
+                            date: "Mar 22, 2026",
+                            title: "Three in a row in the inner ring",
+                            description: "From 30 yards, three straight shots landed inside the target circle.",
+                        },
+                        "shortgame-moment-2": {
+                            date: "Apr 2, 2026",
+                            title: "First bunker escape session",
+                            description: "Got the ball on the green reliably with better flag-side dispersion.",
+                        },
+                        "gift-moment-1": {
+                            date: "Aug 24, 2025",
+                            title: "First balanced finish",
+                            description: "Went from stiff power to a smooth, balanced follow-through.",
+                        },
                     },
                 },
                 menuSectionAria: "Shortcuts",

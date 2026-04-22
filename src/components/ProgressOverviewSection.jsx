@@ -103,8 +103,8 @@ export default function ProgressOverviewSection({ withBottomGap = true, onOpenAs
     const overviewSupport =
         viewMode === "dimensions"
             ? t("progressOverview.storySupportDimensions", {
-                  phase: growthOverview.phaseLabel,
-                  goal: growthOverview.weeklyGoal,
+                  phase: t("progressOverview.demoPhaseLabel"),
+                  goal: t("progressOverview.demoWeeklyGoalMetric"),
               })
             : t("progressOverview.storySupportTrend", {
                   streak: t("progressOverview.streakValue", { count: growthOverview.streakDays }),
@@ -358,7 +358,7 @@ export default function ProgressOverviewSection({ withBottomGap = true, onOpenAs
                             </div>
                             <div className="progress-story-stat">
                                 <span>{t("progressOverview.weeklyGoalLabel")}</span>
-                                <strong>{growthOverview.weeklyGoal}</strong>
+                                <strong>{t("progressOverview.demoWeeklyGoalMetric")}</strong>
                             </div>
                             <div className="progress-story-stat">
                                 <span>
