@@ -35,7 +35,11 @@ const resources = {
                 chatListAria: "聊天会话列表",
                 backAria: "返回上一页",
                 emptyChat: "暂无可显示的会话",
+                systemInboxTitle: "系统通知",
+                systemInboxPreview: "系统与课程、测评等相关通知",
+                systemInboxOpenAria: "进入系统通知",
                 system: {
+                    openAria: "打开系统消息：{{title}}",
                     items: {
                         booking: {
                             title: "上课提醒",
@@ -1134,7 +1138,11 @@ const resources = {
                 chatListAria: "Chat conversations",
                 backAria: "Go back",
                 emptyChat: "No conversations yet",
+                systemInboxTitle: "Notifications",
+                systemInboxPreview: "Academy, lessons, and assessment notices",
+                systemInboxOpenAria: "Open system notifications",
                 system: {
+                    openAria: "Open system message: {{title}}",
                     items: {
                         booking: {
                             title: "Lesson reminder",

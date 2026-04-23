@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { SystemInboxEntryIcon, SystemInboxMessageIcon } from "../components/SystemInboxMessageIcon";
 import { getMockChatThreads, mockMessagesByThreadId, mockSystemMessages } from "../data/messagesMock";
 import { useAppContext } from "../context/AppContext";
 
@@ -7,7 +8,6 @@ export default function MessagesPage({ onToast, onSubViewChange }) {
     const { t } = useTranslation();
     const { state } = useAppContext();
     const role = state.auth.role === "parent" ? "parent" : "student";
-    const [segment, setSegment] = useState(() => "system");
     const [subView, setSubView] = useState(() => null);
     const [composerText, setComposerText] = useState("");
 
@@ -18,6 +18,8 @@ export default function MessagesPage({ onToast, onSubViewChange }) {
         () => [...mockSystemMessages].sort((a, b) => Date.parse(b.sortedAt) - Date.parse(a.sortedAt)),
         []
     );
+    const hasSystemUnread = useMemo(() => systemMessagesSorted.some((m) => m.unread), [systemMessagesSorted]);
+    const systemLatest = systemMessagesSorted[0] ?? null;
 
     const hideChrome = Boolean(subView);
 
@@ -33,7 +35,7 @@ export default function MessagesPage({ onToast, onSubViewChange }) {
         if (scrollMain) {
             scrollMain.scrollTo({ top: 0, behavior: "auto" });
         }
-    }, [subView, segment]);
+    }, [subView]);
 
     useEffect(() => {
         if (subView?.kind !== "chat") {
@@ -41,8 +43,12 @@ export default function MessagesPage({ onToast, onSubViewChange }) {
         }
     }, [subView]);
 
-    const openSystem = (id) => {
-        setSubView({ kind: "system", id });
+    const openSystemInbox = () => {
+        setSubView({ kind: "systemInbox" });
+    };
+
+    const openSystem = (id, { fromInbox = false } = {}) => {
+        setSubView({ kind: "system", id, fromInbox });
     };
 
     const openChat = (threadId) => {
@@ -51,6 +57,14 @@ export default function MessagesPage({ onToast, onSubViewChange }) {
 
     const closeSubView = () => {
         setSubView(null);
+    };
+
+    const backFromSystemDetail = () => {
+        if (subView?.kind === "system" && subView.fromInbox) {
+            setSubView({ kind: "systemInbox" });
+        } else {
+            setSubView(null);
+        }
     };
 
     const activeSystem = subView?.kind === "system" ? mockSystemMessages.find((m) => m.id === subView.id) : null;
@@ -67,7 +81,7 @@ export default function MessagesPage({ onToast, onSubViewChange }) {
         return (
             <section className="screen fade-enter messages-screen messages-screen--subview">
                 <div className="messages-subview-topbar">
-                    <button type="button" className="messages-back-btn" onClick={closeSubView} aria-label={t("messages.backAria")}>
+                    <button type="button" className="messages-back-btn" onClick={backFromSystemDetail} aria-label={t("messages.backAria")}>
                         ←
                     </button>
                     <h2 className="messages-subview-title">{t(`messages.system.items.${sid}.title`)}</h2>
@@ -75,10 +89,52 @@ export default function MessagesPage({ onToast, onSubViewChange }) {
                 <article className="panel panel-elevated messages-system-detail">
                     <p className="messages-system-detail__time">{t(`messages.system.items.${sid}.time`)}</p>
                     <p className="messages-system-detail__body">{t(`messages.system.items.${sid}.body`)}</p>
-                    <button type="button" className="pill messages-system-detail__cta" onClick={closeSubView}>
+                    <button type="button" className="pill messages-system-detail__cta" onClick={backFromSystemDetail}>
                         {t("common.gotIt")}
                     </button>
                 </article>
+            </section>
+        );
+    }
+
+    if (subView?.kind === "systemInbox") {
+        return (
+            <section className="screen fade-enter messages-screen messages-screen--subview messages-screen--system-inbox">
+                <div className="messages-subview-topbar">
+                    <button type="button" className="messages-back-btn" onClick={closeSubView} aria-label={t("messages.backAria")}>
+                        ←
+                    </button>
+                    <h2 className="messages-subview-title">{t("messages.systemInboxTitle")}</h2>
+                </div>
+                <ul className="section-stack messages-system-list" role="list" aria-label={t("messages.systemListAria")}>
+                    {systemMessagesSorted.map((item) => (
+                        <li key={item.id} className="messages-system-list__item">
+                            <button
+                                type="button"
+                                className="messages-chat-row messages-chat-row--system messages-chat-row--inbox-compact panel panel-elevated"
+                                onClick={() => openSystem(item.id, { fromInbox: true })}
+                                aria-label={t("messages.system.openAria", { title: t(`messages.system.items.${item.id}.title`) })}
+                            >
+                                <span className={`messages-unread-dot${item.unread ? " is-on" : ""}`} aria-hidden="true" />
+                                <div
+                                    className="messages-chat-row__avatar messages-chat-row__avatar--system messages-chat-row__avatar--inbox-kind"
+                                    data-system-kind={item.id}
+                                    aria-hidden="true"
+                                >
+                                    <SystemInboxMessageIcon messageId={item.id} />
+                                </div>
+                                <div className="messages-chat-row__body">
+                                    <div className="messages-chat-row__head">
+                                        <span className="messages-chat-row__name">{t(`messages.system.items.${item.id}.title`)}</span>
+                                        <time className="messages-system-row__time" dateTime={item.sortedAt}>
+                                            {t(`messages.system.items.${item.id}.time`)}
+                                        </time>
+                                    </div>
+                                </div>
+                            </button>
+                        </li>
+                    ))}
+                </ul>
             </section>
         );
     }
@@ -135,77 +191,66 @@ export default function MessagesPage({ onToast, onSubViewChange }) {
                 <h1 className="headline">{t("messages.screenTitle")}</h1>
             </header>
 
-            <div className="messages-segments" role="tablist" aria-label={t("messages.segmentsAria")}>
-                <button
-                    type="button"
-                    role="tab"
-                    aria-selected={segment === "system"}
-                    className={`messages-segment${segment === "system" ? " is-active" : ""}`}
-                    onClick={() => setSegment("system")}
-                >
-                    {t("messages.segmentSystem")}
-                </button>
-                <button
-                    type="button"
-                    role="tab"
-                    aria-selected={segment === "chat"}
-                    className={`messages-segment${segment === "chat" ? " is-active" : ""}`}
-                    onClick={() => setSegment("chat")}
-                >
-                    {t("messages.segmentChat")}
-                </button>
-            </div>
-
-            {segment === "system" ? (
-                <ul className="section-stack messages-system-list" role="list" aria-label={t("messages.systemListAria")}>
-                    {systemMessagesSorted.map((item) => (
-                        <li key={item.id} className="messages-system-list__item">
+            <div className="messages-screen-stacks">
+                <div className="messages-list-block">
+                    <p className="small-label">{t("messages.segmentSystem")}</p>
+                    <ul className="section-stack messages-system-list messages-system-list--inbox-entry" role="list" aria-label={t("messages.systemListAria")}>
+                        <li className="messages-system-list__item">
                             <button
                                 type="button"
-                                className="messages-system-row panel panel-elevated"
-                                onClick={() => openSystem(item.id)}
-                                aria-label={t(`messages.system.items.${item.id}.title`)}
+                                className="messages-chat-row messages-chat-row--system messages-system-inbox-entry messages-system-inbox-entry--compact panel panel-elevated"
+                                onClick={openSystemInbox}
+                                aria-label={t("messages.systemInboxOpenAria")}
                             >
-                                <span className={`messages-unread-dot${item.unread ? " is-on" : ""}`} aria-hidden="true" />
-                                <div className="messages-system-row__text">
-                                    <div className="messages-system-row__head">
-                                        <span className="messages-system-row__title">{t(`messages.system.items.${item.id}.title`)}</span>
-                                        <time className="messages-system-row__time">{t(`messages.system.items.${item.id}.time`)}</time>
+                                <span className={`messages-unread-dot${hasSystemUnread ? " is-on" : ""}`} aria-hidden="true" />
+                                <div className="messages-chat-row__avatar messages-chat-row__avatar--system messages-chat-row__avatar--inbox-entry-gold" aria-hidden="true">
+                                    <SystemInboxEntryIcon />
+                                </div>
+                                <div className="messages-chat-row__body">
+                                    <div className="messages-chat-row__head">
+                                        <span className="messages-chat-row__name">{t("messages.systemInboxTitle")}</span>
+                                        {systemLatest ? (
+                                            <time className="messages-system-row__time" dateTime={systemLatest.sortedAt}>
+                                                {t(`messages.system.items.${systemLatest.id}.time`)}
+                                            </time>
+                                        ) : null}
                                     </div>
-                                    <p className="messages-system-row__preview">{t(`messages.system.items.${item.id}.preview`)}</p>
                                 </div>
                             </button>
                         </li>
-                    ))}
-                </ul>
-            ) : (
-                <ul className="section-stack messages-chat-list" role="list" aria-label={t("messages.chatListAria")}>
-                    {chatThreads.length === 0 ? (
-                        <li className="messages-empty panel panel-elevated">{t("messages.emptyChat")}</li>
-                    ) : (
-                        chatThreads.map((th) => (
-                            <li key={th.id} className="messages-chat-list__item">
-                                <button
-                                    type="button"
-                                    className="messages-chat-row panel panel-elevated"
-                                    onClick={() => openChat(th.id)}
-                                    aria-label={t("messages.chat.openThreadAria", { name: t(th.peerNameKey, th.peerNameParams) })}
-                                >
-                                    <span className={`messages-unread-dot${th.unread ? " is-on" : ""}`} aria-hidden="true" />
-                                    <img className="messages-chat-row__avatar" src={th.avatarUrl} alt="" width={48} height={48} />
-                                    <div className="messages-chat-row__body">
-                                        <div className="messages-chat-row__head">
-                                            <span className="messages-chat-row__name">{t(th.peerNameKey, th.peerNameParams)}</span>
-                                            <span className="messages-relation-pill messages-relation-pill--inline">{t(`messages.chat.relation.${th.relation}`)}</span>
+                    </ul>
+                </div>
+
+                <div className="messages-list-block">
+                    <p className="small-label">{t("messages.segmentChat")}</p>
+                    <ul className="section-stack messages-chat-list" role="list" aria-label={t("messages.chatListAria")}>
+                        {chatThreads.length === 0 ? (
+                            <li className="messages-empty panel panel-elevated">{t("messages.emptyChat")}</li>
+                        ) : (
+                            chatThreads.map((th) => (
+                                <li key={th.id} className="messages-chat-list__item">
+                                    <button
+                                        type="button"
+                                        className="messages-chat-row panel panel-elevated"
+                                        onClick={() => openChat(th.id)}
+                                        aria-label={t("messages.chat.openThreadAria", { name: t(th.peerNameKey, th.peerNameParams) })}
+                                    >
+                                        <span className={`messages-unread-dot${th.unread ? " is-on" : ""}`} aria-hidden="true" />
+                                        <img className="messages-chat-row__avatar" src={th.avatarUrl} alt="" width={48} height={48} />
+                                        <div className="messages-chat-row__body">
+                                            <div className="messages-chat-row__head">
+                                                <span className="messages-chat-row__name">{t(th.peerNameKey, th.peerNameParams)}</span>
+                                                <span className="messages-relation-pill messages-relation-pill--inline">{t(`messages.chat.relation.${th.relation}`)}</span>
+                                            </div>
+                                            <p className="messages-chat-row__preview">{t(th.lastPreviewKey)}</p>
                                         </div>
-                                        <p className="messages-chat-row__preview">{t(th.lastPreviewKey)}</p>
-                                    </div>
-                                </button>
-                            </li>
-                        ))
-                    )}
-                </ul>
-            )}
+                                    </button>
+                                </li>
+                            ))
+                        )}
+                    </ul>
+                </div>
+            </div>
         </section>
     );
 }
