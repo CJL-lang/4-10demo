@@ -5,6 +5,7 @@ import { ALL_SLOTS, coachInfoCard, courseAssetsByDate, getSessionDisplay, getSlo
 import { useCountdown } from "../hooks/useCountdown";
 import SessionCourseDetailCard from "../components/SessionCourseDetailCard";
 import LeaveRequestModal from "../components/LeaveRequestModal";
+import RescheduleModal from "../components/RescheduleModal";
 import DateChip from "../components/DateChip";
 import GolfVenueAvatar from "../components/GolfVenueAvatar";
 
@@ -66,6 +67,7 @@ export default function BookingPage({ onOpenBookingModal, onToast, embedded = fa
     const [stripFog, setStripFog] = useState({ left: false, right: false });
     const [leaveModalOpen, setLeaveModalOpen] = useState(false);
     const [leaveModalBooking, setLeaveModalBooking] = useState(null);
+    const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
 
     const selectedSchedule = useMemo(
         () => scheduleDates.find((item) => item.day === state.selectedDate) || scheduleDates[0],
@@ -260,9 +262,6 @@ export default function BookingPage({ onOpenBookingModal, onToast, embedded = fa
 
                             <SessionCourseDetailCard session={previewSession} />
 
-                            <div className="notification-input-wrapper">
-                                <textarea className="notification-input" placeholder={t("booking.pre.rejectReasonPlaceholder")} />
-                            </div>
                             <div className="notification-actions">
                                 <button
                                     type="button"
@@ -281,11 +280,10 @@ export default function BookingPage({ onOpenBookingModal, onToast, embedded = fa
                                     className="secondary-btn"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onToast(t("booking.rejectedToast"));
-                                        setIsNotificationExpanded(false);
+                                        setRescheduleModalOpen(true);
                                     }}
                                 >
-                                    {t("booking.pre.reject")}
+                                    {t("booking.pre.reschedule")}
                                 </button>
                             </div>
                         </div>
@@ -654,6 +652,27 @@ export default function BookingPage({ onOpenBookingModal, onToast, embedded = fa
                         })
                     );
                     setLeaveModalOpen(false);
+                }}
+            />
+
+            <RescheduleModal
+                open={rescheduleModalOpen}
+                initialDay={state.selectedDate}
+                initialSlotId={state.selectedCourseAssetId}
+                onCancel={() => setRescheduleModalOpen(false)}
+                onConfirm={({ day, slotId, reason }) => {
+                    actions.setSelectedDate(day);
+                    actions.setSelectedCourseAsset(slotId);
+                    const slot = getSlotById(slotId);
+                    const timeStr = slot?.range ?? "";
+                    if (reason) {
+                        const short = reason.length > 48 ? `${reason.slice(0, 48)}…` : reason;
+                        onToast(t("booking.pre.rescheduleConfirmToastWithReason", { day, time: timeStr, reason: short }));
+                    } else {
+                        onToast(t("booking.pre.rescheduleConfirmToast", { day, time: timeStr }));
+                    }
+                    setRescheduleModalOpen(false);
+                    setIsNotificationExpanded(false);
                 }}
             />
         </section>

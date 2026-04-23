@@ -65,6 +65,13 @@
     z-index: 10;
 }
 
+/* Portal 到 .device-shell：遮罩铺满整机壳（含底栏、圆角内区域），不随主列表滚动 */
+.device-shell > .modal-mask.modal-mask--device-portal {
+    z-index: 20;
+    background: rgba(0, 0, 0, 0.58);
+    border-radius: 34px;
+}
+
 .scroll-main.no-bottom-nav {
     padding-bottom: 26px;
 }
@@ -8120,13 +8127,16 @@
 
 .plan-label {
     color: var(--on-surface-variant);
-    min-width: 64px;
-    flex-shrink: 0;
+    flex: 0 0 11rem;
+    max-width: 11rem;
+    min-width: 0;
 }
 
 .plan-value {
     color: var(--on-surface);
     font-weight: 500;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .plan-arrow {
@@ -9306,6 +9316,126 @@
     min-height: 96px;
     height: auto;
     resize: vertical;
+}
+
+.modal-card.reschedule-modal {
+    width: min(100%, 400px);
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 18px 16px 16px;
+    max-height: min(calc(100dvh - 80px), 600px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
+}
+
+.reschedule-modal h3 {
+    font-size: 20px;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+}
+
+.reschedule-modal__desc {
+    margin: 8px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--on-surface-variant);
+}
+
+.reschedule-modal__pickers {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0 -2px;
+    padding: 0 2px;
+}
+
+.reschedule-modal__section {
+    margin-top: 14px;
+}
+
+.reschedule-modal__section:first-of-type {
+    margin-top: 12px;
+}
+
+.reschedule-modal__section--slots {
+    margin-top: 10px;
+}
+
+.reschedule-modal h4.reschedule-modal__label {
+    margin: 0 0 6px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--on-surface);
+}
+
+.reschedule-modal__date-row {
+    margin-top: 2px;
+}
+
+.reschedule-modal__hint {
+    margin: 0 0 6px;
+    font-size: 11px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 弹窗内与预约页同款的日期/时段尺寸 */
+.reschedule-modal__pickers .date-row {
+    gap: 8px;
+}
+
+.reschedule-modal__pickers .date-chip {
+    min-width: 64px;
+    height: 80px;
+    border-radius: 16px;
+}
+
+.reschedule-modal__pickers .date-chip-day {
+    font-size: 34px;
+}
+
+.reschedule-modal__pickers .slot-strip-outer {
+    margin: 0 -2px 0;
+}
+
+.reschedule-modal__pickers .booking-slot-grid {
+    padding-bottom: 8px;
+}
+
+.reschedule-modal__reason {
+    margin-top: 14px;
+    flex-shrink: 0;
+}
+
+.reschedule-modal__reason-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--on-surface-variant);
+}
+
+.reschedule-modal__reason-input {
+    margin-top: 0;
+    width: 100%;
+    min-height: 72px;
+    height: auto;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.reschedule-modal .modal-actions {
+    margin-top: 16px;
+    flex-shrink: 0;
+    padding-top: 4px;
 }
 
 .review-invite-modal {

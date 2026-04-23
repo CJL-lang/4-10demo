@@ -57,6 +57,18 @@ function taskCardCopy(task, langIsEn) {
     };
 }
 
+function homeworkDetailCopy(task, langIsEn) {
+    const projectItems =
+        langIsEn && task.projectItemsEn?.length ? task.projectItemsEn : task.projectItems;
+    const projectRequirements =
+        langIsEn && task.projectRequirementsEn ? task.projectRequirementsEn : task.projectRequirements;
+    return {
+        title: langIsEn && task.titleEn ? task.titleEn : task.title,
+        projectItems,
+        projectRequirements,
+    };
+}
+
 function GrowthSessionCard({ task, variant, onOpen }) {
     const { t, i18n } = useTranslation();
     const langIsEn = Boolean(i18n.language?.toLowerCase().startsWith("en"));
@@ -272,6 +284,8 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
     };
 
     const renderTaskDetailView = (task) => {
+        const langIsEn = Boolean(i18n.language?.toLowerCase().startsWith("en"));
+        const detail = homeworkDetailCopy(task, langIsEn);
         return (
             <section className="section-stack section-bottom-gap homework-detail-wrap swing-3d-enter">
                 <article className="panel panel-elevated homework-brief-card">
@@ -282,7 +296,7 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                         <h2 className="section-title-sm homework-detail-topbar-heading">{t("growth.tasks")}</h2>
                     </div>
                     <div className="homework-hero">
-                        <h3 className="homework-task-title">{task.title}</h3>
+                        <h3 className="homework-task-title">{detail.title}</h3>
                     </div>
                     <div className="homework-meta-grid">
                         <div className="homework-meta-card homework-meta-card--publish">
@@ -302,7 +316,7 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                                 <span className="pill">{t("growth.projectCount", { count: task.projectItems?.length ?? 0 })}</span>
                             </div>
                             <ul className="homework-checklist">
-                                {task.projectItems?.map((item) => (
+                                {detail.projectItems?.map((item) => (
                                     <li key={item}>{item}</li>
                                 ))}
                             </ul>
@@ -312,7 +326,7 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                             <div className="homework-block-head">
                                 <h4 className="homework-block-title">{t("growth.projectRequirements")}</h4>
                             </div>
-                            <p className="homework-requirement-text">{task.projectRequirements}</p>
+                            <p className="homework-requirement-text">{detail.projectRequirements}</p>
                         </section>
                     </div>
                 </article>
@@ -398,7 +412,8 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
     const renderReportDetailView = (task) => {
         const langIsEn = Boolean(i18n.language?.toLowerCase().startsWith("en"));
         const copy = taskCardCopy(task, langIsEn);
-        const body = recordForReport?.coachReview || copy.note;
+        const body =
+            (langIsEn && recordForReport?.coachReviewEn) || recordForReport?.coachReview || copy.note;
         const feedItems = recordForReport?.liveFeedEntries || [];
         const getLiveFeedTypeLabel = (type) => {
             if (type === "image") {
@@ -477,7 +492,9 @@ export default function GrowthPage({ onSubmit, onToast, onDetailPageChange, revi
                                                     <RecordReportMediaPlaceholder kind={item.type === "video" ? "video" : "image"} />
                                                 </div>
                                             )}
-                                            <p className="growth-report-detail-live__text">{item.content}</p>
+                                            <p className="growth-report-detail-live__text">
+                                                {langIsEn && item.contentEn ? item.contentEn : item.content}
+                                            </p>
                                         </div>
                                     </li>
                                 ))}

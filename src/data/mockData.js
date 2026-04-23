@@ -219,6 +219,7 @@ export const records = [
                 timestamp: "10:52",
                 type: "text",
                 content: "击球点稳定回到甜蜜区，7号铁方向控制明显更收敛。",
+                contentEn: "Striking is back in the center; 7-iron start lines are clearly tighter.",
                 coachName: MAIN_COACH.name,
             },
             {
@@ -226,6 +227,7 @@ export const records = [
                 timestamp: "10:36",
                 type: "image",
                 content: "侧面动作抓拍：送杆更完整，重心留在左侧更自然。",
+                contentEn: "DTL still: fuller release, lead-side weight sits more naturally.",
                 coachName: MAIN_COACH.name,
             },
             {
@@ -233,11 +235,14 @@ export const records = [
                 timestamp: "10:12",
                 type: "text",
                 content: "完成热身后进入7号铁目标区练习，今天节奏进入状态很快。",
+                contentEn: "After warm-up, into 7-iron target work—you found your rhythm quickly today.",
                 coachName: MAIN_COACH.name,
             },
         ],
         coachReview:
             "本节课重点练习 7 号铁杆面角度与击球瞬间的杆身前倾。从 TRACKMAN 与侧面视频看，你的击球点已明显向甜蜜区集中，目标区命中率稳定在 8/10，且送杆时重心能留在左脚内侧，这是非常好的趋势。\n\n建议巩固：继续用「半挥杆—全挥杆」两段式节奏找触感，下节课我们会加入轻度逆风下的弹道管理，请保持今天这种从容的节奏。",
+        coachReviewEn:
+            "This session focused on 7-iron face angle and shaft lean at impact. From TrackMan and the down-the-line view, your strike is clustering toward the center, target accuracy holds at 8/10, and your weight stays to the instep of the lead foot through the finish—an excellent trend.\n\nTo build on it: keep the two-tempo (half swing–full swing) drill for feel, and we will add a little headwind flight management next time—stay with the calm pace you had today.",
     },
     {
         id: "r-240307",
@@ -259,6 +264,7 @@ export const records = [
                 timestamp: "15:18",
                 type: "text",
                 content: "切杆第一落点更集中，连续几球都能落进预设圈内。",
+                contentEn: "Chipping is tighter on first bounce; several in a row land inside the ring.",
                 coachName: MAIN_COACH.name,
             },
             {
@@ -266,6 +272,7 @@ export const records = [
                 timestamp: "14:58",
                 type: "video",
                 content: "短视频记录：厚草位切杆时，出杆节奏比上次更顺。",
+                contentEn: "Short clip: from thick rough, the through-motion tempo is smoother than last time.",
                 coachName: MAIN_COACH.name,
             },
             {
@@ -273,11 +280,14 @@ export const records = [
                 timestamp: "14:37",
                 type: "text",
                 content: "已开始30码内切杆节奏训练，今天触地反馈整体不错。",
+                contentEn: "Started chipping rhythm work inside 30 yd—contact feedback is solid today.",
                 coachName: MAIN_COACH.name,
             },
         ],
         coachReview:
             "本场在 30 码内切杆上，你的上杆幅度与杆面释放一致性比去年明显提高：第一落点圆心散布缩小，10 球中 7 球落在预设圆内，达标。\n\n草皮略厚时触地略浅，下次带练时会加入「略早释放、略多送杆」的想象，帮助你在湿草上也能稳定打起球。",
+        coachReviewEn:
+            "On shots inside 30 yards, your backswing size and face release are more consistent than last year: first-bounce spread shrinks, 7/10 find the target circle—on target.\n\nFrom thicker lies contact is a touch thin; next time we will cue a slightly earlier release and a little more extension through the ball to help you pick it cleanly in wet grass.",
     },
     {
         id: "r-240215",
@@ -299,6 +309,7 @@ export const records = [
                 timestamp: "15:05",
                 type: "text",
                 content: "纯击球次数已经来到6/10，压缩感开始稳定出现。",
+                contentEn: "Clean strikes are up to 6/10; a steadier sense of compression is showing up.",
                 coachName: MAIN_COACH.name,
             },
             {
@@ -306,6 +317,7 @@ export const records = [
                 timestamp: "14:42",
                 type: "text",
                 content: "下盘启动更清楚，但出杆前半段还需要再慢一点。",
+                contentEn: "Lower body starts clearer, but the first half of the through-motion can still be slower.",
                 coachName: MAIN_COACH.name,
             },
             {
@@ -313,11 +325,14 @@ export const records = [
                 timestamp: "14:16",
                 type: "text",
                 content: "进入铁杆重心转移练习，先用慢挥确认杆身前倾感觉。",
+                contentEn: "Into weight-shift drill—slow swings first to find shaft-lean at impact.",
                 coachName: MAIN_COACH.name,
             },
         ],
         coachReview:
             "这节课我们盯住铁杆「挤压」与杆身前倾：前 9 球你已经能在慢镜里看到手腕延迟释放，纯击球次数升至 6/10，属于部分达标。\n\n接下来一周请每天做 20 次无球慢挥，只在脑子里回放「左脚踏稳—胸中转向—杆头滞后通过球」三件事。节奏先稳，距离自然会回来。",
+        coachReviewEn:
+            "Today we locked in compression and shaft lean: on the first nine you can see delayed release in slow motion, with clean contacts up to 6/10—progress.\n\nThis week, please make 20 slow practice swings a day with no ball, picturing only three things: lead foot quiet, chest turning through, clubhead lagging past the ball. Steady the tempo and the distance will follow.",
     },
 ];
 
@@ -568,8 +583,15 @@ export const practiceTasks = [
             "草痕方向与深浅记录（视频+标注）",
             "击球重心偏移复盘（文字或语音）",
         ],
+        projectItemsEn: [
+            "7-iron face angle self-check (10 consecutive shots)",
+            "Turf mark direction and depth log (video + on-screen notes)",
+            "Strike and weight shift review (text or voice)",
+        ],
         projectRequirements:
             "视频需包含杆面朝向与草痕特写；复盘需说明至少两次节奏失衡的原因与调整。",
+        projectRequirementsEn:
+            "Video must show face angle and turf mark close-ups; the review should explain the cause and adjustment for at least two rhythm imbalances.",
         reward: "",
         progress: 0,
     },
@@ -597,7 +619,14 @@ export const practiceTasks = [
             "厚草与薄草位各 5 球触地反馈记录",
             "节奏口令与呼吸配合复盘",
         ],
+        projectItemsEn: [
+            "10-ball landing spread stats (chipping inside 30 yards)",
+            "5 shots each from thick vs thin rough — contact feedback log",
+            "Tempo cue and breathing review",
+        ],
         projectRequirements: "请上传侧面与正面的切杆视频；文字复盘需写出两次节奏断点的自我感受。",
+        projectRequirementsEn:
+            "Upload side-on and face-on chipping video; the written review should describe what you felt at two rhythm break points.",
         reward: "",
         progress: 100,
     },
@@ -625,7 +654,14 @@ export const practiceTasks = [
             "10 球纯击球与起草质量自检",
             "TRACKMAN 或落点数据截图（可选）",
         ],
+        projectItemsEn: [
+            "Slow swings to confirm shaft lean and weight shift",
+            "10-ball solid strike and turf interaction self-check",
+            "Optional: TRACKMAN or dispersion screenshot",
+        ],
         projectRequirements: "视频需能看到击球后草痕；复盘说明重心转移时常见的卡顿点。",
+        projectRequirementsEn:
+            "Video should show post-impact turf marks; the review should cover common hitches in your weight transfer.",
         reward: "",
         progress: 100,
     },
